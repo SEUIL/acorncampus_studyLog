@@ -16,7 +16,7 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-    <!-- 로그인/권한 체크: /l_check/* 요청에만 적용 -->
+    <!-- 로그인/권한 체크: /l_check/* (로그인 필수) + /admin/* (ADMIN 역할 필수) -->
     <filter>
         <filter-name>LoginCheckFilter</filter-name>
         <filter-class>com.acorncampus_studylog.filter.LoginCheckFilter</filter-class>
@@ -24,6 +24,10 @@
     <filter-mapping>
         <filter-name>LoginCheckFilter</filter-name>
         <url-pattern>/l_check/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>LoginCheckFilter</filter-name>
+        <url-pattern>/admin/*</url-pattern>
     </filter-mapping>
 
     <!-- 세션 유지 시간: 30분 -->
