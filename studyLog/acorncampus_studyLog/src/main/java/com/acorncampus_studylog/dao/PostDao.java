@@ -394,15 +394,14 @@ public class PostDao {
         PostDto p = new PostDto();
         p.setPostId(rs.getInt("post_id"));
         p.setUserId(rs.getInt("user_id"));
-        int sid = rs.getInt("series_id");
-        p.setSeriesId(rs.wasNull() ? null : sid);
+        try { int sid = rs.getInt("series_id"); p.setSeriesId(rs.wasNull() ? null : sid); } catch (SQLException ignored) {}
         p.setTitle(rs.getString("title"));
         if (withDetail) p.setContent(rs.getString("content"));
         p.setThumbnailUrl(rs.getString("thumbnail_url"));
         p.setIsPublic(rs.getString("is_public"));
         p.setViewCount(rs.getInt("view_count"));
         p.setCreatedAt(rs.getTimestamp("created_at"));
-        p.setUpdatedAt(rs.getTimestamp("updated_at"));
+        try { p.setUpdatedAt(rs.getTimestamp("updated_at")); } catch (SQLException ignored) {}
         try { p.setDeletedAt(rs.getTimestamp("deleted_at")); } catch (SQLException ignored) {}
         try { p.setAuthorName(rs.getString("author_name")); } catch (SQLException ignored) {}
         try { p.setSeriesName(rs.getString("series_name")); } catch (SQLException ignored) {}
