@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Himalaya Light Theme - Components</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        :root {
+            --bg-body: #ECEFF1;
+            --bg-card: #FAFAFA;
+            --text-main: #263238;
+            --text-sub: #78909C;
+            --border: #CFD8DC;
+            --accent: #607D8B;
+        }
+        body { font-family: 'Pretendard', sans-serif; background: var(--bg-body); color: var(--text-main); margin: 0; padding: 40px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 800px; background: var(--bg-card); padding: 30px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        h1 { font-size: 24px; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; color: var(--text-main); }
+        h2 { font-size: 18px; margin-top: 30px; color: var(--accent); }
+        
+        /* Buttons */
+        .btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        .btn { padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-family: inherit; transition: 0.2s; font-size: 14px; }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+        .btn-outline:hover { background: rgba(96, 125, 139, 0.1); }
+        .btn-disabled { background: var(--bg-body); color: var(--text-sub); border: 1px solid var(--border); cursor: not-allowed; }
+
+        /* List */
+        .list { list-style: none; padding: 0; margin: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+        .list-item { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); transition: background 0.2s; }
+        .list-item:last-child { border-bottom: none; }
+        .list-item:hover { background: var(--bg-body); }
+        .list-title { font-weight: 600; font-size: 15px; }
+        .tag { font-size: 12px; background: var(--bg-body); padding: 4px 8px; border-radius: 4px; color: var(--accent); font-weight: 600; }
+
+        /* Form Elements */
+        .input-group { margin-bottom: 15px; }
+        .input-label { display: block; margin-bottom: 5px; font-size: 13px; color: var(--text-sub); font-weight: 600; }
+        .input-text { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; background: #fff; color: var(--text-main); box-sizing: border-box; }
+        .input-text:focus { outline: none; border-color: var(--accent); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Himalaya Light Theme UI</h1>
+        
+        <h2>1. Buttons</h2>
+        <div class="btn-group">
+            <button class="btn btn-primary">저장하기</button>
+            <button class="btn btn-outline">취소</button>
+            <button class="btn btn-disabled" disabled>비활성화</button>
+        </div>
+
+        <h2>2. Form Elements</h2>
+        <div class="input-group">
+            <label class="input-label">게시글 제목</label>
+            <input type="text" class="input-text" placeholder="제목을 입력하세요">
+        </div>
+
+        <h2>3. List View</h2>
+        <ul class="list">
+            <li class="list-item">
+                <span class="list-title">Java Spring MVC 패턴 정리</span>
+                <span class="tag">Backend</span>
+            </li>
+            <li class="list-item">
+                <span class="list-title">Oracle 19c 설치 및 환경 설정</span>
+                <span class="tag">Database</span>
+            </li>
+            <li class="list-item">
+                <span class="list-title">JSP/Servlet 로그인 구현</span>
+                <span class="tag">Web</span>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>

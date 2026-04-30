@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스터디로그 - 커뮤니티</title>
+    <link rel="stylesheet" href="global_theme.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { padding: 0; display: block; }
+        .dashboard-wrapper { display: flex; min-height: 100vh; width: 100%; background-color: var(--bg-body); }
+        .sidebar { width: 280px; background-color: var(--bg-card); border-right: 1px solid var(--border-color); padding: 30px 20px; display: flex; flex-direction: column; gap: 30px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+        .brand-logo { font-size: 22px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .grass-section { padding-bottom: 20px; border-bottom: 1px solid var(--border-color); }
+        .grass-title { font-size: 12px; font-weight: 700; color: var(--text-sub); margin-bottom: 10px; display: block; }
+        .grass-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        .grass-node { aspect-ratio: 1; border-radius: 2px; background-color: var(--tag-bg); }
+        .level-1 { background-color: rgba(96, 125, 139, 0.3); }
+        .level-2 { background-color: rgba(96, 125, 139, 0.6); }
+        .level-3 { background-color: rgba(96, 125, 139, 0.8); }
+        .level-4 { background-color: var(--accent-color); }
+        .dark-theme .level-1 { background-color: #0e4429; }
+        .dark-theme .level-2 { background-color: #006d32; }
+        .dark-theme .level-3 { background-color: #26a641; }
+        .dark-theme .level-4 { background-color: #39d353; }
+        .profile-section { text-align: center; }
+        .profile-avatar { width: 80px; height: 80px; background-color: var(--accent-color); color: var(--accent-contrast); border-radius: 50%; margin: 0 auto 15px; display: flex; justify-content: center; align-items: center; font-size: 32px; }
+        .profile-info h2 { font-size: 18px; margin: 0 0 5px 0; color: var(--text-main); }
+        .profile-info p { color: var(--text-sub); font-size: 12px; }
+        .nav-menu { list-style: none; padding: 0; margin: 0; flex-grow: 1; }
+        .nav-menu li { margin-bottom: 10px; font-size: 14px; font-weight: 600; color: var(--text-main); padding: 10px 12px; border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; gap: 10px; transition: var(--transition-base); }
+        .nav-menu li:hover, .nav-menu li.active { background-color: var(--list-hover); }
+        .nav-menu li.active { border-left: 4px solid var(--accent-color); }
+        .nav-menu i { color: var(--text-sub); width: 20px; text-align: center; }
+        .nav-menu li.active i { color: var(--accent-color); }
+        .main-content { flex: 1; padding: 40px; max-width: 1200px; margin: 0 auto; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+        .nav-left { display: flex; align-items: center; gap: 20px; }
+        .breadcrumb { font-size: 14px; font-weight: 600; color: var(--text-sub); display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 6px 12px; border-radius: var(--radius-sm); transition: var(--transition-base); }
+        .breadcrumb:hover { color: var(--text-main); background-color: var(--list-hover); }
+        .nav-right { display: flex; align-items: center; gap: 15px; }
+        .icon-btn { background: transparent; border: none; color: var(--text-sub); font-size: 18px; cursor: pointer; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: var(--transition-base); }
+        .icon-btn:hover { background-color: var(--list-hover); color: var(--text-main); }
+        
+        .community-top-section { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-bottom: 40px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .section-header h2 { font-size: 18px; margin: 0; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+        .popular-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .popular-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; display: flex; flex-direction: column; justify-content: space-between; min-height: 140px; }
+        .popular-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-sm); border-color: var(--accent-color); }
+        .popular-card h3 { font-size: 15px; margin: 0 0 10px 0; color: var(--text-main); line-height: 1.4; }
+        .popular-meta { font-size: 12px; color: var(--text-sub); display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: auto; }
+        .popular-meta .stats { display: flex; gap: 10px; }
+        
+        .search-panel { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .search-input-wrapper { position: relative; display: flex; align-items: center; }
+        .search-input-wrapper i { position: absolute; left: 12px; color: var(--text-sub); font-size: 14px; }
+        .search-input-wrapper input { width: 100%; padding: 10px 12px 10px 35px; background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-family: inherit; font-size: 13px; transition: var(--transition-base); }
+        .search-input-wrapper input:focus { outline: none; border-color: var(--accent-color); }
+
+        /* 하단 시리즈 스타일 */
+        .community-feed { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; }
+        .feed-header { padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background-color: rgba(0,0,0,0.02); }
+        .dark-theme .feed-header { background-color: rgba(255,255,255,0.02); }
+        .feed-header h3 { margin: 0; font-size: 16px; color: var(--text-main); }
+        
+        .series-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .series-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; aspect-ratio: 4/3; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; }
+        .series-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-sm); border-color: var(--accent-color); }
+        .series-info h3 { font-size: 16px; margin: 0 0 8px 0; color: var(--text-main); line-height: 1.4; }
+        .series-info p { font-size: 13px; color: var(--text-sub); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .series-meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-sub); border-top: 1px solid var(--border-color); padding-top: 12px; }
+    </style>
+</head>
+<body>
+<div class="dashboard-wrapper">
+    <aside class="sidebar">
+        <div class="brand-logo" onclick="location.href='workspace_main.html'"><i class="fa-solid fa-book-open"></i> 스터디로그</div>
+        <div class="grass-section">
+            <span class="grass-title">Yearly Contributions</span>
+            <div class="grass-grid">
+                <div class="grass-node level-4"></div><div class="grass-node level-2"></div><div class="grass-node"></div><div class="grass-node level-1"></div><div class="grass-node level-3"></div><div class="grass-node"></div><div class="grass-node level-2"></div>
+                <div class="grass-node level-1"></div><div class="grass-node level-4"></div><div class="grass-node"></div><div class="grass-node level-2"></div><div class="grass-node level-3"></div><div class="grass-node level-1"></div><div class="grass-node"></div>
+                <div class="grass-node level-4"></div><div class="grass-node level-2"></div><div class="grass-node"></div><div class="grass-node level-1"></div><div class="grass-node level-3"></div><div class="grass-node"></div><div class="grass-node level-2"></div>
+            </div>
+        </div>
+        <div class="profile-section">
+            <div class="profile-avatar"><i class="fa-solid fa-user"></i></div>
+            <div class="profile-info"><h2>User Name</h2><p>Learning & Recording...</p></div>
+        </div>
+        <ul class="nav-menu">
+            <li onclick="location.href='workspace_main.html'"><i class="fa-solid fa-layer-group"></i> 내 시리즈</li>
+            <li class="active"><i class="fa-solid fa-globe"></i> 커뮤니티 탐색</li>
+            <li><i class="fa-regular fa-folder"></i> 보관함</li>
+            <li><i class="fa-solid fa-bookmark"></i> 북마크</li>
+        </ul>
+        <div style="margin-top: auto; border-top: 1px solid var(--border-color); padding-top: 20px;">
+            <button class="btn btn-outline" style="width: 100%; font-size: 12px;" onclick="document.body.classList.toggle('dark-theme')">
+                <i class="fa-solid fa-moon"></i> 테마 변경
+            </button>
+            <div style="margin-top: 15px; font-size: 13px; font-weight: 600; color: var(--text-sub); cursor: pointer; text-align: center;">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> 로그아웃
+            </div>
+        </div>
+    </aside>
+    <main class="main-content">
+        <div class="top-bar">
+            <div class="nav-left">
+                <div class="breadcrumb" title="홈으로 이동" onclick="location.href='workspace_main.html'">
+                    <i class="fa-solid fa-house"></i> Home <span style="color: var(--border-color);">/</span> 커뮤니티
+                </div>
+                <button class="btn btn-outline" style="padding: 6px 12px; font-size: 13px;" onclick="location.href='workspace_main.html'">
+                    <i class="fa-solid fa-desktop"></i> 내 작업 공간으로
+                </button>
+            </div>
+            <div class="nav-right">
+                <button class="icon-btn" title="설정"><i class="fa-solid fa-gear"></i></button>
+            </div>
+        </div>
+        <div class="community-top-section">
+            <div class="popular-section">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-fire" style="color: #FF7043;"></i> 이번 주 인기 게시글</h2>
+                    <button class="btn btn-outline" style="padding: 4px 10px; font-size: 12px;" onclick="location.href='community_posts.html'">전체 게시판 보기 <i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+                <div class="popular-grid">
+                    <div class="popular-card" onclick="location.href='post_detail.html'">
+                        <h3>스프링 부트(Spring Boot) 핵심 원리 완벽 이해하기</h3>
+                        <div class="popular-meta">
+                            <span>by DevMaster</span>
+                            <div class="stats"><i class="fa-solid fa-heart"></i> 124 <i class="fa-solid fa-comment"></i> 32</div>
+                        </div>
+                    </div>
+                    <div class="popular-card" onclick="location.href='post_detail.html'">
+                        <h3>Oracle 19c 실무에서 자주 쓰는 쿼리 튜닝 기법 정리</h3>
+                        <div class="popular-meta">
+                            <span>by DataGuru</span>
+                            <div class="stats"><i class="fa-solid fa-heart"></i> 98 <i class="fa-solid fa-comment"></i> 15</div>
+                        </div>
+                    </div>
+                    <div class="popular-card" onclick="location.href='post_detail.html'">
+                        <h3>주니어 개발자를 위한 이력서 작성 가이드</h3>
+                        <div class="popular-meta">
+                            <span>by CareerCoach</span>
+                            <div class="stats"><i class="fa-solid fa-heart"></i> 210 <i class="fa-solid fa-comment"></i> 45</div>
+                        </div>
+                    </div>
+                    <div class="popular-card" onclick="location.href='post_detail.html'">
+                        <h3>MVC2 패턴의 한계와 현대 웹 아키텍처의 진화</h3>
+                        <div class="popular-meta">
+                            <span>by ArchLog</span>
+                            <div class="stats"><i class="fa-solid fa-heart"></i> 87 <i class="fa-solid fa-comment"></i> 22</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="search-sidebar">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-magnifying-glass"></i> 통합 검색</h2>
+                </div>
+                <div class="search-panel">
+                    <div class="search-input-wrapper">
+                        <i class="fa-solid fa-align-left"></i>
+                        <input type="text" placeholder="게시글/시리즈 제목 검색">
+                    </div>
+                    <div class="search-input-wrapper">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" placeholder="사용자 이름(닉네임) 검색">
+                    </div>
+                    <div class="search-input-wrapper">
+                        <i class="fa-solid fa-hashtag"></i>
+                        <input type="text" placeholder="태그 검색 (예: #Java)">
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 5px;">검색하기</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="community-feed">
+            <div class="feed-header">
+                <h3>주목받는 인기 시리즈</h3>
+                <button class="btn btn-outline" style="padding: 4px 10px; font-size: 12px;" onclick="location.href='community_posts.html'">전체 시리즈 보기 <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+            <div class="series-grid" style="padding: 20px;">
+                <div class="series-card" onclick="location.href='series_detail.html'">
+                    <div class="series-info">
+                        <h3>Java Backend Mastery</h3>
+                        <p>Java 17, Spring Boot, 그리고 JPA를 활용한 백엔드 아키텍처 학습 기록입니다.</p>
+                    </div>
+                    <div class="series-meta">
+                        <span><i class="fa-solid fa-circle-user"></i> DevMaster</span>
+                        <span><i class="fa-regular fa-file-lines"></i> 12 Posts</span>
+                    </div>
+                </div>
+                <div class="series-card" onclick="location.href='series_detail.html'">
+                    <div class="series-info">
+                        <h3>프론트엔드 UI/UX 개선기</h3>
+                        <p>바닐라 JS와 CSS를 활용하여 사용자 경험을 극대화하는 다양한 기법들.</p>
+                    </div>
+                    <div class="series-meta">
+                        <span><i class="fa-solid fa-circle-user"></i> UI_Lover</span>
+                        <span><i class="fa-regular fa-file-lines"></i> 8 Posts</span>
+                    </div>
+                </div>
+                <div class="series-card" onclick="location.href='series_detail.html'">
+                    <div class="series-info">
+                        <h3>클린 코드와 리팩토링</h3>
+                        <p>유지보수하기 좋은 코드를 작성하기 위한 원칙과 실제 적용 사례.</p>
+                    </div>
+                    <div class="series-meta">
+                        <span><i class="fa-solid fa-circle-user"></i> CodeNewbie</span>
+                        <span><i class="fa-regular fa-file-lines"></i> 5 Posts</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>
