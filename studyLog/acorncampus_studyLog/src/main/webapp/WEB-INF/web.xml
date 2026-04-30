@@ -35,6 +35,12 @@
         <session-timeout>30</session-timeout>
     </session-config>
 
+    <!-- 정적 리소스: DefaultServlet에 위임 (MainController @WebServlet("/") 충돌 방지) -->
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>/resources/*</url-pattern>
+    </servlet-mapping>
+
     <!-- 루트 URL 접속 시 첫 페이지 -->
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>

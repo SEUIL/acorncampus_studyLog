@@ -25,7 +25,7 @@
         <a class="navbar-brand" href="${pageContext.request.contextPath}/">StudyLog</a>
 
         <!-- 검색: keyword 파라미터를 search/result.do 로 전송 -->
-        <form class="search-form" action="${pageContext.request.contextPath}/search/result.do" method="get">
+            <form class="search-form" action="${pageContext.request.contextPath}/search.do" method="get">
             <input type="text" name="keyword" class="search-input"
                    placeholder="검색어 입력..."
                    value="<c:out value='${param.keyword}'/>">
@@ -45,7 +45,7 @@
                 <c:otherwise>
                     <%-- 비로그인 상태: 로그인 + 회원가입 --%>
                     <a href="${pageContext.request.contextPath}/user/login.do" class="btn-nav">로그인</a>
-                    <a href="${pageContext.request.contextPath}/user/register.do" class="btn-nav btn-primary">회원가입</a>
+            <a href="${pageContext.request.contextPath}/user/reg.do" class="btn-nav btn-primary">회원가입</a>
                 </c:otherwise>
             </c:choose>
         </div>

@@ -1,0 +1,168 @@
+﻿body {
+            padding: 0;
+            display: block;
+        }
+
+        .main-wrapper {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        .interaction-section {
+            flex: 1.2;
+            background-color: var(--bg-body);
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            position: relative;
+            overflow: hidden;
+            padding-bottom: 10px;
+        }
+
+        #jelly-container {
+            width: 80%;
+            height: 70%;
+            max-width: 600px;
+        }
+
+        .login-section {
+            flex: 1;
+            background-color: var(--bg-card);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 32px;
+            border-left: 1px solid var(--border-color);
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 360px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .text-logo {
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: -1.5px;
+            margin-bottom: 16px;
+            display: inline-block;
+            border-bottom: 4px solid var(--text-main);
+            line-height: 1;
+        }
+
+        .login-header h1 {
+            font-size: 1.875rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+            color: var(--text-main);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .input-control {
+            width: 100%;
+            padding: 12px 0;
+            border: none;
+            border-bottom: 2px solid var(--border-color);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            outline: none;
+            background: transparent;
+            color: var(--text-main);
+        }
+
+        .input-control:focus {
+            border-bottom-color: var(--text-main);
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            margin-bottom: 24px;
+            color: var(--text-sub);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--text-main);
+            color: #ffffff;
+            border-radius: 9999px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            transition: opacity 0.2s;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        .btn-login:hover {
+            opacity: 0.9;
+        }
+
+        .btn-google {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 9999px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: background-color 0.2s;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-google:hover {
+            background-color: var(--bg-body);
+        }
+
+        .google-icon-text {
+            font-weight: 900;
+            font-size: 18px;
+            background: linear-gradient(to right, #4285F4, #EA4335, #FBBC05, #34A853);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .signup-link {
+            text-align: center;
+            margin-top: 32px;
+            font-size: 0.875rem;
+            color: var(--text-sub);
+        }
+
+        .signup-link a {
+            color: var(--text-main);
+            font-weight: 700;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .main-wrapper { flex-direction: column; }
+            .interaction-section { display: none; }
+        }
