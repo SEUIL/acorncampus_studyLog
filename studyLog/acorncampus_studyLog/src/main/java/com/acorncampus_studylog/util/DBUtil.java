@@ -10,7 +10,7 @@ import java.sql.SQLException;
 public class DBUtil {
 
     // DB 접속 정보
-    private static final String URL  = "jdbc:oracle:thin:@localhost:1521:xe";
+    private static final String URL  = "jdbc:oracle:thin:@localhost:1521:testdb";
     private static final String USER = "blog";
     private static final String PASS = "blog1234";
 
