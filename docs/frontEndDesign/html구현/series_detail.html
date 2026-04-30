@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스터디로그 - 시리즈 상세</title>
+    <link rel="stylesheet" href="global_theme.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { padding: 0; display: block; background-color: var(--bg-body); }
+        .dashboard-wrapper { display: flex; min-height: 100vh; width: 100%; }
+        /* 사이드바 공통 */
+        .sidebar { width: 280px; background-color: var(--bg-card); border-right: 1px solid var(--border-color); padding: 30px 20px; display: flex; flex-direction: column; gap: 30px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+        .brand-logo { font-size: 22px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .profile-section { text-align: center; }
+        .profile-avatar { width: 80px; height: 80px; background-color: var(--accent-color); color: var(--accent-contrast); border-radius: 50%; margin: 0 auto 15px; display: flex; justify-content: center; align-items: center; font-size: 32px; }
+        .profile-info h2 { font-size: 18px; margin: 0 0 5px 0; color: var(--text-main); }
+        .profile-info p { color: var(--text-sub); font-size: 12px; }
+        .nav-menu { list-style: none; padding: 0; margin: 0; flex-grow: 1; }
+        .nav-menu li { margin-bottom: 10px; font-size: 14px; font-weight: 600; color: var(--text-main); padding: 10px 12px; border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; gap: 10px; transition: var(--transition-base); }
+        .nav-menu li:hover, .nav-menu li.active { background-color: var(--list-hover); }
+        .nav-menu li.active { border-left: 4px solid var(--accent-color); }
+        .nav-menu i { color: var(--text-sub); width: 20px; text-align: center; }
+        .nav-menu li.active i { color: var(--accent-color); }
+        
+        /* 메인 콘텐츠 */
+        .main-content { flex: 1; padding: 40px; max-width: 1000px; margin: 0 auto; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+        .breadcrumb { font-size: 14px; font-weight: 600; color: var(--text-sub); display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 6px 12px; border-radius: var(--radius-sm); transition: var(--transition-base); }
+        .breadcrumb:hover { color: var(--text-main); background-color: var(--list-hover); }
+        
+        /* 시리즈 헤더 */
+        .series-header { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 30px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .series-title-area h1 { margin: 0 0 10px 0; border: none; padding: 0; font-size: 24px; color: var(--text-main); }
+        .series-title-area p { color: var(--text-sub); font-size: 14px; margin: 0 0 15px 0; }
+        .series-meta { font-size: 13px; font-weight: 600; color: var(--accent-color); }
+        .series-actions { display: flex; gap: 10px; }
+        
+        /* 게시글 리스트 (드래그 앤 드롭 순서 변경을 암시하는 UI) */
+        .post-list { list-style: none; padding: 0; margin: 0; border: 1px solid var(--border-color); border-radius: var(--radius-md); background-color: var(--bg-card); overflow: hidden; }
+        .post-item { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid var(--border-color); transition: var(--transition-base); }
+        .post-item:last-child { border-bottom: none; }
+        .post-item:hover { background-color: var(--list-hover); }
+        .post-info { display: flex; align-items: center; gap: 15px; flex: 1; cursor: pointer; }
+        .post-number { font-weight: 700; color: var(--text-sub); font-size: 16px; width: 30px; text-align: center; }
+        .post-title { font-size: 16px; font-weight: 600; color: var(--text-main); }
+        .post-date { font-size: 12px; color: var(--text-sub); margin-left: 10px; font-weight: 400; }
+        .post-actions { display: flex; gap: 8px; opacity: 0; transition: opacity 0.2s; }
+        .post-item:hover .post-actions { opacity: 1; }
+        .action-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-sub); padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; transition: var(--transition-base); }
+        .action-btn:hover { border-color: var(--text-main); color: var(--text-main); }
+        .action-btn.delete:hover { border-color: #ef5350; color: #ef5350; }
+    </style>
+</head>
+<body>
+<div class="dashboard-wrapper">
+    <aside class="sidebar">
+        <div class="brand-logo" onclick="location.href='workspace_main.html'"><i class="fa-solid fa-book-open"></i> 스터디로그</div>
+        <div class="profile-section">
+            <div class="profile-avatar"><i class="fa-solid fa-user"></i></div>
+            <div class="profile-info"><h2>User Name</h2><p>Learning & Recording...</p></div>
+        </div>
+        <ul class="nav-menu">
+            <li class="active"><i class="fa-solid fa-layer-group"></i> 내 시리즈</li>
+            <li onclick="location.href='community_main.html'"><i class="fa-solid fa-globe"></i> 커뮤니티 탐색</li>
+            <li><i class="fa-regular fa-folder"></i> 보관함</li>
+        </ul>
+    </aside>
+    <main class="main-content">
+        <div class="top-bar">
+            <div class="nav-left">
+                <div class="breadcrumb" onclick="location.href='workspace_main.html'">
+                    <i class="fa-solid fa-arrow-left"></i> 돌아가기
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="location.href='post_write.html'"><i class="fa-solid fa-plus"></i> 새 글 추가</button>
+        </div>
+
+        <div class="series-header">
+            <div class="series-title-area">
+                <h1>Java Backend Mastery</h1>
+                <p>Java 17, Spring Boot, 그리고 JPA를 활용한 백엔드 아키텍처 학습 기록입니다. (총 4개의 글)</p>
+                <span class="series-meta"><i class="fa-solid fa-lock-open"></i> 공개 시리즈</span>
+            </div>
+            <div class="series-actions">
+                <button class="btn btn-outline" title="시리즈 설정"><i class="fa-solid fa-gear"></i> 설정</button>
+            </div>
+        </div>
+
+        <ul class="post-list">
+            <li class="post-item">
+                <div class="post-info" onclick="location.href='post_detail.html'">
+                    <div class="post-number">1</div>
+                    <div>
+                        <span class="post-title">JVM의 구조와 메모리 영역 (Runtime Data Area)</span>
+                        <span class="post-date">2026.04.10</span>
+                    </div>
+                </div>
+                <div class="post-actions">
+                    <button class="action-btn">수정</button>
+                    <button class="action-btn delete">삭제</button>
+                </div>
+            </li>
+            <li class="post-item">
+                <div class="post-info" onclick="location.href='post_detail.html'">
+                    <div class="post-number">2</div>
+                    <div>
+                        <span class="post-title">객체지향 설계 원칙 (SOLID) 적용기</span>
+                        <span class="post-date">2026.04.15</span>
+                    </div>
+                </div>
+                <div class="post-actions">
+                    <button class="action-btn">수정</button>
+                    <button class="action-btn delete">삭제</button>
+                </div>
+            </li>
+            <li class="post-item">
+                <div class="post-info" onclick="location.href='post_detail.html'">
+                    <div class="post-number">3</div>
+                    <div>
+                        <span class="post-title">Spring Boot 환경 설정 및 기본 구조의 이해</span>
+                        <span class="post-date">2026.04.22</span>
+                    </div>
+                </div>
+                <div class="post-actions">
+                    <button class="action-btn">수정</button>
+                    <button class="action-btn delete">삭제</button>
+                </div>
+            </li>
+            <li class="post-item">
+                <div class="post-info" onclick="location.href='post_detail.html'">
+                    <div class="post-number">4</div>
+                    <div>
+                        <span class="post-title">JPA 영속성 컨텍스트(Persistence Context) 완벽 가이드</span>
+                        <span class="post-date">2026.04.30</span>
+                    </div>
+                </div>
+                <div class="post-actions">
+                    <button class="action-btn">수정</button>
+                    <button class="action-btn delete">삭제</button>
+                </div>
+            </li>
+        </ul>
+    </main>
+</div>
+</body>
+</html>
