@@ -8,7 +8,7 @@ sqlplus / as sysdba
 ```sql
 -- 계정 생성
 -- 계정이름 : blog , 비밀번호 : blog1234 로 통일
-CREATE 계정이름 IDENTIFIED BY 비밀번호;
+CREATE USER 계정이름 IDENTIFIED BY 비밀번호;
 
 -- 계정 권한 부여
 -- 계정이름 : blog 로 통일
