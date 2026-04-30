@@ -1,5 +1,9 @@
 package com.acorncampus_studylog.controller;
 
+import com.acorncampus_studylog.dto.PostDto;
+import com.acorncampus_studylog.dto.ReportDto;
+import com.acorncampus_studylog.dto.TagDto;
+import com.acorncampus_studylog.dto.UserDto;
 import com.acorncampus_studylog.service.CommentService;
 import com.acorncampus_studylog.service.PostService;
 import com.acorncampus_studylog.service.ReportService;
@@ -12,6 +16,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 관리자 컨트롤러 (ADMIN 권한 필수 — LoginCheckFilter + role 체크 적용)
@@ -98,7 +105,13 @@ public class AdminController extends HttpServlet {
      */
     private void handleDashboard(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // TODO: 각 Service에서 통계 수집 → setAttribute → forward
+        req.setAttribute("totalUserCount", 12);
+        req.setAttribute("todayUserCount", 1);
+        req.setAttribute("totalPostCount", 34);
+        req.setAttribute("todayPostCount", 2);
+        req.setAttribute("pendingReportCount", 1);
+        req.setAttribute("recentPostStats", "최근 작성 흐름 샘플");
+        req.getRequestDispatcher("/WEB-INF/views/admin/main.jsp").forward(req, resp);
     }
 
     // ── 사용자 관리 ──────────────────────────────────────────────────────────
@@ -127,7 +140,22 @@ public class AdminController extends HttpServlet {
      */
     private void handleUserList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // TODO: userService.getUserList(keyword, page) → setAttribute → forward
+        List<UserDto> users = new ArrayList<>();
+        UserDto user = new UserDto();
+        user.setUserId(1);
+        user.setUsername("임시사용자");
+        user.setEmail("temp@studylog.dev");
+        user.setRole("ADMIN");
+        user.setIsBanned("N");
+        users.add(user);
+
+        req.setAttribute("userList", users);
+        req.setAttribute("totalUserCount", 12);
+        req.setAttribute("activeUserCount", 11);
+        req.setAttribute("bannedUserCount", 1);
+        req.setAttribute("deletedUserCount", 0);
+        req.setAttribute("userStatsGraphLabel", "회원 통계 샘플");
+        req.getRequestDispatcher("/WEB-INF/views/admin/user/list.jsp").forward(req, resp);
     }
 
     /**
@@ -181,7 +209,19 @@ public class AdminController extends HttpServlet {
      */
     private void handlePostList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // TODO: postService.getPostListForAdmin(page) → setAttribute → forward
+        List<PostDto> posts = new ArrayList<>();
+        PostDto post = new PostDto();
+        post.setPostId(101);
+        post.setTitle("임시 커뮤니티 게시글");
+        post.setAuthorName("임시사용자");
+        post.setSeriesName("임시 시리즈");
+        post.setViewCount(42);
+        post.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        post.setIsPublic("Y");
+        posts.add(post);
+
+        req.setAttribute("postList", posts);
+        req.getRequestDispatcher("/WEB-INF/views/admin/post/list.jsp").forward(req, resp);
     }
 
     /**
@@ -254,7 +294,19 @@ public class AdminController extends HttpServlet {
      */
     private void handleReportList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // TODO: reportService.getReportList(status, page) → setAttribute → forward
+        List<ReportDto> reports = new ArrayList<>();
+        ReportDto report = new ReportDto();
+        report.setReportId(301);
+        report.setTargetType("POST");
+        report.setTargetSummary("임시 커뮤니티 게시글");
+        report.setReporterName("테스트신고자");
+        report.setStatus("PENDING");
+        report.setReason("화면 연결 확인용 임시 신고 데이터");
+        report.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        reports.add(report);
+
+        req.setAttribute("reportList", reports);
+        req.getRequestDispatcher("/WEB-INF/views/admin/report/list.jsp").forward(req, resp);
     }
 
     /**
@@ -300,7 +352,15 @@ public class AdminController extends HttpServlet {
      */
     private void handleTagList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // TODO: tagService.getAllTagsForAdmin() → setAttribute → forward
+        List<TagDto> tags = new ArrayList<>();
+        TagDto tag = new TagDto();
+        tag.setTagId(401);
+        tag.setName("java");
+        tag.setPostCount(5);
+        tags.add(tag);
+
+        req.setAttribute("tagList", tags);
+        req.getRequestDispatcher("/WEB-INF/views/admin/tag/list.jsp").forward(req, resp);
     }
 
     /**

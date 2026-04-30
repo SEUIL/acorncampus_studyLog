@@ -1,5 +1,6 @@
 package com.acorncampus_studylog.controller;
 
+import com.acorncampus_studylog.dto.PostDto;
 import com.acorncampus_studylog.service.PostService;
 import com.acorncampus_studylog.service.SeriesService;
 import com.acorncampus_studylog.service.TagService;
@@ -10,6 +11,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * 게시글 컨트롤러
@@ -71,7 +76,20 @@ public class PostController extends HttpServlet {
      */
     private void handleList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // TODO: page 파라미터 파싱 → postService.getPostList(page) → setAttribute → forward
+        List<PostDto> samplePosts = new ArrayList<>();
+        PostDto sample = new PostDto();
+        sample.setPostId(101);
+        sample.setUserId(1);
+        sample.setTitle("임시 커뮤니티 게시글");
+        sample.setAuthorName("임시사용자");
+        sample.setSeriesName("임시 시리즈");
+        sample.setViewCount(42);
+        sample.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        sample.setIsPublic("Y");
+        samplePosts.add(sample);
+
+        req.setAttribute("postList", samplePosts);
+        req.getRequestDispatcher("/WEB-INF/views/post/list.jsp").forward(req, resp);
     }
 
     /**
@@ -80,8 +98,22 @@ public class PostController extends HttpServlet {
      */
     private void handleDetail(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // TODO: id 파라미터 → postService.getPostDetail(id) → 없으면 404
-        //       → commentService.getCommentsByPost → setAttribute → forward
+        PostDto sample = new PostDto();
+        sample.setPostId(101);
+        sample.setUserId(1);
+        sample.setTitle("임시 커뮤니티 게시글");
+        sample.setAuthorName("임시사용자");
+        sample.setContent("<p>화면 연결 확인용 임시 본문입니다.</p><p>백엔드 기능 없이 JSP 이동만 테스트할 수 있도록 준비한 데이터입니다.</p>");
+        sample.setViewCount(42);
+        sample.setLikeCount(7);
+        sample.setCommentCount(0);
+        sample.setSeriesName("임시 시리즈");
+        sample.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        sample.setTagList(Collections.emptyList());
+
+        req.setAttribute("post", sample);
+        req.setAttribute("comments", Collections.emptyList());
+        req.getRequestDispatcher("/WEB-INF/views/post/detail.jsp").forward(req, resp);
     }
 
     /**
@@ -90,8 +122,8 @@ public class PostController extends HttpServlet {
      */
     private void handleWriteForm(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // TODO: 세션에서 userId → seriesService.getSeriesByUser(userId) → setAttribute("seriesList")
-        //       → forward /WEB-INF/views/post/write.jsp
+        req.setAttribute("seriesList", Collections.emptyList());
+        req.getRequestDispatcher("/WEB-INF/views/post/write.jsp").forward(req, resp);
     }
 
     /**

@@ -1,5 +1,7 @@
 package com.acorncampus_studylog.controller;
 
+import com.acorncampus_studylog.dto.PostDto;
+import com.acorncampus_studylog.dto.SeriesDto;
 import com.acorncampus_studylog.service.SeriesService;
 
 import javax.servlet.ServletException;
@@ -8,6 +10,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 시리즈 컨트롤러
@@ -63,7 +68,19 @@ public class SeriesController extends HttpServlet {
      */
     private void handleList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // TODO: seriesService.getSeriesList(page) → setAttribute("series", "page") → forward
+        List<SeriesDto> sampleSeries = new ArrayList<>();
+        SeriesDto series = new SeriesDto();
+        series.setSeriesId(201);
+        series.setUserId(1);
+        series.setName("임시 시리즈");
+        series.setDescription("시리즈 화면 연결 확인을 위한 임시 설명입니다.");
+        series.setAuthorName("임시사용자");
+        series.setPostCount(1);
+        series.setIsPublic("Y");
+        sampleSeries.add(series);
+
+        req.setAttribute("seriesList", sampleSeries);
+        req.getRequestDispatcher("/WEB-INF/views/series/list.jsp").forward(req, resp);
     }
 
     /**
@@ -72,7 +89,29 @@ public class SeriesController extends HttpServlet {
      */
     private void handleDetail(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // TODO: seriesService.getSeriesDetail(id) → 없으면 404 → setAttribute → forward
+        SeriesDto series = new SeriesDto();
+        series.setSeriesId(201);
+        series.setUserId(1);
+        series.setName("임시 시리즈");
+        series.setDescription("시리즈 상세 화면 연결 확인을 위한 임시 설명입니다.");
+        series.setAuthorName("임시사용자");
+        series.setPostCount(1);
+        series.setIsPublic("Y");
+        series.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+
+        PostDto post = new PostDto();
+        post.setPostId(101);
+        post.setUserId(1);
+        post.setTitle("임시 커뮤니티 게시글");
+        post.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+
+        List<PostDto> postList = new ArrayList<>();
+        postList.add(post);
+        series.setPostList(postList);
+
+        req.setAttribute("series", series);
+        req.setAttribute("postList", postList);
+        req.getRequestDispatcher("/WEB-INF/views/series/detail.jsp").forward(req, resp);
     }
 
     /**

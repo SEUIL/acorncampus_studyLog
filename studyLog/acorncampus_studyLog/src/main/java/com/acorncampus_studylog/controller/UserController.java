@@ -1,6 +1,6 @@
 package com.acorncampus_studylog.controller;
 
-import com.acorncampus_studylog.dto.UserDetailDto;
+import com.acorncampus_studylog.dto.UserDto;
 import com.acorncampus_studylog.service.UserService;
 
 import javax.servlet.ServletException;
@@ -8,6 +8,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
@@ -71,8 +72,12 @@ public class UserController extends HttpServlet {
      */
     private void handleLoginForm(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // TODO: 세션에 loginUser 있으면 resp.sendRedirect(contextPath + "/")
-        // TODO: req.getRequestDispatcher("/WEB-INF/views/user/login.jsp").forward(req, resp)
+        HttpSession session = req.getSession(false);
+        if (session != null && session.getAttribute("loginUser") != null) {
+            req.getRequestDispatcher("/WEB-INF/views/workspace_main.jsp").forward(req, resp);
+            return;
+        }
+        req.getRequestDispatcher("/WEB-INF/views/user/login.jsp").forward(req, resp);
     }
 
     /**
@@ -80,7 +85,11 @@ public class UserController extends HttpServlet {
      */
     private void handleLogout(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        // TODO: session.invalidate() → resp.sendRedirect(contextPath + "/user/login.do")
+        HttpSession session = req.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        resp.sendRedirect(req.getContextPath() + "/user/login.do");
     }
 
     /**
@@ -89,7 +98,7 @@ public class UserController extends HttpServlet {
      */
     private void handleRegForm(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // TODO: req.getRequestDispatcher("/WEB-INF/views/user/register.jsp").forward(req, resp)
+        req.getRequestDispatcher("/WEB-INF/views/user/register.jsp").forward(req, resp);
     }
 
     /**
@@ -120,8 +129,18 @@ public class UserController extends HttpServlet {
      */
     private void handleLogin(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // TODO: userService.login(email, pw) → 세션 저장 → redirect
-        // 파라미터: email, password
+        String email = req.getParameter("email");
+
+        UserDto tempUser = new UserDto();
+        tempUser.setUserId(1);
+        tempUser.setEmail(email != null ? email : "temp@studylog.dev");
+        tempUser.setUsername("임시사용자");
+        tempUser.setRole("ADMIN");
+        tempUser.setIsBanned("N");
+
+        req.getSession(true).setAttribute("loginUser", tempUser);
+        req.setAttribute("seriesList", java.util.Collections.emptyList());
+        req.getRequestDispatcher("/WEB-INF/views/workspace_main.jsp").forward(req, resp);
     }
 
     /**

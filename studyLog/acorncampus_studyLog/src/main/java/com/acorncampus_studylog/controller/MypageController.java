@@ -1,5 +1,6 @@
 package com.acorncampus_studylog.controller;
 
+import com.acorncampus_studylog.dto.SeriesDto;
 import com.acorncampus_studylog.service.PostService;
 import com.acorncampus_studylog.service.SeriesService;
 import com.acorncampus_studylog.service.UserService;
@@ -10,6 +11,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 마이페이지 / 프로필 수정 컨트롤러 (로그인 필수 — LoginCheckFilter 적용)
@@ -59,9 +62,18 @@ public class MypageController extends HttpServlet {
      */
     private void handleMypage(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // TODO: 세션에서 userId → postService.getPostsByUser, seriesService.getSeriesByUser
-        //       → setAttribute("posts", ...) setAttribute("series", ...)
-        //       → forward /WEB-INF/views/user/mypage.jsp
+        List<SeriesDto> seriesList = new ArrayList<>();
+
+        SeriesDto series = new SeriesDto();
+        series.setSeriesId(201);
+        series.setUserId(1);
+        series.setName("임시 시리즈");
+        series.setDescription("내 시리즈 복귀 동선 확인용 임시 데이터입니다.");
+        series.setPostCount(1);
+        seriesList.add(series);
+
+        req.setAttribute("seriesList", seriesList);
+        req.getRequestDispatcher("/WEB-INF/views/workspace_main.jsp").forward(req, resp);
     }
 
     /**
