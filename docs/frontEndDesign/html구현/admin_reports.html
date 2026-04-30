@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>스터디로그 관리자 - 신고 관리</title>
+    <link rel="stylesheet" href="global_theme.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { padding: 0; display: block; background-color: var(--bg-body); }
+        .dashboard-wrapper { display: flex; min-height: 100vh; width: 100%; }
+        /* 사이드바 */
+        .sidebar { width: 280px; background-color: var(--bg-card); border-right: 1px solid var(--border-color); padding: 30px 20px; display: flex; flex-direction: column; gap: 30px; position: sticky; top: 0; height: 100vh; }
+        .brand-logo { font-size: 22px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .nav-menu { list-style: none; padding: 0; margin: 0; flex-grow: 1; }
+        .nav-menu li { margin-bottom: 10px; font-size: 14px; font-weight: 600; color: var(--text-main); padding: 10px 12px; border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; gap: 10px; transition: var(--transition-base); }
+        .nav-menu li:hover, .nav-menu li.active { background-color: var(--list-hover); }
+        .nav-menu li.active { border-left: 4px solid var(--accent-color); }
+        .nav-menu i { color: var(--text-sub); width: 20px; text-align: center; }
+        .nav-menu li.active i { color: var(--accent-color); }
+        /* 메인 콘텐츠 */
+        .main-content { flex: 1; padding: 40px; overflow-y: auto; }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .admin-header h1 { margin: 0; border: none; padding: 0; font-size: 24px; color: var(--text-main); }
+        /* 테이블 공통 */
+        .admin-table-wrapper { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; margin-top: 20px; }
+        .admin-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: center; }
+        .admin-table th, .admin-table td { border-bottom: 1px solid var(--border-color); padding: 12px; color: var(--text-main); }
+        .admin-table th { background-color: var(--list-hover); font-weight: 700; }
+        .admin-table tr:hover:not(.detail-row) { background-color: rgba(0,0,0,0.02); }
+        .dark-theme .admin-table tr:hover:not(.detail-row) { background-color: rgba(255,255,255,0.02); }
+        /* 테이블 확장 행 */
+        .detail-row { display: none; background-color: var(--bg-body); text-align: left; }
+        .detail-row.active { display: table-row; }
+        .detail-content { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .detail-actions { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-main); cursor: pointer; }
+        .btn-sm:hover { border-color: var(--accent-color); color: var(--accent-color); }
+        .btn-danger { color: #ef5350; border-color: #ef5350; }
+        .btn-danger:hover { background-color: #ef5350; color: white; }
+        /* 컨트롤 바 (검색/필터) */
+        .controls-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: var(--bg-card); padding: 15px; border-radius: var(--radius-md); border: 1px solid var(--border-color); }
+        .controls-left, .controls-right { display: flex; gap: 10px; align-items: center; }
+        .admin-input { padding: 8px 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 13px; background: var(--input-bg); color: var(--text-main); }
+        .admin-select { padding: 8px 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 13px; background: var(--input-bg); color: var(--text-main); }
+</style>
+</head>
+<body>
+<div class="dashboard-wrapper">
+    
+    <aside class="sidebar">
+        <div class="brand-logo" onclick="location.href='admin_main.html'"><i class="fa-solid fa-user-shield"></i> 스터디로그 Admin</div>
+        <ul class="nav-menu" style="margin-top: 30px;">
+            <li  onclick="location.href='admin_main.html'"><i class="fa-solid fa-chart-pie"></i> 대시보드 메인</li>
+<li  onclick="location.href='admin_users.html'"><i class="fa-solid fa-users"></i> 회원 관리</li>
+<li  onclick="location.href='admin_posts.html'"><i class="fa-solid fa-file-lines"></i> 게시글 관리</li>
+<li class="active" onclick="location.href='admin_reports.html'"><i class="fa-solid fa-triangle-exclamation"></i> 신고 관리</li>
+<li  onclick="location.href='admin_tags.html'"><i class="fa-solid fa-tags"></i> 태그 관리</li>
+
+        </ul>
+        <div style="margin-top: auto; border-top: 1px solid var(--border-color); padding-top: 20px;">
+            <button class="btn btn-outline" style="width: 100%; font-size: 13px; margin-bottom:10px;" onclick="document.body.classList.toggle('dark-theme')">
+                <i class="fa-solid fa-moon"></i> 테마 변경
+            </button>
+            <button class="btn btn-outline" style="width: 100%; font-size: 13px;" onclick="location.href='workspace_main.html'">
+                <i class="fa-solid fa-desktop"></i> 사용자 모드로
+            </button>
+        </div>
+    </aside>
+    
+    <main class="main-content">
+        <div class="admin-header">
+            <h1 style="background: var(--bg-card); padding: 15px 30px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">신고목록</h1>
+            <div class="controls-right">
+                <input type="text" class="admin-input" placeholder="검색어 입력">
+                <button class="btn-sm">검색</button>
+                <button class="btn-sm">필터</button>
+            </div>
+        </div>
+
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>신고ID</th><th>신고유형</th><th>게시글 제목</th><th>신고자</th><th>작성자</th><th>상태</th><th>신고일</th><th>관리</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr onclick="document.getElementById('report-1').classList.toggle('active')" style="cursor: pointer;">
+                        <td>A001</td><td>욕설,광고</td><td>JSP 정리글</td><td>user01</td><td>user02</td><td style="color: #FFB300; font-weight:bold;">보류</td><td>2026/04/29 23:11</td><td>[보기]</td>
+                    </tr>
+                    <tr id="report-1" class="detail-row">
+                        <td colspan="8">
+                            <div class="detail-content">
+                                <div>
+                                    <strong>[신고 상세]</strong><br><br>
+                                    신고 유형: 욕설 / 비방<br>
+                                    신고 내용:<br>"댓글에 욕설이 포함되어 있습니다."<br><br>
+                                    신고된 게시글:<br>
+                                    제목: JSP 정리글<br>
+                                    작성자: user02<br>
+                                    <a href="post_detail.html" style="color: var(--accent-color); font-weight: 600;">[게시글 바로가기]</a><br><br>
+                                    처리 상태: <strong>대기중</strong>
+                                </div>
+                                <div class="detail-actions">
+                                    <button class="btn-sm btn-danger">[게시글 삭제]</button>
+                                    <button class="btn-sm">[작성자 활동 제한]</button>
+                                    <button class="btn-sm">[신고 반려]</button>
+                                    <button class="btn-sm" style="background:var(--accent-color); color:white;">[처리 완료]</button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+</body>
+</html>

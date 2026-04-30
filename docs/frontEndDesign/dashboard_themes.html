@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Themes</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+        :root {
+            /* 1. Minimalist Nordic (Default) */
+            --bg-body: #FAFAFA;
+            --bg-sidebar: #FFFFFF;
+            --bg-card: #FFFFFF;
+            --text-main: #212121;
+            --text-sub: #757575;
+            --border-color: #E0E0E0;
+            --accent-color: #81C784;
+            --icon-color: #FFB300; /* Folder icon etc */
+            
+            /* Jandi Colors */
+            --jd-0: #ebedf0;
+            --jd-1: #c6e48b;
+            --jd-2: #7bc96f;
+            --jd-3: #239a3b;
+            --jd-4: #196127;
+            
+            --sidebar-text: var(--text-main);
+            --sidebar-sub: var(--text-sub);
+        }
+
+        [data-theme="midnight"] {
+            /* 2. Midnight Technical */
+            --bg-body: #121212;
+            --bg-sidebar: #1E1E1E;
+            --bg-card: #252525;
+            --text-main: #E0E0E0;
+            --text-sub: #9E9E9E;
+            --border-color: #333333;
+            --accent-color: #00E676;
+            --icon-color: #00E676;
+            
+            --jd-0: #2d333b;
+            --jd-1: #0e4429;
+            --jd-2: #006d32;
+            --jd-3: #26a641;
+            --jd-4: #39d353;
+            
+            --sidebar-text: var(--text-main);
+            --sidebar-sub: var(--text-sub);
+        }
+
+        [data-theme="indigo"] {
+            /* 3. Indigo Classic */
+            --bg-body: #F4F5F7;
+            --bg-sidebar: #1A237E;
+            --bg-card: #FFFFFF;
+            --text-main: #1A237E;
+            --text-sub: #5C6BC0;
+            --border-color: #C5CAE9;
+            --accent-color: #BF360C;
+            --icon-color: #FF8A65;
+            
+            --jd-0: #E8EAF6;
+            --jd-1: #FFCCBC;
+            --jd-2: #FF8A65;
+            --jd-3: #E64A19;
+            --jd-4: #BF360C;
+            
+            --sidebar-text: #FFFFFF;
+            --sidebar-sub: #C5CAE9;
+        }
+
+        [data-theme="himalaya"] {
+            /* 4. Creed Himalaya */
+            --bg-body: #ECEFF1;
+            --bg-sidebar: #FAFAFA;
+            --bg-card: #FFFFFF;
+            --text-main: #263238;
+            --text-sub: #78909C;
+            --border-color: #CFD8DC;
+            --accent-color: #607D8B;
+            --icon-color: #90A4AE;
+            
+            --jd-0: #ECEFF1;
+            --jd-1: #CFD8DC;
+            --jd-2: #B0BEC5;
+            --jd-3: #90A4AE;
+            --jd-4: #607D8B;
+            
+            --sidebar-text: var(--text-main);
+            --sidebar-sub: var(--text-sub);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background-color: var(--bg-sidebar);
+            color: var(--sidebar-text);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 30px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .jandi-section {
+            margin-bottom: 40px;
+        }
+
+        .jandi-section h3 {
+            font-size: 12px;
+            color: var(--sidebar-sub);
+            margin-bottom: 10px;
+        }
+
+        .jandi-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .jandi-cell {
+            aspect-ratio: 1;
+            border-radius: 2px;
+        }
+
+        .jd-0 { background-color: var(--jd-0); }
+        .jd-1 { background-color: var(--jd-1); }
+        .jd-2 { background-color: var(--jd-2); }
+        .jd-3 { background-color: var(--jd-3); }
+        .jd-4 { background-color: var(--jd-4); }
+
+        .profile-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            background-color: #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            color: #8E24AA;
+            font-size: 40px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .profile-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .profile-sub {
+            font-size: 12px;
+            color: var(--sidebar-sub);
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .nav-menu li {
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px 10px;
+            border-radius: 6px;
+        }
+
+        .nav-menu li:hover {
+            background-color: rgba(128, 128, 128, 0.1);
+        }
+
+        .nav-menu i {
+            width: 24px;
+            color: var(--icon-color);
+        }
+
+        /* Theme Selector */
+        .theme-selector {
+            margin-top: auto;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+        
+        .theme-selector p {
+            font-size: 12px;
+            color: var(--sidebar-sub);
+            margin-bottom: 10px;
+        }
+
+        .theme-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .theme-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .theme-btn:hover, .theme-btn.active {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+        }
+
+        .menu-btn {
+            background: #000;
+            color: #fff;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 8px 15px;
+            width: 300px;
+        }
+
+        .search-bar i {
+            color: var(--text-sub);
+            margin-right: 10px;
+        }
+
+        .search-bar input {
+            border: none;
+            background: transparent;
+            outline: none;
+            color: var(--text-main);
+            width: 100%;
+            font-family: inherit;
+        }
+
+        .settings-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-sub);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dashboard-body {
+            padding: 20px 40px;
+        }
+
+        .dashboard-body h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .dashboard-body p {
+            color: var(--text-sub);
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .content-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 60px 20px;
+            text-align: center;
+            color: var(--text-sub);
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="jandi-section">
+            <h3>Yearly Contributions</h3>
+            <div class="jandi-grid">
+                <!-- Row 1 -->
+                <div class="jandi-cell jd-4"></div><div class="jandi-cell jd-0"></div><div class="jandi-cell jd-0"></div><div class="jandi-cell jd-2"></div><div class="jandi-cell jd-0"></div><div class="jandi-cell jd-2"></div><div class="jandi-cell jd-1"></div>
+                <!-- Row 2 -->
+                <div class="jandi-cell jd-0"></div><div class="jandi-cell jd-4"></div><div class="jandi-cell jd-0"></div><div class="jandi-cell jd-2"></div><div class="jandi-cell jd-3"></div><div class="jandi-cell jd-1"></div><div class="jandi-cell jd-1"></div>
+                <!-- Row 3 -->
+                <div class="jandi-cell jd-3"></div><div class="jandi-cell jd-2"></div><div class="jandi-cell jd-0"></div><div class="jandi-cell jd-1"></div><div class="jandi-cell jd-3"></div><div class="jandi-cell jd-0"></div><div class="jandi-cell jd-2"></div>
+            </div>
+        </div>
+
+        <div class="profile-section">
+            <div class="avatar"><i class="fa-solid fa-user"></i></div>
+            <div class="profile-name">User Name</div>
+            <div class="profile-sub">Learning & Recording...</div>
+        </div>
+
+        <ul class="nav-menu">
+            <li><i class="fa-regular fa-folder"></i> My Folders</li>
+            <li><i class="fa-solid fa-bookmark" style="color: #EF5350;"></i> Bookmarks</li>
+            <li style="margin-top: 20px;"><i class="fa-solid fa-arrow-right-from-bracket" style="color: #8D6E63;"></i> Logout</li>
+        </ul>
+
+        <div class="theme-selector">
+            <p><i class="fa-solid fa-palette"></i> 테마 선택 (스타일 프리뷰)</p>
+            <div class="theme-buttons">
+                <button class="theme-btn active" onclick="setTheme('nordic', this)">Nordic (기본)</button>
+                <button class="theme-btn" onclick="setTheme('midnight', this)">Midnight (다크)</button>
+                <button class="theme-btn" onclick="setTheme('indigo', this)">Indigo (데님)</button>
+                <button class="theme-btn" onclick="setTheme('himalaya', this)">Himalaya (메탈)</button>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header>
+            <button class="menu-btn"><i class="fa-solid fa-bars"></i></button>
+            <div class="header-right">
+                <div class="search-bar">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" placeholder="기록 검색하기...">
+                </div>
+                <button class="settings-btn"><i class="fa-solid fa-gear"></i></button>
+            </div>
+        </header>
+
+        <section class="dashboard-body">
+            <h1>My Dashboard</h1>
+            <p>오늘의 학습 기록을 확인해보세요.</p>
+            
+            <div class="content-card">
+                메인 콘텐츠가 들어갈 자리입니다.
+            </div>
+            <div class="content-card">
+                메인 콘텐츠가 들어갈 자리입니다.
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function setTheme(themeName, btnElement) {
+            // 바디 태그에 데이터 속성 설정
+            if (themeName === 'nordic') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', themeName);
+            }
+
+            // 버튼 액티브 상태 변경
+            document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+        }
+    </script>
+</body>
+</html>
