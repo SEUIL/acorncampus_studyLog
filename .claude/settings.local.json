@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(git restore *)",
-      "Bash(mvn clean *)"
+      "Bash(mvn clean *)",
+      "Bash(Get-ChildItem -Path \"D:\\\\workSpace\\\\workSpace_acorncampus_studyLog\" -Recurse -Force)",
+      "Bash(Select-Object FullName)",
+      "Bash(Sort-Object FullName)",
+      "Bash(dir /s)",
+      "Bash(Get-ChildItem -Recurse -Path \"D:\\\\workSpace\\\\workSpace_acorncampus_studyLog\\\\studyLog\\\\acorncampus_studyLog\\\\src\\\\main\\\\java\\\\com\\\\acorncampus_studylog\" -File)"
     ]
   }
 }

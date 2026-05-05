@@ -50,7 +50,6 @@ src/main/webapp/resources/upload/*
 !src/main/webapp/resources/upload/.gitkeep
 
 ### Claude Code 전용 설정 파일 ###
-CLAUDE.md
 .claude/settings.local.json
 
 ### 로그 ###

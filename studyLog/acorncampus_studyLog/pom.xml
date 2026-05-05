@@ -52,6 +52,13 @@
             <version>2.15.1</version>
         </dependency>
 
+        <!-- Gson (AJAX JSON 직렬화) -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10.1</version>
+        </dependency>
+
         <!-- Oracle JDBC -->
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>
