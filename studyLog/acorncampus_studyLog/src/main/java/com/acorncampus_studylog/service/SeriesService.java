@@ -6,6 +6,23 @@ import com.acorncampus_studylog.dto.SeriesDto;
 
 import java.util.List;
 
+//1. getSeriesList(int pageNo)
+//공개 시리즈 목록을 페이지 단위로 가져옴
+//  2. getSeriesPage(int pageNo)
+//시리즈 목록 페이지 정보를 만듦
+//  3. getSeriesDetail(int seriesId)
+//시리즈 상세 정보와 그 안의 게시글 목록을 같이 가져옴
+//  4. createSeries(int userId, String name, String description, String isPublic)
+//새 시리즈를 생성함
+//  5. updateSeries(int seriesId, String name, String description, String isPublic)
+//기존 시리즈 제목, 설명, 공개 여부를 수정함
+//  6. deleteSeries(int seriesId)
+//시리즈를 삭제함
+//이때 소속 게시글의 series_id는 DAO에서 NULL로 바꿈
+//  7. getSeriesByUser(int userId)
+//특정 사용자의 시리즈 목록을 가져옴
+//현겸 게시글 작성 화면 드롭다운에서 쓰는 메서드야.
+
 /** 시리즈 비즈니스 로직 (CRUD, 소속 게시글 조회) */
 public class SeriesService {
 
@@ -16,14 +33,15 @@ public class SeriesService {
      * @param pageNo 현재 페이지
      */
     public List<SeriesDto> getSeriesList(int pageNo) {
-        // TODO: seriesDao.countAll → PageDto → seriesDao.findAll
-        return null;
+        // 페이지 정보를 만든 뒤 공개 시리즈 목록을 조회
+        PageDto page = getSeriesPage(pageNo);
+        return seriesDao.findAll(page.getOffset(), page.getPageSize());
     }
 
     /** 시리즈 목록 페이지 정보 */
     public PageDto getSeriesPage(int pageNo) {
-        // TODO: new PageDto(pageNo, 10, seriesDao.countAll())
-        return null;
+        // 공개 시리즈 전체 개수 기준으로 페이지 정보 생성
+        return new PageDto(pageNo, 10, seriesDao.countAll());
     }
 
     /**
@@ -31,8 +49,15 @@ public class SeriesService {
      * @return SeriesDto (postList 포함), 없으면 null
      */
     public SeriesDto getSeriesDetail(int seriesId) {
-        // TODO: seriesDao.findById → seriesDao.findPostsBySeries → series.setPostList
-        return null;
+        // 시리즈 기본 정보 조회
+        SeriesDto series = seriesDao.findById(seriesId);
+        if (series == null) {
+            return null;
+        }
+
+        // 상세 화면에서 사용할 소속 게시글 목록까지 함께 담기
+        series.setPostList(seriesDao.findPostsBySeries(seriesId));
+        return series;
     }
 
     /**
@@ -40,8 +65,11 @@ public class SeriesService {
      * @return 생성된 series_id
      */
     public int createSeries(int userId, String name, String description, String isPublic) {
-        // TODO: name 유효성 검사 → seriesDao.insert
-        return 0;
+        // 입력값 정리/검증 후 시리즈 생성
+        validateUserId(userId);
+        String validName = normalizeName(name);
+        String validIsPublic = normalizeIsPublic(isPublic);
+        return seriesDao.insert(userId, validName, normalizeDescription(description), validIsPublic);
     }
 
     /**
@@ -49,7 +77,11 @@ public class SeriesService {
      * 본인 소유 확인은 Controller에서 처리
      */
     public void updateSeries(int seriesId, String name, String description, String isPublic) {
-        // TODO: seriesDao.update
+        // 입력값 정리/검증 후 시리즈 수정
+        validateSeriesId(seriesId);
+        String validName = normalizeName(name);
+        String validIsPublic = normalizeIsPublic(isPublic);
+        seriesDao.update(seriesId, validName, normalizeDescription(description), validIsPublic);
     }
 
     /**
@@ -57,14 +89,44 @@ public class SeriesService {
      * 본인 소유 확인은 Controller에서 처리
      */
     public void deleteSeries(int seriesId) {
-        // TODO: seriesDao.delete (내부에서 게시글 연결 해제 후 삭제 트랜잭션 처리)
+        // DAO에서 소속 게시글 연결 해제 후 시리즈 삭제
+        validateSeriesId(seriesId);
+        seriesDao.delete(seriesId);
     }
 
     /**
      * 특정 사용자의 시리즈 목록 조회 (마이페이지/프로필)
      */
     public List<SeriesDto> getSeriesByUser(int userId) {
-        // TODO: seriesDao.findByUserId
-        return null;
+        // 현겸 post_write.jsp 드롭다운에서 사용할 사용자별 시리즈 목록
+        validateUserId(userId);
+        return seriesDao.findByUserId(userId);
+    }
+
+    private void validateUserId(int userId) {
+        if (userId <= 0) {
+            throw new IllegalArgumentException("유효하지 않은 사용자 ID입니다.");
+        }
+    }
+
+    private void validateSeriesId(int seriesId) {
+        if (seriesId <= 0) {
+            throw new IllegalArgumentException("유효하지 않은 시리즈 ID입니다.");
+        }
+    }
+
+    private String normalizeName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("시리즈 이름은 필수입니다.");
+        }
+        return name.trim();
+    }
+
+    private String normalizeDescription(String description) {
+        return description == null ? "" : description.trim();
+    }
+
+    private String normalizeIsPublic(String isPublic) {
+        return "N".equalsIgnoreCase(isPublic) ? "N" : "Y";
     }
 }

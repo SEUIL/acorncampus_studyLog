@@ -1,7 +1,8 @@
 package com.acorncampus_studylog.controller;
 
-import com.acorncampus_studylog.dto.PostDto;
+import com.acorncampus_studylog.dto.PageDto;
 import com.acorncampus_studylog.dto.SeriesDto;
+import com.acorncampus_studylog.dto.UserDto;
 import com.acorncampus_studylog.service.SeriesService;
 
 import javax.servlet.ServletException;
@@ -10,9 +11,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 
 @WebServlet(urlPatterns = {"/series/*", "/l_check/series/*"})
 public class SeriesController extends HttpServlet {
@@ -70,47 +68,27 @@ public class SeriesController extends HttpServlet {
 
     private void handleList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // TODO: seriesService.getPublicSeriesList(page) 로 교체
-        List<SeriesDto> sampleSeries = new ArrayList<>();
-        SeriesDto series = new SeriesDto();
-        series.setSeriesId(201);
-        series.setUserId(1);
-        series.setName("샘플 시리즈");
-        series.setDescription("시리즈 화면 연결 확인용 샘플 설명입니다.");
-        series.setAuthorName("임시사용자");
-        series.setPostCount(1);
-        series.setIsPublic("Y");
-        sampleSeries.add(series);
+        // 공개 시리즈 목록을 실제 DB 데이터로 조회
+        int pageNo = parseInt(req.getParameter("page"), 1);
+        PageDto page = seriesService.getSeriesPage(pageNo);
 
-        req.setAttribute("seriesList", sampleSeries);
+        req.setAttribute("seriesList", seriesService.getSeriesList(pageNo));
+        req.setAttribute("page", page);
         req.getRequestDispatcher("/WEB-INF/views/series/list.jsp").forward(req, resp);
     }
 
     private void handleDetail(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // TODO: seriesService.getSeriesDetail(seriesId) 로 교체
-        SeriesDto series = new SeriesDto();
-        series.setSeriesId(201);
-        series.setUserId(1);
-        series.setName("샘플 시리즈");
-        series.setDescription("시리즈 상세 화면 연결 확인용 샘플 설명입니다.");
-        series.setAuthorName("임시사용자");
-        series.setPostCount(1);
-        series.setIsPublic("Y");
-        series.setCreatedAt(new Timestamp(System.currentTimeMillis()));
-
-        PostDto post = new PostDto();
-        post.setPostId(101);
-        post.setUserId(1);
-        post.setTitle("샘플 커뮤니티 게시글");
-        post.setCreatedAt(new Timestamp(System.currentTimeMillis()));
-
-        List<PostDto> postList = new ArrayList<>();
-        postList.add(post);
-        series.setPostList(postList);
+        // 시리즈 상세와 소속 게시글 목록을 함께 조회
+        int seriesId = parseInt(req.getParameter("id"), 0);
+        SeriesDto series = seriesService.getSeriesDetail(seriesId);
+        if (series == null) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
 
         req.setAttribute("series", series);
-        req.setAttribute("postList", postList);
+        req.setAttribute("postList", series.getPostList());
         req.getRequestDispatcher("/WEB-INF/views/series/detail.jsp").forward(req, resp);
     }
 
@@ -121,14 +99,17 @@ public class SeriesController extends HttpServlet {
 
     private void handleUpdateForm(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // TODO: seriesService.getSeriesDetail(seriesId) + 본인 확인 후 교체
-        SeriesDto series = new SeriesDto();
-        series.setSeriesId(201);
-        series.setUserId(1);
-        series.setName("수정용 샘플 시리즈");
-        series.setDescription("시리즈 수정 화면 연결 확인용 샘플 설명입니다.");
-        series.setAuthorName("스터디로그");
-        series.setIsPublic("Y");
+        // 수정 화면은 시리즈 소유자 또는 관리자만 접근 가능
+        int seriesId = parseInt(req.getParameter("id"), 0);
+        SeriesDto series = seriesService.getSeriesDetail(seriesId);
+        if (series == null) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        if (!canManageSeries(req, series)) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
 
         req.setAttribute("series", series);
         req.getRequestDispatcher("/WEB-INF/views/series/update.jsp").forward(req, resp);
@@ -136,19 +117,73 @@ public class SeriesController extends HttpServlet {
 
     private void handleWrite(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        // TODO: seriesService.createSeries(loginUser.getUserId(), name, description, isPublic)
-        resp.sendRedirect(req.getContextPath() + "/l_check/user/mypage.do");
+        // 로그인 사용자의 새 시리즈 생성
+        UserDto loginUser = getLoginUser(req);
+        int seriesId = seriesService.createSeries(
+                loginUser.getUserId(),
+                req.getParameter("name"),
+                req.getParameter("description"),
+                req.getParameter("isPublic")
+        );
+        resp.sendRedirect(req.getContextPath() + "/l_check/series/detail.do?id=" + seriesId);
     }
 
     private void handleUpdate(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        // TODO: seriesService.updateSeries(seriesId, name, description, isPublic) + 본인 확인
-        resp.sendRedirect(req.getContextPath() + "/l_check/series/detail.do?id=" + req.getParameter("seriesId"));
+        // 소유권 확인 후 시리즈 수정
+        int seriesId = parseInt(req.getParameter("seriesId"), 0);
+        SeriesDto series = seriesService.getSeriesDetail(seriesId);
+        if (series == null) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        if (!canManageSeries(req, series)) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        seriesService.updateSeries(
+                seriesId,
+                req.getParameter("name"),
+                req.getParameter("description"),
+                req.getParameter("isPublic")
+        );
+        resp.sendRedirect(req.getContextPath() + "/l_check/series/detail.do?id=" + seriesId);
     }
 
     private void handleDelete(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        // TODO: seriesService.deleteSeries(seriesId) — 소속 게시글도 함께 삭제 확인 필요
+        // 소유권 확인 후 시리즈 삭제
+        int seriesId = parseInt(req.getParameter("seriesId"), 0);
+        SeriesDto series = seriesService.getSeriesDetail(seriesId);
+        if (series == null) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        if (!canManageSeries(req, series)) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        seriesService.deleteSeries(seriesId);
         resp.sendRedirect(req.getContextPath() + "/l_check/user/mypage.do");
+    }
+
+    private int parseInt(String value, int defaultValue) {
+        try {
+            return value == null ? defaultValue : Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    private UserDto getLoginUser(HttpServletRequest req) {
+        return (UserDto) req.getSession().getAttribute("loginUser");
+    }
+
+    private boolean canManageSeries(HttpServletRequest req, SeriesDto series) {
+        UserDto loginUser = getLoginUser(req);
+        return loginUser != null
+                && (loginUser.getUserId() == series.getUserId() || "ADMIN".equals(loginUser.getRole()));
     }
 }
