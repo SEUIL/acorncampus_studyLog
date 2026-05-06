@@ -5,6 +5,7 @@ import com.acorncampus_studylog.dto.PostDto;
 import com.acorncampus_studylog.dto.SeriesDto;
 import com.acorncampus_studylog.dto.UserDto;
 import com.acorncampus_studylog.service.CommentService;
+import com.acorncampus_studylog.service.LikeService;
 import com.acorncampus_studylog.service.PostService;
 import com.acorncampus_studylog.service.SeriesService;
 import com.google.gson.Gson;
@@ -109,6 +110,8 @@ public class PostController extends HttpServlet {
      */
     private void handleDetail(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        LikeService likeService = new LikeService();
+
         // id 파라미터가 없거나 숫자가 아니면 400 Bad Request 반환
         String idParam = req.getParameter("id");
         if (idParam == null) {
@@ -136,6 +139,19 @@ public class PostController extends HttpServlet {
         // null이면 빈 리스트로 대체해서 JSP에서 NullPointerException 발생하지 않도록 처리
         List<CommentDto> comments = commentService.getCommentsByPost(postId);
         if (comments == null) comments = Collections.emptyList();
+
+        // --- 좋아요 상태 조회 로직 추가 ---
+        // 세션에서 로그인한 사용자 정보를 가져옵니다.
+        // (UserDto 타입은 프로젝트의 실제 클래스명에 맞춰 확인이 필요할 수 있습니다.)
+        HttpSession session = req.getSession();
+        UserDto loginUser = (UserDto) session.getAttribute("loginUser");
+
+        // 로그인한 사용자라면 현재 글에 대한 좋아요 상태("L", "D", null)를 조회해서 JSP로 넘김
+        if (loginUser != null) {
+            String myLike = likeService.getPostLikeStatus(postId, loginUser.getUserId());
+            // 주의: LikeService에 findPostLike를 호출하는 getPostLikeStatus 메서드가 있어야 함!
+            req.setAttribute("myLike", myLike);
+        }
 
         req.setAttribute("post",     post);
         req.setAttribute("comments", comments);

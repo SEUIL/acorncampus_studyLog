@@ -77,11 +77,14 @@
       <option name="catalinaBase" value="C:\Users\user\.SmartTomcat\acorncampus_studyLog\acorncampus_studyLog" />
       <option name="contextPath" value="/acorncampus_studyLog" />
       <option name="docBase" value="$PROJECT_DIR$/src/main/webapp" />
+      <option name="envOptions">
+        <map />
+      </option>
       <option name="extraClassPath" value="" />
       <option name="tomcatInfo">
         <TomcatInfo>
-          <option name="name" value="Apache Tomcat/9.0.117" />
-          <option name="path" value="$PROJECT_DIR$/../../../tools/apache-tomcat-9.0.117" />
+          <option name="name" value="Apache Tomcat/9.0.117 (2)" />
+          <option name="path" value="$USER_HOME$/OneDrive/바탕 화면/web/tools/apache-tomcat-9.0.117-windows-x64/apache-tomcat-9.0.117" />
           <option name="version" value="9.0.117.0" />
         </TomcatInfo>
       </option>
@@ -112,6 +115,10 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>
