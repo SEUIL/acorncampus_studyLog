@@ -52,6 +52,28 @@ public class UserDao {
         }
     }
 
+    // 추가
+    /** user_nickname로 사용자 조회 */
+    public UserDetailDto findByNickname(String nickname) {
+        String sql = "SELECT user_id, email, nickname, password, bio, avatar_url, role, is_banned, created_at, deleted_at " +
+                "FROM users WHERE nickname = ? AND deleted_at IS NULL";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            conn = DBUtil.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, nickname);
+            rs = pstmt.executeQuery();
+            return rs.next() ? mapRow(rs) : null;
+        } catch (SQLException e) {
+            throw new RuntimeException("UserDao.findByNickname 실패", e);
+        } finally {
+            DBUtil.close(conn, pstmt, rs);
+        }
+    }
+
+
     /** 관리자 - 사용자 목록 조회 (keyword: 이메일/닉네임 검색, null이면 전체) */
     public List<UserDetailDto> findAll(String keyword, int offset, int limit) {
         String like = (keyword != null && !keyword.trim().isEmpty()) ? "%" + keyword.trim() + "%" : "%";

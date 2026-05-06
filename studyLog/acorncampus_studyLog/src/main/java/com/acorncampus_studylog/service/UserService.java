@@ -20,7 +20,29 @@ public class UserService {
      */
     public UserDetailDto login(String email, String rawPassword) {
         // TODO: userDao.findByEmail → BCryptUtil.check → 정지 계정 확인 → 반환
-        return null;
+
+        // 이메일 조회
+        UserDetailDto user = userDao.findByEmail(email);
+
+        // 이메일 조회 x, 사용자 없으면 로그인 실패
+        if(user == null){
+            return null;
+        }
+
+        // 이메일 조회 o, 비밀번호 검증
+        boolean ok = BCryptUtil.check(rawPassword, user.getPassword());
+
+        if (!ok){
+            return null;
+        }
+
+        // 정지 계정 확인
+        if ("Y".equals(user.getIsBanned())) {
+            return null;
+        }
+
+        // 로그인 성공
+        return user;
     }
 
     /**
@@ -32,8 +54,25 @@ public class UserService {
      */
     public int register(String email, String nickname, String rawPassword) {
         // TODO: 중복 이메일/닉네임 확인 → BCryptUtil.hash → userDao.insert
-        return 0;
+
+        // 중복 이메일 확인
+        if (userDao.findByEmail(email) != null ){
+            return 0;
+
+        }
+
+        // 중복 닉네임 확인
+        if (userDao.findByNickname(nickname) != null){
+            return 0;
+        }
+
+        // 비밀번호 저장 전 해시
+        String hashed = BCryptUtil.hash(rawPassword);
+
+        // 아이디 생성
+        return userDao.insert(email, nickname, hashed);
     }
+
 
     /**
      * 이메일 중복 확인 (AJAX용)
@@ -41,7 +80,11 @@ public class UserService {
      */
     public boolean checkEmailAvailable(String email) {
         // TODO: userDao.findByEmail != null이면 false
-        return false;
+        if (userDao.findByEmail(email) == null){
+            return true;
+        }else {
+            return false;
+        }
     }
 
     /**
@@ -50,8 +93,15 @@ public class UserService {
      */
     public UserDetailDto getUserById(int userId) {
         // TODO: userDao.findById
+        UserDetailDto user = userDao.findById(userId);
+
+        if (user != null){
+            return user;
+        }
+
         return null;
     }
+
 
     /**
      * 프로필 수정 (닉네임, 자기소개, 아바타 URL)
@@ -59,6 +109,8 @@ public class UserService {
      */
     public void updateProfile(int userId, String nickname, String bio, String avatarUrl) {
         // TODO: 닉네임 중복 확인 → userDao.updateProfile
+
+        
     }
 
     /**
