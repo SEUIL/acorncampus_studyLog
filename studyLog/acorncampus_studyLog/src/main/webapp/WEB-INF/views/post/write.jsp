@@ -11,17 +11,9 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/post/post_write.css">
 </head>
 <body>
+<%@ include file="/WEB-INF/views/common/header.jsp" %>
+<%@ include file="/WEB-INF/views/common/sideBar.jsp" %>
 <div class="dashboard-wrapper">
-    <aside class="sidebar">
-        <a class="brand-logo" href="${pageContext.request.contextPath}/">
-            <i class="fa-solid fa-book-open"></i> 스터디로그
-        </a>
-        <ul class="nav-menu" style="margin-top: 30px;">
-            <li class="active" onclick="location.href='${pageContext.request.contextPath}/l_check/user/mypage.do'"><i class="fa-solid fa-layer-group"></i> 내 시리즈</li>
-            <li onclick="location.href='${pageContext.request.contextPath}/post/list.do'"><i class="fa-solid fa-globe"></i> 커뮤니티 탐색</li>
-        </ul>
-    </aside>
-
     <main class="main-content">
         <div class="top-bar">
             <a class="breadcrumb" href="${pageContext.request.contextPath}/l_check/user/mypage.do">

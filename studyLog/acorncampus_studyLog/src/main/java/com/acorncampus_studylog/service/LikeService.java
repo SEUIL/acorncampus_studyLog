@@ -104,4 +104,26 @@ public class LikeService {
         // DAO에 요청하여 배열 [likeCount, dislikeCount] 반환
         return likeDao.countCommentLikes(commentId);
     }
+
+    /**
+     * 특정 사용자의 게시글 좋아요/싫어요 상태 조회 (상세 페이지 초기 렌더링용)
+     * @param postId 게시글 ID
+     * @param userId 로그인 사용자 ID
+     * @return "L"(좋아요), "D"(싫어요), null(반응 없음)
+     */
+    public String getPostLikeStatus(int postId, int userId) {
+        // DAO에 요청하여 현재 사용자의 좋아요 상태를 반환[cite: 4]
+        return likeDao.findPostLike(postId, userId);
+    }
+
+    /**
+     * 특정 사용자의 댓글 좋아요/싫어요 상태 조회 (초기 렌더링용)
+     * @param commentId 댓글 ID
+     * @param userId 로그인 사용자 ID
+     * @return "L"(좋아요), "D"(싫어요), null(반응 없음)
+     */
+    public String getCommentLikeStatus(int commentId, int userId) {
+        // DAO에 요청하여 현재 사용자의 댓글 좋아요 상태를 반환[cite: 4]
+        return likeDao.findCommentLike(commentId, userId);
+    }
 }
