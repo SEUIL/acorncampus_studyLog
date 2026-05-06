@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -105,6 +106,7 @@ public class AdminController extends HttpServlet {
      */
     private void handleDashboard(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        // TODO: 각 service 통계 호출로 교체
         req.setAttribute("totalUserCount", 12);
         req.setAttribute("todayUserCount", 1);
         req.setAttribute("totalPostCount", 34);
@@ -140,6 +142,7 @@ public class AdminController extends HttpServlet {
      */
     private void handleUserList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        // TODO: userService.getUserListForAdmin(keyword, page) 로 교체
         List<UserDto> users = new ArrayList<>();
         UserDto user = new UserDto();
         user.setUserId(1);
@@ -154,7 +157,6 @@ public class AdminController extends HttpServlet {
         req.setAttribute("activeUserCount", 11);
         req.setAttribute("bannedUserCount", 1);
         req.setAttribute("deletedUserCount", 0);
-        req.setAttribute("userStatsGraphLabel", "회원 통계 샘플");
         req.getRequestDispatcher("/WEB-INF/views/admin/user/list.jsp").forward(req, resp);
     }
 
@@ -164,7 +166,8 @@ public class AdminController extends HttpServlet {
      */
     private void handleUserBan(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        // TODO: userService.banUser(userId) → redirect
+        // TODO: userService.banUser(Integer.parseInt(req.getParameter("userId")))
+        resp.sendRedirect(req.getContextPath() + "/admin/user/list.do");
     }
 
     /**
@@ -173,7 +176,8 @@ public class AdminController extends HttpServlet {
      */
     private void handleUserUnban(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        // TODO: userService.unbanUser(userId) → redirect
+        // TODO: userService.unbanUser(Integer.parseInt(req.getParameter("userId")))
+        resp.sendRedirect(req.getContextPath() + "/admin/user/list.do");
     }
 
     /**
@@ -182,7 +186,8 @@ public class AdminController extends HttpServlet {
      */
     private void handleUserDelete(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        // TODO: userService.forceDeleteUser(userId) → redirect
+        // TODO: userService.forceDeleteUser(Integer.parseInt(req.getParameter("userId")))
+        resp.sendRedirect(req.getContextPath() + "/admin/user/list.do");
     }
 
     // ── 게시글 관리 ──────────────────────────────────────────────────────────
@@ -209,6 +214,7 @@ public class AdminController extends HttpServlet {
      */
     private void handlePostList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        // TODO: postService.getPostListForAdmin(page) 로 교체
         List<PostDto> posts = new ArrayList<>();
         PostDto post = new PostDto();
         post.setPostId(101);
@@ -230,7 +236,8 @@ public class AdminController extends HttpServlet {
      */
     private void handlePostDelete(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        // TODO: postService.forceDeletePost(postId) → redirect
+        // TODO: postService.forceDeletePost(Integer.parseInt(req.getParameter("postId")))
+        resp.sendRedirect(req.getContextPath() + "/admin/post/list.do");
     }
 
     // ── 댓글 관리 ────────────────────────────────────────────────────────────
@@ -257,7 +264,9 @@ public class AdminController extends HttpServlet {
      */
     private void handleCommentList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // TODO: commentService.getCommentListForAdmin(page) → setAttribute → forward
+        // TODO: commentService.getCommentListForAdmin(page) 로 교체
+        req.setAttribute("commentList", Collections.emptyList());
+        req.getRequestDispatcher("/WEB-INF/views/admin/comment/list.jsp").forward(req, resp);
     }
 
     /**
@@ -266,7 +275,8 @@ public class AdminController extends HttpServlet {
      */
     private void handleCommentDelete(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        // TODO: commentService.forceDeleteComment(commentId) → redirect
+        // TODO: commentService.forceDeleteComment(Integer.parseInt(req.getParameter("commentId")))
+        resp.sendRedirect(req.getContextPath() + "/admin/comment/list.do");
     }
 
     // ── 신고 관리 ────────────────────────────────────────────────────────────
@@ -294,6 +304,7 @@ public class AdminController extends HttpServlet {
      */
     private void handleReportList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        // TODO: reportService.getReportList(status, page) 로 교체
         List<ReportDto> reports = new ArrayList<>();
         ReportDto report = new ReportDto();
         report.setReportId(301);
@@ -315,8 +326,9 @@ public class AdminController extends HttpServlet {
      */
     private void handleReportResolve(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        // TODO: reportService.resolveReport(reportId) → redirect
+        // TODO: reportService.resolveReport(Integer.parseInt(req.getParameter("reportId")))
         // 대상 컨텐츠 삭제가 필요하면 postService/commentService도 호출
+        resp.sendRedirect(req.getContextPath() + "/admin/report/list.do");
     }
 
     /**
@@ -325,7 +337,8 @@ public class AdminController extends HttpServlet {
      */
     private void handleReportDismiss(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        // TODO: reportService.dismissReport(reportId) → redirect
+        // TODO: reportService.dismissReport(Integer.parseInt(req.getParameter("reportId")))
+        resp.sendRedirect(req.getContextPath() + "/admin/report/list.do");
     }
 
     // ── 태그 관리 ────────────────────────────────────────────────────────────
@@ -352,6 +365,7 @@ public class AdminController extends HttpServlet {
      */
     private void handleTagList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        // TODO: tagService.getTagListForAdmin() 로 교체
         List<TagDto> tags = new ArrayList<>();
         TagDto tag = new TagDto();
         tag.setTagId(401);
@@ -369,6 +383,7 @@ public class AdminController extends HttpServlet {
      */
     private void handleTagDelete(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        // TODO: tagService.deleteTag(tagId) → redirect
+        // TODO: tagService.deleteTag(Integer.parseInt(req.getParameter("tagId")))
+        resp.sendRedirect(req.getContextPath() + "/admin/tag/list.do");
     }
 }
