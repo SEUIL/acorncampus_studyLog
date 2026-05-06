@@ -80,6 +80,21 @@
                      현재는 미구현 상태이므로 추후 PostService.createPost/updatePost에 sanitize 추가 필요 --%>
                 <c:out value="${post.content}" escapeXml="false"/>
             </div>
+            <div class="post-actions-bottom" style="text-align: center; margin-top: 40px; margin-bottom: 40px;">
+                            <c:choose>
+                                <c:when test="${not empty loginUser}">
+                                    <button type="button" class="btn btn-outline ${myLike eq 'L' ? 'active' : ''}" onclick="togglePostLike(${post.postId}, 'L')">
+                                        <i class="fa-solid fa-thumbs-up"></i> 추천 <span id="like-count">${post.likeCount}</span>
+                                    </button>
+                                    <button type="button" class="btn btn-outline ${myLike eq 'D' ? 'active-dislike' : ''}" onclick="togglePostLike(${post.postId}, 'D')" style="margin-left: 10px;">
+                                        <i class="fa-solid fa-thumbs-down"></i> 비추천 <span id="dislike-count">${post.dislikeCount}</span>
+                                    </button>
+                                </c:when>
+                                <c:otherwise>
+                                    <p style="font-size: 13px; color: #888;">추천/비추천은 로그인 후 가능합니다.</p>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
         </article>
 
         <section class="comments-section">
@@ -143,11 +158,12 @@
             <h3>게시글 신고하기</h3>
             <button type="button" class="btn-close" onclick="toggleModal(false)"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <form action="${pageContext.request.contextPath}/l_check/report/post.do" method="post">
+        <!-- 🟢 폼 action 제거, id 추가, 카테고리 name 속성 복구 -->
+        <form id="reportPostForm">
             <div class="modal-body">
                 <input type="hidden" name="postId" value="${post.postId}">
                 <label for="reportCategory">신고 사유 카테고리</label>
-                <select class="modal-select" id="reportCategory">
+                <select class="modal-select" id="reportCategory" name="category" required>
                     <option value="">사유를 선택해 주세요</option>
                     <option value="스팸/광고">스팸/광고</option>
                     <option value="욕설/비방">욕설/비방</option>
@@ -166,53 +182,96 @@
 </div>
 
 <script>
-    // 기존에 있던 모달 함수
+    // 1. 모달 열기/닫기 함수
     function toggleModal(show) {
         document.getElementById('reportModal').style.display = show ? 'flex' : 'none';
     }
 
-    // ── 여기부터 댓글 AJAX 로직 추가 ──
+    // 2. 게시글 좋아요/싫어요 토글 AJAX (복구 완료!)
+    function togglePostLike(postId, likeType) {
+        const params = new URLSearchParams();
+        params.append('postId', postId);
+        params.append('likeType', likeType);
+
+        fetch('${pageContext.request.contextPath}/l_check/like/post.do', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                // 색상 활성화 상태도 함께 갱신하기 위해 페이지 새로고침
+                window.location.reload();
+            } else {
+                alert('오류 발생: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('서버 통신 중 오류가 발생했습니다.');
+        });
+    }
 
     document.addEventListener('DOMContentLoaded', function() {
+        // 3. 댓글 등록 AJAX
         const commentForm = document.getElementById('commentForm');
-
-        // 폼이 존재할 때만 이벤트 리스너 등록 (비로그인 상태 방어)
         if (commentForm) {
             commentForm.addEventListener('submit', function(e) {
-                // 1. 폼의 기본 동작(페이지 강제 새로고침/이동) 방지
                 e.preventDefault();
-
-                // 2. 입력된 데이터 가져오기
                 const postId = commentForm.querySelector('input[name="postId"]').value;
                 const content = commentForm.querySelector('textarea[name="content"]').value;
-
-                // 3. Controller(req.getParameter)가 읽을 수 있도록 Form 데이터 형식으로 변환
                 const params = new URLSearchParams();
                 params.append('postId', postId);
                 params.append('content', content);
 
-                // 4. AJAX(fetch) 전송
                 fetch('${pageContext.request.contextPath}/l_check/comment/write.do', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded' // 폼 데이터 명시
-                    },
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: params
                 })
-                .then(response => response.json()) // Controller가 보낸 JSON 파싱
+                .then(response => response.json())
                 .then(data => {
                     if (data.status === 'ok') {
-                        // 성공 시 화면을 새로고침하여 등록된 댓글이 보이도록 함
                         window.location.reload();
                     } else {
-                        // 실패 시 Controller에서 보낸 에러 메시지 팝업
                         alert('댓글 등록 실패: ' + data.message);
                     }
                 })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('서버 통신 중 오류가 발생했습니다.');
-                });
+                .catch(error => alert('서버 통신 중 오류가 발생했습니다.'));
+            });
+        }
+
+        // 4. 게시글 신고 AJAX (복구 완료!)
+        const reportPostForm = document.getElementById('reportPostForm');
+        if (reportPostForm) {
+            reportPostForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const postId = reportPostForm.querySelector('input[name="postId"]').value;
+                const category = reportPostForm.querySelector('select[name="category"]').value;
+                const reasonDetail = reportPostForm.querySelector('textarea[name="reason"]').value;
+                const fullReason = "[" + category + "] " + reasonDetail;
+
+                const params = new URLSearchParams();
+                params.append('postId', postId);
+                params.append('reason', fullReason);
+
+                fetch('${pageContext.request.contextPath}/l_check/report/post.do', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: params
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        alert('신고가 정상적으로 접수되었습니다.');
+                        toggleModal(false);
+                        reportPostForm.reset();
+                    } else {
+                        alert('신고 실패: ' + data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
             });
         }
     });
