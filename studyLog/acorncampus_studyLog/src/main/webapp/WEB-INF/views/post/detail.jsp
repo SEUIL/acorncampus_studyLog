@@ -15,15 +15,9 @@
 <%@ include file="/WEB-INF/views/common/header.jsp" %>
 <%@ include file="/WEB-INF/views/common/sideBar.jsp" %>
 <div class="dashboard-wrapper">
-    <aside class="sidebar">
-        <a class="brand-logo" href="${pageContext.request.contextPath}/">
-            <i class="fa-solid fa-book-open"></i> 스터디로그
-        </a>
-        <ul class="nav-menu" style="margin-top: 30px;">
-            <li onclick="location.href='${pageContext.request.contextPath}/l_check/user/mypage.do'"><i class="fa-solid fa-layer-group"></i> 내 시리즈</li>
-            <li onclick="location.href='${pageContext.request.contextPath}/post/list.do'"><i class="fa-solid fa-globe"></i> 커뮤니티 탐색</li>
-        </ul>
-    </aside>
+    <jsp:include page="/WEB-INF/views/common/sideBar.jsp">
+        <jsp:param name="activeMenu" value="community"/>
+    </jsp:include>
 
     <main class="main-content">
         <div class="top-bar">
@@ -71,7 +65,8 @@
                 <c:if test="${not empty post.tagList}">
                     <div class="tag-list">
                         <c:forEach var="tag" items="${post.tagList}">
-                            <a class="tag-chip" href="${pageContext.request.contextPath}/tag/post.do?tag=${tag.name}">
+                            <%-- href URL 파라미터에 tag.name을 그대로 쓰면 XSS 가능 → fn:escapeXml 처리 --%>
+                            <a class="tag-chip" href="${pageContext.request.contextPath}/tag/post.do?tag=${fn:escapeXml(tag.name)}">
                                 #<c:out value="${tag.name}"/>
                             </a>
                         </c:forEach>
@@ -80,6 +75,9 @@
             </header>
 
             <div class="post-body">
+                <%-- escapeXml="false": Toast UI Editor가 HTML을 생성하므로 raw 출력이 불가피함
+                     XSS 방지는 게시글 저장 시 서버에서 jsoup 같은 라이브러리로 sanitize해야 함
+                     현재는 미구현 상태이므로 추후 PostService.createPost/updatePost에 sanitize 추가 필요 --%>
                 <c:out value="${post.content}" escapeXml="false"/>
             </div>
         </article>
