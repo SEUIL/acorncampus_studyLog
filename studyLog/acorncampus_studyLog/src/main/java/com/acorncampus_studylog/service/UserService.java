@@ -110,8 +110,19 @@ public class UserService {
     public void updateProfile(int userId, String nickname, String bio, String avatarUrl) {
         // TODO: 닉네임 중복 확인 → userDao.updateProfile
 
+        // 닉네임 중복 확인
+        UserDetailDto existUSer = userDao.findByNickname(nickname);
+
+        // 중복일 경우 사용불가
+        if (existUSer != null && existUSer.getUserId() != userId) {
+            throw new RuntimeException("이미 사용 중인 닉네임입니다.");
+        }
+
+        // 중복없을 경우 수정 업데이트
+        userDao.updateProfile(userId, nickname,bio, avatarUrl);
         
     }
+
 
     /**
      * 비밀번호 변경
