@@ -1,4 +1,5 @@
-﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -6,15 +7,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>나만의 학습 기록 블로그 - Welcome</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/global_theme.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/auth/index.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <c:choose>
+        <c:when test="${authMode eq 'register'}">
+            <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/auth/register.css">
+        </c:when>
+        <c:otherwise>
+            <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/auth/login.css">
+        </c:otherwise>
+    </c:choose>
 </head>
 <body>
-
 <div class="main-wrapper">
+
+    <%-- 좌측: 젤리 캐릭터 연출 영역 (JS 인터랙션 포함) --%>
     <section class="interaction-section">
         <svg id="jelly-container" viewBox="0 0 500 400" preserveAspectRatio="xMidYMid meet">
 
-            <%-- ① 보라: x=85, w=76, topY=48  (반원 rx=38, bottom=360) --%>
+            <%-- ① 보라: x=85, w=76, topY=48 --%>
             <g id="char-purple">
                 <path class="body" d="M85,360 L85,86 Q85,48 123,48 Q161,48 161,86 L161,360 Z" fill="#7C5CE7"/>
                 <circle class="eye-white" cx="104" cy="100" r="7.5" fill="white"/>
@@ -23,7 +33,7 @@
                 <circle class="pupil"     cx="142" cy="100" r="3.5" fill="#222"/>
             </g>
 
-            <%-- ② 주황: x=110, w=170, topY=186  (반원 rx=85, bottom=360) --%>
+            <%-- ② 주황: x=110, w=170, topY=186 --%>
             <g id="char-orange">
                 <path class="body" d="M110,360 L110,271 Q110,186 195,186 Q280,186 280,271 L280,360 Z" fill="#FF9F43"/>
                 <circle class="eye-white" cx="165" cy="235" r="13"  fill="white"/>
@@ -33,7 +43,7 @@
                 <path class="mouth" d="M175,258 Q195,274 215,258" stroke="#333" stroke-width="3" fill="none" stroke-linecap="round"/>
             </g>
 
-            <%-- ③ 핑크: x=238, w=92, topY=150  (반원 rx=46, bottom=360) --%>
+            <%-- ③ 핑크: x=238, w=92, topY=150 --%>
             <g id="char-pink">
                 <path class="body" d="M238,360 L238,196 Q238,150 284,150 Q330,150 330,196 L330,360 Z" fill="#E84393"/>
                 <circle class="eye-white" cx="263" cy="204" r="9"   fill="white"/>
@@ -42,7 +52,7 @@
                 <circle class="pupil"     cx="305" cy="204" r="4.2" fill="#222"/>
             </g>
 
-            <%-- ④ 노랑: x=295, w=120, topY=250  (반원 rx=60, bottom=360) --%>
+            <%-- ④ 노랑: x=295, w=120, topY=250 --%>
             <g id="char-yellow">
                 <path class="body" d="M295,360 L295,310 Q295,250 355,250 Q415,250 415,310 L415,360 Z" fill="#FECA57"/>
                 <circle class="eye-white" cx="325" cy="316" r="9"   fill="white"/>
@@ -54,46 +64,18 @@
         </svg>
     </section>
 
-    <section class="login-section">
-        <div class="login-container">
-            <header class="login-header">
-                <div class="text-logo">LOG.ME</div>
-                <h1>Welcome back!</h1>
-                <p class="text-sub">학습의 기록을 계속 이어가세요.</p>
-            </header>
+    <%-- 우측: authMode에 따라 로그인 또는 회원가입 폼 include --%>
+    <c:choose>
+        <c:when test="${authMode eq 'register'}">
+            <jsp:include page="/WEB-INF/views/user/register.jsp"/>
+        </c:when>
+        <c:otherwise>
+            <jsp:include page="/WEB-INF/views/user/login.jsp"/>
+        </c:otherwise>
+    </c:choose>
 
-            <form id="loginForm" action="${pageContext.request.contextPath}/user/login.do" method="post">
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" class="input-control" placeholder="example@domain.com" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" class="input-control" placeholder="••••••••" required>
-                </div>
-
-                <div class="form-options">
-                    <label style="cursor: pointer;"><input type="checkbox"> Remember me</label>
-                    <a href="#">Forgot password?</a>
-                </div>
-
-                <button type="submit" class="btn-login">Log In</button>
-
-                <button type="button" class="btn-google">
-                    <span class="google-icon-text">G</span>
-                    Continue with Google
-                </button>
-            </form>
-
-            <div class="signup-link">
-                Don't have an account? <a href="${pageContext.request.contextPath}/user/reg.do">Sign up</a>
-            </div>
-        </div>
-    </section>
 </div>
-
+<script src="${pageContext.request.contextPath}/resources/js/page-transition.js"></script>
 <script src="${pageContext.request.contextPath}/resources/js/index-interaction.js"></script>
 </body>
 </html>
-

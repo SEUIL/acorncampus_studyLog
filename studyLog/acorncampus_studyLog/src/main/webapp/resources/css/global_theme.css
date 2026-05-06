@@ -61,14 +61,20 @@ body, h1, h2, h3, p, ul, li {
 }
 
 /* 3. 베이스 스타일 (Base Typography & Body) */
+
 body {
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     background-color: var(--bg-body);
     color: var(--text-main);
     line-height: 1.6;
-    display: block; /* 뷰포트 중앙 정렬 제거, 전체 화면 사용 */
+    display: block;
     padding: 0;
-    transition: background-color var(--transition-base), color var(--transition-base);
+    /* 페이지 진입 시 CSS 에서 숨김 상태로 시작 → page-transition.js 가 fade-in 트리거
+       CSS animation 을 쓰면 animation-fill-mode 가 transition 을 막으므로 사용하지 않음 */
+    opacity: 0;
+    transform: translateY(12px);
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out,
+                opacity 0.3s ease-out, transform 0.3s ease-out;
 }
 
 /* 4. 공통 레이아웃 (Layout Utilities) */
