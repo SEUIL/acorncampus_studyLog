@@ -1,5 +1,6 @@
 package com.acorncampus_studylog.controller;
 
+import com.acorncampus_studylog.dto.UserDto;
 import com.acorncampus_studylog.service.LikeService;
 
 import javax.servlet.ServletException;
@@ -8,6 +9,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Map;
 
 /**
  * 좋아요/싫어요 컨트롤러 (로그인 필수 — LoginCheckFilter 적용)
@@ -43,9 +46,41 @@ public class LikeController extends HttpServlet {
      */
     private void handlePostLike(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        // TODO: 세션 userId → postId, likeType 파싱
-        //       → likeService.togglePostLike → JSON 응답 출력
-        // resp.setContentType("application/json; charset=UTF-8")
+        resp.setContentType("application/json; charset=UTF-8");
+        PrintWriter out = resp.getWriter();
+
+        try {
+            // 1. 세션에서 로그인한 사용자 정보 가져오기[cite: 3]
+            UserDto loginUser = (UserDto) req.getSession().getAttribute("loginUser");
+            int userId = loginUser.getUserId();
+
+            // 2. 파라미터 파싱
+            int postId = Integer.parseInt(req.getParameter("postId"));
+            String likeType = req.getParameter("likeType"); // "L" 또는 "D"
+
+            // 3. 서비스 호출하여 결과 Map 받기
+            Map<String, Object> result = likeService.togglePostLike(postId, userId, likeType);
+
+            // 4. Map 데이터를 JSON 문자열로 변환 (myLike가 null일 경우의 처리 포함)
+            String myLike = (String) result.get("myLike");
+            String myLikeJson = (myLike == null) ? "null" : "\"" + myLike + "\"";
+
+            String jsonResponse = String.format(
+                    "{\"status\":\"%s\", \"likeCount\":%d, \"dislikeCount\":%d, \"myLike\":%s}",
+                    result.get("status"),
+                    result.get("likeCount"),
+                    result.get("dislikeCount"),
+                    myLikeJson
+            );
+
+            // 5. 응답 출력
+            out.print(jsonResponse);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            String msg = e.getMessage() != null ? e.getMessage().replace("\"", "\\\"") : "서버 오류";
+            out.print("{\"status\":\"error\", \"message\":\"" + msg + "\"}");
+        }
     }
 
     /**
@@ -55,7 +90,40 @@ public class LikeController extends HttpServlet {
      */
     private void handleCommentLike(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        // TODO: 세션 userId → commentId, likeType 파싱
-        //       → likeService.toggleCommentLike → JSON 응답 출력
+        resp.setContentType("application/json; charset=UTF-8");
+        PrintWriter out = resp.getWriter();
+
+        try {
+            // 1. 세션에서 로그인한 사용자 정보 가져오기[cite: 3]
+            UserDto loginUser = (UserDto) req.getSession().getAttribute("loginUser");
+            int userId = loginUser.getUserId();
+
+            // 2. 파라미터 파싱
+            int commentId = Integer.parseInt(req.getParameter("commentId"));
+            String likeType = req.getParameter("likeType"); // "L" 또는 "D"
+
+            // 3. 서비스 호출하여 결과 Map 받기
+            Map<String, Object> result = likeService.toggleCommentLike(commentId, userId, likeType);
+
+            // 4. Map 데이터를 JSON 문자열로 변환
+            String myLike = (String) result.get("myLike");
+            String myLikeJson = (myLike == null) ? "null" : "\"" + myLike + "\"";
+
+            String jsonResponse = String.format(
+                    "{\"status\":\"%s\", \"likeCount\":%d, \"dislikeCount\":%d, \"myLike\":%s}",
+                    result.get("status"),
+                    result.get("likeCount"),
+                    result.get("dislikeCount"),
+                    myLikeJson
+            );
+
+            // 5. 응답 출력
+            out.print(jsonResponse);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            String msg = e.getMessage() != null ? e.getMessage().replace("\"", "\\\"") : "서버 오류";
+            out.print("{\"status\":\"error\", \"message\":\"" + msg + "\"}");
+        }
     }
 }

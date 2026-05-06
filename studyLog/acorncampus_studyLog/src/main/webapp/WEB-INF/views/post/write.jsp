@@ -12,15 +12,9 @@
 </head>
 <body>
 <div class="dashboard-wrapper">
-    <aside class="sidebar">
-        <a class="brand-logo" href="${pageContext.request.contextPath}/">
-            <i class="fa-solid fa-book-open"></i> 스터디로그
-        </a>
-        <ul class="nav-menu" style="margin-top: 30px;">
-            <li class="active" onclick="location.href='${pageContext.request.contextPath}/l_check/user/mypage.do'"><i class="fa-solid fa-layer-group"></i> 내 시리즈</li>
-            <li onclick="location.href='${pageContext.request.contextPath}/post/list.do'"><i class="fa-solid fa-globe"></i> 커뮤니티 탐색</li>
-        </ul>
-    </aside>
+    <jsp:include page="/WEB-INF/views/common/sideBar.jsp">
+        <jsp:param name="activeMenu" value="mypage"/>
+    </jsp:include>
 
     <main class="main-content">
         <div class="top-bar">
@@ -29,7 +23,7 @@
             </a>
         </div>
 
-        <form class="write-container" action="${pageContext.request.contextPath}/post/write.do" method="post">
+        <form class="write-container" action="${pageContext.request.contextPath}/l_check/post/write.do" method="post">
             <div class="title-area">
                 <input type="text" name="title" class="title-input" placeholder="게시글 제목을 입력하세요" value="<c:out value='${param.title}'/>" required>
             </div>

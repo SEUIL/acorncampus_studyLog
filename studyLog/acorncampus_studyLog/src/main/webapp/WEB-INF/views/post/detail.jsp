@@ -12,16 +12,12 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/post/post_detail.css">
 </head>
 <body>
+<%@ include file="/WEB-INF/views/common/header.jsp" %>
+<%@ include file="/WEB-INF/views/common/sideBar.jsp" %>
 <div class="dashboard-wrapper">
-    <aside class="sidebar">
-        <a class="brand-logo" href="${pageContext.request.contextPath}/">
-            <i class="fa-solid fa-book-open"></i> 스터디로그
-        </a>
-        <ul class="nav-menu" style="margin-top: 30px;">
-            <li onclick="location.href='${pageContext.request.contextPath}/l_check/user/mypage.do'"><i class="fa-solid fa-layer-group"></i> 내 시리즈</li>
-            <li onclick="location.href='${pageContext.request.contextPath}/post/list.do'"><i class="fa-solid fa-globe"></i> 커뮤니티 탐색</li>
-        </ul>
-    </aside>
+    <jsp:include page="/WEB-INF/views/common/sideBar.jsp">
+        <jsp:param name="activeMenu" value="community"/>
+    </jsp:include>
 
     <main class="main-content">
         <div class="top-bar">
@@ -69,7 +65,8 @@
                 <c:if test="${not empty post.tagList}">
                     <div class="tag-list">
                         <c:forEach var="tag" items="${post.tagList}">
-                            <a class="tag-chip" href="${pageContext.request.contextPath}/tag/post.do?tag=${tag.name}">
+                            <%-- href URL 파라미터에 tag.name을 그대로 쓰면 XSS 가능 → fn:escapeXml 처리 --%>
+                            <a class="tag-chip" href="${pageContext.request.contextPath}/tag/post.do?tag=${fn:escapeXml(tag.name)}">
                                 #<c:out value="${tag.name}"/>
                             </a>
                         </c:forEach>
@@ -78,8 +75,26 @@
             </header>
 
             <div class="post-body">
+                <%-- escapeXml="false": Toast UI Editor가 HTML을 생성하므로 raw 출력이 불가피함
+                     XSS 방지는 게시글 저장 시 서버에서 jsoup 같은 라이브러리로 sanitize해야 함
+                     현재는 미구현 상태이므로 추후 PostService.createPost/updatePost에 sanitize 추가 필요 --%>
                 <c:out value="${post.content}" escapeXml="false"/>
             </div>
+            <div class="post-actions-bottom" style="text-align: center; margin-top: 40px; margin-bottom: 40px;">
+                            <c:choose>
+                                <c:when test="${not empty loginUser}">
+                                    <button type="button" class="btn btn-outline ${myLike eq 'L' ? 'active' : ''}" onclick="togglePostLike(${post.postId}, 'L')">
+                                        <i class="fa-solid fa-thumbs-up"></i> 추천 <span id="like-count">${post.likeCount}</span>
+                                    </button>
+                                    <button type="button" class="btn btn-outline ${myLike eq 'D' ? 'active-dislike' : ''}" onclick="togglePostLike(${post.postId}, 'D')" style="margin-left: 10px;">
+                                        <i class="fa-solid fa-thumbs-down"></i> 비추천 <span id="dislike-count">${post.dislikeCount}</span>
+                                    </button>
+                                </c:when>
+                                <c:otherwise>
+                                    <p style="font-size: 13px; color: #888;">추천/비추천은 로그인 후 가능합니다.</p>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
         </article>
 
         <section class="comments-section">
@@ -87,11 +102,12 @@
 
             <c:choose>
                 <c:when test="${not empty loginUser}">
-                    <form class="comment-input-box" action="${pageContext.request.contextPath}/l_check/comment/write.do" method="post">
-                        <input type="hidden" name="postId" value="${post.postId}">
-                        <textarea class="comment-input" name="content" placeholder="댓글을 작성해 보세요..." required></textarea>
-                        <button type="submit" class="btn btn-primary comment-submit">댓글 등록</button>
-                    </form>
+                   <!-- 기존 폼 부분 (수정) -->
+                   <form id="commentForm" class="comment-input-box">
+                       <input type="hidden" name="postId" value="${post.postId}">
+                       <textarea class="comment-input" name="content" placeholder="댓글을 작성해 보세요..." required></textarea>
+                       <button type="submit" class="btn btn-primary comment-submit">댓글 등록</button>
+                   </form>
                 </c:when>
                 <c:otherwise>
                     <p class="empty-state">댓글 작성은 로그인 후 이용할 수 있습니다.</p>
@@ -142,11 +158,12 @@
             <h3>게시글 신고하기</h3>
             <button type="button" class="btn-close" onclick="toggleModal(false)"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <form action="${pageContext.request.contextPath}/l_check/report/post.do" method="post">
+        <!-- 🟢 폼 action 제거, id 추가, 카테고리 name 속성 복구 -->
+        <form id="reportPostForm">
             <div class="modal-body">
                 <input type="hidden" name="postId" value="${post.postId}">
                 <label for="reportCategory">신고 사유 카테고리</label>
-                <select class="modal-select" id="reportCategory">
+                <select class="modal-select" id="reportCategory" name="category" required>
                     <option value="">사유를 선택해 주세요</option>
                     <option value="스팸/광고">스팸/광고</option>
                     <option value="욕설/비방">욕설/비방</option>
@@ -165,9 +182,99 @@
 </div>
 
 <script>
+    // 1. 모달 열기/닫기 함수
     function toggleModal(show) {
         document.getElementById('reportModal').style.display = show ? 'flex' : 'none';
     }
+
+    // 2. 게시글 좋아요/싫어요 토글 AJAX (복구 완료!)
+    function togglePostLike(postId, likeType) {
+        const params = new URLSearchParams();
+        params.append('postId', postId);
+        params.append('likeType', likeType);
+
+        fetch('${pageContext.request.contextPath}/l_check/like/post.do', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                // 색상 활성화 상태도 함께 갱신하기 위해 페이지 새로고침
+                window.location.reload();
+            } else {
+                alert('오류 발생: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('서버 통신 중 오류가 발생했습니다.');
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // 3. 댓글 등록 AJAX
+        const commentForm = document.getElementById('commentForm');
+        if (commentForm) {
+            commentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const postId = commentForm.querySelector('input[name="postId"]').value;
+                const content = commentForm.querySelector('textarea[name="content"]').value;
+                const params = new URLSearchParams();
+                params.append('postId', postId);
+                params.append('content', content);
+
+                fetch('${pageContext.request.contextPath}/l_check/comment/write.do', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: params
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        window.location.reload();
+                    } else {
+                        alert('댓글 등록 실패: ' + data.message);
+                    }
+                })
+                .catch(error => alert('서버 통신 중 오류가 발생했습니다.'));
+            });
+        }
+
+        // 4. 게시글 신고 AJAX (복구 완료!)
+        const reportPostForm = document.getElementById('reportPostForm');
+        if (reportPostForm) {
+            reportPostForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const postId = reportPostForm.querySelector('input[name="postId"]').value;
+                const category = reportPostForm.querySelector('select[name="category"]').value;
+                const reasonDetail = reportPostForm.querySelector('textarea[name="reason"]').value;
+                const fullReason = "[" + category + "] " + reasonDetail;
+
+                const params = new URLSearchParams();
+                params.append('postId', postId);
+                params.append('reason', fullReason);
+
+                fetch('${pageContext.request.contextPath}/l_check/report/post.do', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: params
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        alert('신고가 정상적으로 접수되었습니다.');
+                        toggleModal(false);
+                        reportPostForm.reset();
+                    } else {
+                        alert('신고 실패: ' + data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        }
+    });
 </script>
 </body>
 </html>

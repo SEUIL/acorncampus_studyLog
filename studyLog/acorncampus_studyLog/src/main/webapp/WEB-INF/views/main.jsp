@@ -53,7 +53,7 @@
                 <form class="search-panel" action="${pageContext.request.contextPath}/search.do" method="get">
                     <div class="search-input-wrapper">
                         <i class="fa-solid fa-align-left"></i>
-                        <input type="text" name="q" placeholder="게시글 제목 검색"
+                        <input type="text" name="q" placeholder="키워드 또는 #태그명으로 검색"
                                value="<c:out value='${param.q}'/>">
                     </div>
                     <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 5px;">검색하기</button>
