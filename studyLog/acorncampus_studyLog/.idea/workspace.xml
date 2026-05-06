@@ -6,13 +6,13 @@
   <component name="ChangeListManager">
     <list default="true" id="90b9efea-6be4-4e66-ba9d-ba6e33eeec21" name="변경" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/acorncampus_studylog/controller/AdminController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/acorncampus_studylog/controller/AdminController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/acorncampus_studylog/controller/MainController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/acorncampus_studylog/controller/MainController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/acorncampus_studylog/controller/MypageController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/acorncampus_studylog/controller/MypageController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/acorncampus_studylog/controller/SeriesController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/acorncampus_studylog/controller/SeriesController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/acorncampus_studylog/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/acorncampus_studylog/controller/UserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/common/header.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/common/header.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/common/sideBar.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/common/sideBar.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/acorncampus_studylog/controller/CommentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/acorncampus_studylog/controller/CommentController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/acorncampus_studylog/controller/LikeController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/acorncampus_studylog/controller/LikeController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/acorncampus_studylog/controller/ReportController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/acorncampus_studylog/controller/ReportController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/acorncampus_studylog/service/CommentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/acorncampus_studylog/service/CommentService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/acorncampus_studylog/service/LikeService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/acorncampus_studylog/service/LikeService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/acorncampus_studylog/service/ReportService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/acorncampus_studylog/service/ReportService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/post/detail.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/post/detail.jsp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,7 +57,7 @@
     "Smart Tomcat.이름이 지정되지 않았습니다.executor": "Run",
     "codeWithMe.voiceChat.enabledByDefault": "false",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "feature/front/JCJ",
+    "git-widget-placeholder": "feature/hyunkyum-comment",
     "ignore.virus.scanning.warn.message": "true",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
@@ -81,11 +81,14 @@
       <option name="catalinaBase" value="C:\Users\user\.SmartTomcat\acorncampus_studyLog\acorncampus_studyLog" />
       <option name="contextPath" value="/acorncampus_studyLog" />
       <option name="docBase" value="$PROJECT_DIR$/src/main/webapp" />
+      <option name="envOptions">
+        <map />
+      </option>
       <option name="extraClassPath" value="" />
       <option name="tomcatInfo">
         <TomcatInfo>
           <option name="name" value="Apache Tomcat/9.0.117" />
-          <option name="path" value="$USER_HOME$/OneDrive/바탕 화면/web/tools/apache-tomcat-9.0.117-windows-x64/apache-tomcat-9.0.117" />
+          <option name="path" value="$PROJECT_DIR$/../../../tools/apache-tomcat-9.0.117" />
           <option name="version" value="9.0.117.0" />
         </TomcatInfo>
       </option>

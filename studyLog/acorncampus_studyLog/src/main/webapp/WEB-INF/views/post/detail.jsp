@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/post/post_detail.css">
 </head>
 <body>
+<%@ include file="/WEB-INF/views/common/header.jsp" %>
+<%@ include file="/WEB-INF/views/common/sideBar.jsp" %>
 <div class="dashboard-wrapper">
     <aside class="sidebar">
         <a class="brand-logo" href="${pageContext.request.contextPath}/">
@@ -87,11 +89,12 @@
 
             <c:choose>
                 <c:when test="${not empty loginUser}">
-                    <form class="comment-input-box" action="${pageContext.request.contextPath}/l_check/comment/write.do" method="post">
-                        <input type="hidden" name="postId" value="${post.postId}">
-                        <textarea class="comment-input" name="content" placeholder="댓글을 작성해 보세요..." required></textarea>
-                        <button type="submit" class="btn btn-primary comment-submit">댓글 등록</button>
-                    </form>
+                   <!-- 기존 폼 부분 (수정) -->
+                   <form id="commentForm" class="comment-input-box">
+                       <input type="hidden" name="postId" value="${post.postId}">
+                       <textarea class="comment-input" name="content" placeholder="댓글을 작성해 보세요..." required></textarea>
+                       <button type="submit" class="btn btn-primary comment-submit">댓글 등록</button>
+                   </form>
                 </c:when>
                 <c:otherwise>
                     <p class="empty-state">댓글 작성은 로그인 후 이용할 수 있습니다.</p>
@@ -165,9 +168,56 @@
 </div>
 
 <script>
+    // 기존에 있던 모달 함수
     function toggleModal(show) {
         document.getElementById('reportModal').style.display = show ? 'flex' : 'none';
     }
+
+    // ── 여기부터 댓글 AJAX 로직 추가 ──
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const commentForm = document.getElementById('commentForm');
+
+        // 폼이 존재할 때만 이벤트 리스너 등록 (비로그인 상태 방어)
+        if (commentForm) {
+            commentForm.addEventListener('submit', function(e) {
+                // 1. 폼의 기본 동작(페이지 강제 새로고침/이동) 방지
+                e.preventDefault();
+
+                // 2. 입력된 데이터 가져오기
+                const postId = commentForm.querySelector('input[name="postId"]').value;
+                const content = commentForm.querySelector('textarea[name="content"]').value;
+
+                // 3. Controller(req.getParameter)가 읽을 수 있도록 Form 데이터 형식으로 변환
+                const params = new URLSearchParams();
+                params.append('postId', postId);
+                params.append('content', content);
+
+                // 4. AJAX(fetch) 전송
+                fetch('${pageContext.request.contextPath}/l_check/comment/write.do', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded' // 폼 데이터 명시
+                    },
+                    body: params
+                })
+                .then(response => response.json()) // Controller가 보낸 JSON 파싱
+                .then(data => {
+                    if (data.status === 'ok') {
+                        // 성공 시 화면을 새로고침하여 등록된 댓글이 보이도록 함
+                        window.location.reload();
+                    } else {
+                        // 실패 시 Controller에서 보낸 에러 메시지 팝업
+                        alert('댓글 등록 실패: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('서버 통신 중 오류가 발생했습니다.');
+                });
+            });
+        }
+    });
 </script>
 </body>
 </html>
