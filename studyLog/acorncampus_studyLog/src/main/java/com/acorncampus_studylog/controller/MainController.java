@@ -2,7 +2,9 @@ package com.acorncampus_studylog.controller;
 
 import com.acorncampus_studylog.dto.PostDto;
 import com.acorncampus_studylog.dto.SeriesDto;
+import com.acorncampus_studylog.dto.TagDto;
 import com.acorncampus_studylog.service.PostService;
+import com.acorncampus_studylog.service.SeriesService;
 import com.acorncampus_studylog.service.TagService;
 
 import javax.servlet.ServletException;
@@ -11,45 +13,39 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 
-// "/community.do" 추가 이유: web.xml welcome-file이 index.jsp를 가로채므로 "/" 단독으로는 도달 불가
+// urlPatterns에 "/community.do"를 함께 등록한 이유:
+// web.xml의 welcome-file-list에 index.jsp가 등록되어 있어서
+// URL이 "/" 단독으로 들어오면 Tomcat이 Servlet보다 index.jsp를 먼저 처리해버림
+// → 커뮤니티 메인은 "/community.do"로 접근하고, 로그인 화면은 index.jsp가 담당
 @WebServlet(urlPatterns = {"/", "/community.do"})
 public class MainController extends HttpServlet {
 
-    private final PostService postService = new PostService();
-    private final TagService tagService = new TagService();
+    private final PostService   postService   = new PostService();
+    private final SeriesService seriesService = new SeriesService();
+    private final TagService    tagService    = new TagService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // TODO: postService.getPopularPosts(limit) 로 교체
-        List<PostDto> popularPosts = new ArrayList<>();
-        PostDto post = new PostDto();
-        post.setPostId(101);
-        post.setUserId(1);
-        post.setTitle("샘플 커뮤니티 게시글");
-        post.setAuthorName("스터디로그");
-        post.setLikeCount(12);
-        post.setCommentCount(3);
-        post.setViewCount(128);
-        post.setCreatedAt(new Timestamp(System.currentTimeMillis()));
-        popularPosts.add(post);
 
-        // TODO: seriesService.getPopularSeries(limit) 로 교체
-        List<SeriesDto> popularSeries = new ArrayList<>();
-        SeriesDto series = new SeriesDto();
-        series.setSeriesId(201);
-        series.setUserId(1);
-        series.setName("샘플 시리즈");
-        series.setDescription("커뮤니티 메인 연결 확인용 시리즈입니다.");
-        series.setAuthorName("스터디로그");
-        series.setPostCount(4);
-        popularSeries.add(series);
+        // 인기 게시글: 최신 글 1페이지(10개) 중 앞 4개만 메인에 표시
+        // 나중에 likes 기준 정렬이 필요하면 postService에 getPopularPosts() 메서드를 추가하면 됨
+        List<PostDto> popularPosts = postService.getPostList(1);
+        if (popularPosts != null && popularPosts.size() > 4) {
+            popularPosts = popularPosts.subList(0, 4);
+        }
 
-        req.setAttribute("popularPosts", popularPosts);
+        // 인기 시리즈: SeriesService가 아직 TODO라서 null 반환 가능 → 빈 리스트로 방어
+        // JSP의 ${popularSeries} 변수명과 반드시 일치해야 함
+        List<SeriesDto> popularSeries = seriesService.getSeriesList(1);
+        if (popularSeries == null) popularSeries = java.util.Collections.emptyList();
+        if (popularSeries.size() > 5) {
+            popularSeries = popularSeries.subList(0, 5);
+        }
+
+        req.setAttribute("popularPosts",  popularPosts);
         req.setAttribute("popularSeries", popularSeries);
         req.getRequestDispatcher("/WEB-INF/views/main.jsp").forward(req, resp);
     }
