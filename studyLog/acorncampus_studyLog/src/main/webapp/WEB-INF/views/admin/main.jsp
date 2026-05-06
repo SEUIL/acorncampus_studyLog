@@ -69,6 +69,8 @@
         </div>
     </main>
 </div>
+<%-- 관리자 화면 표시용 전환 스크립트 --%>
+<script src="${pageContext.request.contextPath}/resources/js/page-transition.js"></script>
 </body>
 </html>
 
