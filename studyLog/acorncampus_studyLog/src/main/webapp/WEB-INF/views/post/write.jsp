@@ -11,9 +11,11 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/post/post_write.css">
 </head>
 <body>
-<%@ include file="/WEB-INF/views/common/header.jsp" %>
-<%@ include file="/WEB-INF/views/common/sideBar.jsp" %>
 <div class="dashboard-wrapper">
+    <jsp:include page="/WEB-INF/views/common/sideBar.jsp">
+        <jsp:param name="activeMenu" value="mypage"/>
+    </jsp:include>
+
     <main class="main-content">
         <div class="top-bar">
             <a class="breadcrumb" href="${pageContext.request.contextPath}/l_check/user/mypage.do">
@@ -21,7 +23,7 @@
             </a>
         </div>
 
-        <form class="write-container" action="${pageContext.request.contextPath}/post/write.do" method="post">
+        <form class="write-container" action="${pageContext.request.contextPath}/l_check/post/write.do" method="post">
             <div class="title-area">
                 <input type="text" name="title" class="title-input" placeholder="게시글 제목을 입력하세요" value="<c:out value='${param.title}'/>" required>
             </div>
