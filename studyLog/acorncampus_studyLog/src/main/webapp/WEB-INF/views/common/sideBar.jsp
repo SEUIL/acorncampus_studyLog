@@ -10,6 +10,17 @@
 --%>
 <script src="${pageContext.request.contextPath}/resources/js/page-transition.js"></script>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/common/sidebar.css">
+
+<!-- 🟢 1. 테마 즉시 복구 (깜빡임 방지를 위해 최상단 배치) -->
+<script>
+    (function() {
+        const savedTheme = localStorage.getItem('studyLogTheme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-theme');
+        }
+    })();
+</script>
+
 <aside class="sidebar" id="appSidebar">
     <button class="sidebar-toggle" id="sidebarToggle" title="사이드바 접기/펼치기">
         <i class="fa-solid fa-chevron-left" id="sidebarToggleIcon"></i>
@@ -59,9 +70,9 @@
         </c:if>
     </ul>
     <div class="logout-btn">
-        <button class="btn btn-outline" style="width: 100%; font-size: 12px;"
-                onclick="document.body.classList.toggle('dark-theme')">
-            <i class="fa-solid fa-moon"></i>
+        <!-- 🟢 2. 테마 변경 버튼 로직 수정 (toggleTheme 함수 호출) -->
+        <button class="btn btn-outline" style="width: 100%; font-size: 12px;" onclick="toggleTheme()">
+            <i class="fa-solid fa-moon" id="themeToggleIcon"></i>
             <span class="sidebar-text"> 테마 변경</span>
         </button>
         <div style="margin-top: 15px; font-size: 13px; font-weight: 600; color: var(--text-sub); cursor: pointer; text-align: center;"
@@ -71,7 +82,31 @@
         </div>
     </div>
 </aside>
+
 <script>
+// 🟢 3. 테마 토글 함수 정의
+function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark-theme');
+    const themeIcon = document.getElementById('themeToggleIcon');
+
+    // 로컬 스토리지에 현재 상태 저장
+    localStorage.setItem('studyLogTheme', isDark ? 'dark' : 'light');
+
+    // 아이콘 변경
+    if (themeIcon) {
+        themeIcon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    }
+}
+
+// 초기 로딩 시 아이콘 모양 맞추기 (DOM이 다 그려진 후 실행)
+document.addEventListener('DOMContentLoaded', function() {
+    const themeIcon = document.getElementById('themeToggleIcon');
+    if (document.body.classList.contains('dark-theme') && themeIcon) {
+        themeIcon.className = 'fa-solid fa-sun';
+    }
+});
+
+// 기존 사이드바 접기/펼치기 로직
 (function () {
     const sidebar    = document.getElementById('appSidebar');
     const toggleBtn  = document.getElementById('sidebarToggle');
