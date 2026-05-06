@@ -2,6 +2,7 @@ package com.acorncampus_studylog.controller;
 
 import com.acorncampus_studylog.dto.UserDto;
 import com.acorncampus_studylog.service.UserService;
+import com.google.gson.Gson;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -10,21 +11,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-/**
- * 회원 기능 컨트롤러 (로그인 불필요 기능)
- * URL 패턴: /user/*
- *
- * GET  /user/login.do    → 로그인 폼
- * POST /user/login.do    → 로그인 처리
- * GET  /user/logout.do   → 로그아웃 처리
- * GET  /user/reg.do      → 회원가입 폼
- * POST /user/reg.do      → 회원가입 처리
- * GET  /user/checkEmail.do → 이메일 중복 확인 (AJAX)
- * GET  /user/password.do → 비밀번호 변경 폼
- * POST /user/password.do → 비밀번호 변경 처리
- * POST /user/delete.do   → 회원 탈퇴 처리
- */
 @WebServlet("/user/*")
 public class UserController extends HttpServlet {
 
@@ -34,14 +23,26 @@ public class UserController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         String path = req.getPathInfo();
-        if (path == null) path = "/login.do";
+        if (path == null) {
+            path = "/login.do";
+        }
 
         switch (path) {
-            case "/login.do":      handleLoginForm(req, resp);      break;
-            case "/logout.do":     handleLogout(req, resp);         break;
-            case "/reg.do":        handleRegForm(req, resp);        break;
-            case "/checkEmail.do": handleCheckEmail(req, resp);     break;
-            case "/password.do":   handlePasswordForm(req, resp);   break;
+            case "/login.do":
+                handleLoginForm(req, resp);
+                break;
+            case "/logout.do":
+                handleLogout(req, resp);
+                break;
+            case "/reg.do":
+                handleRegForm(req, resp);
+                break;
+            case "/checkEmail.do":
+                handleCheckEmail(req, resp);
+                break;
+            case "/password.do":
+                handlePasswordForm(req, resp);
+                break;
             default:
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
@@ -51,38 +52,40 @@ public class UserController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         String path = req.getPathInfo();
-        if (path == null) path = "";
+        if (path == null) {
+            path = "";
+        }
 
         switch (path) {
-            case "/login.do":    handleLogin(req, resp);      break;
-            case "/reg.do":      handleRegister(req, resp);   break;
-            case "/password.do": handlePassword(req, resp);   break;
-            case "/delete.do":   handleDelete(req, resp);     break;
+            case "/login.do":
+                handleLogin(req, resp);
+                break;
+            case "/reg.do":
+                handleRegister(req, resp);
+                break;
+            case "/password.do":
+                handlePassword(req, resp);
+                break;
+            case "/delete.do":
+                handleDelete(req, resp);
+                break;
             default:
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }
 
-    // ── GET 핸들러 ──────────────────────────────────────────────────────────
-
-    /**
-     * GET /user/login.do → 로그인 폼 표시
-     * forward: /WEB-INF/views/user/login.jsp
-     * 이미 로그인 상태면 / 로 리다이렉트
-     */
     private void handleLoginForm(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         HttpSession session = req.getSession(false);
         if (session != null && session.getAttribute("loginUser") != null) {
-            req.getRequestDispatcher("/WEB-INF/views/workspace_main.jsp").forward(req, resp);
+            resp.sendRedirect(req.getContextPath() + "/l_check/user/mypage.do");
             return;
         }
-        req.getRequestDispatcher("/WEB-INF/views/user/login.jsp").forward(req, resp);
+
+        req.setAttribute("authMode", "login");
+        req.getRequestDispatcher("/index.jsp").forward(req, resp);
     }
 
-    /**
-     * GET /user/logout.do → 세션 무효화 후 로그인 페이지로 리다이렉트
-     */
     private void handleLogout(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         HttpSession session = req.getSession(false);
@@ -92,45 +95,40 @@ public class UserController extends HttpServlet {
         resp.sendRedirect(req.getContextPath() + "/user/login.do");
     }
 
-    /**
-     * GET /user/reg.do → 회원가입 폼 표시
-     * forward: /WEB-INF/views/user/register.jsp
-     */
     private void handleRegForm(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        req.getRequestDispatcher("/WEB-INF/views/user/register.jsp").forward(req, resp);
+        req.setAttribute("authMode", "register");
+        req.getRequestDispatcher("/index.jsp").forward(req, resp);
     }
 
-    /**
-     * GET /user/checkEmail.do?email={email} → 이메일 중복 확인 (AJAX JSON 응답)
-     * 응답: {"available": true} 또는 {"available": false}
-     */
     private void handleCheckEmail(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        // TODO: userService.checkEmailAvailable(email) → JSON 응답 출력
-        // resp.setContentType("application/json; charset=UTF-8")
+        String email = req.getParameter("email");
+        // TODO: boolean available = userService.checkEmailAvailable(email)
+        boolean available = email != null && !email.trim().isEmpty();
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("available", available);
+        resp.setContentType("application/json; charset=UTF-8");
+        resp.getWriter().write(new Gson().toJson(result));
     }
 
-    /**
-     * GET /user/password.do → 비밀번호 변경 폼 (로그인 필요 — Controller에서 직접 세션 확인)
-     * forward: /WEB-INF/views/user/password.jsp
-     */
     private void handlePasswordForm(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // TODO: 세션 loginUser 없으면 로그인 페이지로 → forward
+        HttpSession session = req.getSession(false);
+        if (session == null || session.getAttribute("loginUser") == null) {
+            resp.sendRedirect(req.getContextPath() + "/user/login.do");
+            return;
+        }
+
+        req.getRequestDispatcher("/WEB-INF/views/user/password.jsp").forward(req, resp);
     }
 
-    // ── POST 핸들러 ─────────────────────────────────────────────────────────
-
-    /**
-     * POST /user/login.do → 로그인 처리
-     * 성공: 세션에 loginUser 저장 → / 리다이렉트
-     * 실패: login.jsp에 errorMsg setAttribute 후 forward
-     */
     private void handleLogin(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         String email = req.getParameter("email");
 
+        // TODO: UserDto user = userService.login(email, password) → 실패 시 errorMsg + index.jsp(authMode=login) forward
         UserDto tempUser = new UserDto();
         tempUser.setUserId(1);
         tempUser.setEmail(email != null ? email : "temp@studylog.dev");
@@ -139,40 +137,24 @@ public class UserController extends HttpServlet {
         tempUser.setIsBanned("N");
 
         req.getSession(true).setAttribute("loginUser", tempUser);
-        req.setAttribute("seriesList", java.util.Collections.emptyList());
-        req.getRequestDispatcher("/WEB-INF/views/workspace_main.jsp").forward(req, resp);
+        resp.sendRedirect(req.getContextPath() + "/l_check/user/mypage.do");
     }
 
-    /**
-     * POST /user/reg.do → 회원가입 처리
-     * 성공: /user/login.do 리다이렉트
-     * 실패: register.jsp에 errorMsg 후 forward
-     */
     private void handleRegister(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         // TODO: 입력값 검증 → userService.register → redirect
-        // 파라미터: email, nickname, password, passwordConfirm
+        resp.sendRedirect(req.getContextPath() + "/user/login.do");
     }
 
-    /**
-     * POST /user/password.do → 비밀번호 변경 처리
-     * 성공: / 리다이렉트
-     * 실패: 폼으로 forward + 오류 메시지
-     */
     private void handlePassword(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // TODO: 세션에서 userId → userService.changePassword → redirect
-        // 파라미터: oldPassword, newPassword, newPasswordConfirm
+        // TODO: 세션에서 userId → userService.changePassword
+        resp.sendRedirect(req.getContextPath() + "/l_check/user/mypage.do");
     }
 
-    /**
-     * POST /user/delete.do → 회원 탈퇴 처리
-     * 성공: 세션 무효화 → /user/login.do 리다이렉트
-     * 실패: 폼으로 forward + 오류 메시지
-     */
     private void handleDelete(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // TODO: 세션에서 userId → userService.deleteAccount(userId, password) → 세션 무효화 → redirect
-        // 파라미터: password
+        // TODO: userService.deleteAccount(userId, password) → session.invalidate
+        resp.sendRedirect(req.getContextPath() + "/user/login.do");
     }
 }

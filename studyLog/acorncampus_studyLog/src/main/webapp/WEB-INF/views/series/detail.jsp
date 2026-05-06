@@ -13,22 +13,9 @@
 </head>
 <body>
 <div class="dashboard-wrapper">
-    <aside class="sidebar">
-        <a class="brand-logo" href="${pageContext.request.contextPath}/">
-            <i class="fa-solid fa-book-open"></i> 스터디로그
-        </a>
-        <div class="profile-section">
-            <div class="profile-avatar"><i class="fa-solid fa-user"></i></div>
-            <div class="profile-info">
-                <h2><c:out value="${loginUser.username}"/></h2>
-                <p>Learning &amp; Recording...</p>
-            </div>
-        </div>
-        <ul class="nav-menu">
-            <li class="active" onclick="location.href='${pageContext.request.contextPath}/l_check/user/mypage.do'"><i class="fa-solid fa-layer-group"></i> 내 시리즈</li>
-            <li onclick="location.href='${pageContext.request.contextPath}/post/list.do'"><i class="fa-solid fa-globe"></i> 커뮤니티 탐색</li>
-        </ul>
-    </aside>
+    <jsp:include page="/WEB-INF/views/common/sideBar.jsp">
+        <jsp:param name="activeMenu" value="mypage"/>
+    </jsp:include>
 
     <main class="main-content">
         <div class="top-bar">

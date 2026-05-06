@@ -12,73 +12,14 @@
 </head>
 <body>
 <div class="dashboard-wrapper">
-    <aside class="sidebar">
-        <a class="brand-logo" href="${pageContext.request.contextPath}/">
-            <i class="fa-solid fa-book-open"></i> 스터디로그
-        </a>
-
-        <div class="grass-section">
-            <span class="grass-title">Yearly Contributions</span>
-            <div class="grass-grid">
-                <%-- TODO: 실제 기여도 데이터로 동적 렌더링 --%>
-                <div class="grass-node level-4"></div><div class="grass-node level-2"></div><div class="grass-node"></div><div class="grass-node level-1"></div><div class="grass-node level-3"></div><div class="grass-node"></div><div class="grass-node level-2"></div>
-                <div class="grass-node level-1"></div><div class="grass-node level-4"></div><div class="grass-node"></div><div class="grass-node level-2"></div><div class="grass-node level-3"></div><div class="grass-node level-1"></div><div class="grass-node"></div>
-                <div class="grass-node level-4"></div><div class="grass-node level-2"></div><div class="grass-node"></div><div class="grass-node level-1"></div><div class="grass-node level-3"></div><div class="grass-node"></div><div class="grass-node level-2"></div>
-            </div>
-        </div>
-
-        <div class="profile-section">
-            <div class="profile-avatar">
-                <i class="fa-solid fa-user"></i>
-            </div>
-            <div class="profile-info">
-                <h2><c:out value="${loginUser.username}"/></h2>
-                <p>Learning &amp; Recording...</p>
-            </div>
-        </div>
-
-        <ul class="nav-menu">
-            <li onclick="location.href='${pageContext.request.contextPath}/l_check/user/mypage.do'">
-                <i class="fa-solid fa-layer-group"></i> 내 시리즈
-            </li>
-            <li class="active"><i class="fa-solid fa-globe"></i> 커뮤니티 탐색</li>
-            <c:if test="${loginUser.role eq 'ADMIN'}">
-                <li class="nav-admin" onclick="location.href='${pageContext.request.contextPath}/admin/main.do'">
-                    <i class="fa-solid fa-user-shield"></i> 관리자 모드
-                </li>
-            </c:if>
-        </ul>
-
-        <div class="logout-btn">
-            <button class="btn btn-outline" style="width: 100%; font-size: 12px;"
-                    onclick="document.body.classList.toggle('dark-theme')">
-                <i class="fa-solid fa-moon"></i> 테마 변경
-            </button>
-            <div style="margin-top: 15px; font-size: 13px; font-weight: 600; color: var(--text-sub); cursor: pointer; text-align: center;"
-                 onclick="location.href='${pageContext.request.contextPath}/user/logout.do'">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i> 로그아웃
-            </div>
-        </div>
-    </aside>
+    <jsp:include page="/WEB-INF/views/common/sideBar.jsp">
+        <jsp:param name="activeMenu" value="community"/>
+    </jsp:include>
 
     <main class="main-content">
-        <div class="top-bar">
-            <div class="nav-left">
-                <a class="breadcrumb" href="${pageContext.request.contextPath}/l_check/user/mypage.do">
-                    <i class="fa-solid fa-house"></i> Home <span style="color: var(--border-color);">/</span> 커뮤니티
-                </a>
-                <button class="btn btn-outline" style="padding: 6px 12px; font-size: 13px;"
-                        onclick="location.href='${pageContext.request.contextPath}/l_check/user/mypage.do'">
-                    <i class="fa-solid fa-desktop"></i> 내 작업 공간으로
-                </button>
-            </div>
-            <div class="nav-right">
-                <button class="icon-btn" title="설정"
-                        onclick="location.href='${pageContext.request.contextPath}/l_check/user/update.do'">
-                    <i class="fa-solid fa-gear"></i>
-                </button>
-            </div>
-        </div>
+        <jsp:include page="/WEB-INF/views/common/header.jsp">
+            <jsp:param name="activeMenu" value="community"/>
+        </jsp:include>
 
         <div class="community-top-section">
             <div class="popular-section">
@@ -112,7 +53,7 @@
                 <form class="search-panel" action="${pageContext.request.contextPath}/search.do" method="get">
                     <div class="search-input-wrapper">
                         <i class="fa-solid fa-align-left"></i>
-                        <input type="text" name="q" placeholder="게시글 제목 검색"
+                        <input type="text" name="q" placeholder="키워드 또는 #태그명으로 검색"
                                value="<c:out value='${param.q}'/>">
                     </div>
                     <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 5px;">검색하기</button>

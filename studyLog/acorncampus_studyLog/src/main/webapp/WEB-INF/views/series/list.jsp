@@ -12,31 +12,9 @@
 </head>
 <body>
 <div class="dashboard-wrapper">
-    <aside class="sidebar">
-        <a class="brand-logo" href="${pageContext.request.contextPath}/">
-            <i class="fa-solid fa-book-open"></i> 스터디로그
-        </a>
-        <div class="profile-section" style="margin-top:20px;">
-            <div class="profile-avatar"><i class="fa-solid fa-user"></i></div>
-            <div class="profile-info">
-                <h2><c:out value="${loginUser.username}"/></h2>
-                <p>Learning &amp; Recording...</p>
-            </div>
-        </div>
-        <ul class="nav-menu" style="margin-top: 30px;">
-            <li onclick="location.href='${pageContext.request.contextPath}/l_check/user/mypage.do'"><i class="fa-solid fa-layer-group"></i> 내 시리즈</li>
-            <li class="active"><i class="fa-solid fa-globe"></i> 커뮤니티 탐색</li>
-        </ul>
-        <div style="margin-top: auto; border-top: 1px solid var(--border-color); padding-top: 20px;">
-            <button class="btn btn-outline" style="width: 100%; font-size: 13px; margin-bottom:10px;" onclick="document.body.classList.toggle('dark-theme')">
-                <i class="fa-solid fa-moon"></i> 테마 변경
-            </button>
-            <div style="margin-top: 15px; font-size: 13px; font-weight: 600; color: var(--text-sub); cursor: pointer; text-align: center;"
-                 onclick="location.href='${pageContext.request.contextPath}/user/logout.do'">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i> 로그아웃
-            </div>
-        </div>
-    </aside>
+    <jsp:include page="/WEB-INF/views/common/sideBar.jsp">
+        <jsp:param name="activeMenu" value="community"/>
+    </jsp:include>
 
     <main class="main-content">
         <div class="top-bar">
