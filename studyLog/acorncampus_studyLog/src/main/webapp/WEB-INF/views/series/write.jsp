@@ -9,6 +9,9 @@
     <title>스터디로그 - 시리즈 <c:choose><c:when test="${not empty series}">수정</c:when><c:otherwise>만들기</c:otherwise></c:choose></title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/global_theme.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/typography.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/layout.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/button.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/post/post_write.css">
 </head>
 <body>

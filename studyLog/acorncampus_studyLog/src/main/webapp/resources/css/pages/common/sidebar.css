@@ -22,9 +22,19 @@
 .logout-btn { margin-top: auto; border-top: 1px solid var(--border-color); padding-top: 20px; }
 
 .sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    background-color: var(--bg-card);
+    border-right: 1px solid var(--border-color);
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: visible;          /* 툴팁 · 토글 버튼이 사이드바 밖으로 나올 수 있게 */
     transition: width 0.28s ease, padding 0.28s ease;
-    position: relative;
-    overflow: visible;          /* 툴팁이 사이드바 밖으로 나올 수 있게 */
 }
 
 /* ── 토글 버튼 ─────────────────────────────────────────────────────────── */

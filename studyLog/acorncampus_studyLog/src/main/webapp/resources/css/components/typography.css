@@ -1,0 +1,13 @@
+/* ==========================================================================
+   typography.css — 공통 타이포그래피
+   의존: global_theme.css
+   사용: 전체 페이지
+   ========================================================================== */
+
+/* 1. 제목 */
+h1 { font-size: 24px; font-weight: 800; color: var(--text-main); margin-bottom: 15px; }
+h2 { font-size: 18px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; }
+h3 { font-size: 16px; font-weight: 600; color: var(--text-main); margin-bottom: 8px; }
+
+/* 2. 서브 텍스트 */
+p.text-sub { color: var(--text-sub); font-size: 14px; }
