@@ -13,6 +13,20 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/form.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/table.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/admin/admin_user_list.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/admin/admin_user_list.css?v=graph-20260507">
+    <style>
+        <%-- 회원관리 그래프 스타일: 브라우저가 예전 CSS를 캐시해도 막대 그래프가 보이도록 보강 --%>
+        .big-graph { min-height: 200px; height: auto; font-size: 14px; font-weight: 400; color: var(--text-main); padding: 24px; }
+        .user-chart { width: 100%; max-width: 760px; display: flex; flex-direction: column; gap: 18px; }
+        .chart-row { display: grid; grid-template-columns: 70px minmax(120px, 1fr) 70px; align-items: center; gap: 14px; font-size: 14px; color: var(--text-main); }
+        .chart-label { font-weight: 700; }
+        .chart-track { height: 18px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 999px; overflow: hidden; }
+        .chart-bar { height: 100%; min-width: 2px; border-radius: 999px; }
+        .chart-bar.active { background: var(--accent-color); }
+        .chart-bar.banned { background: #ef5350; }
+        .chart-bar.deleted { background: #90A4AE; }
+        .chart-row strong { text-align: right; font-weight: 800; }
+    </style>
 </head>
 <body>
 <div class="dashboard-wrapper">
@@ -39,7 +53,26 @@
             <div class="stat-item">탈퇴 <span><c:out value="${deletedUserCount}"/></span></div>
         </div>
 
-        <div class="big-graph"><c:out value="${empty userStatsGraphLabel ? '그래프 및 통계' : userStatsGraphLabel}"/></div>
+        <div class="big-graph">
+            <%-- 회원 상태 통계를 한눈에 볼 수 있는 간단 막대 그래프 --%>
+            <div class="user-chart">
+                <div class="chart-row">
+                    <span class="chart-label">정상</span>
+                    <div class="chart-track"><div class="chart-bar active" style="width:${activeUserPercent}%;"></div></div>
+                    <strong><c:out value="${activeUserCount}"/>명</strong>
+                </div>
+                <div class="chart-row">
+                    <span class="chart-label">정지</span>
+                    <div class="chart-track"><div class="chart-bar banned" style="width:${bannedUserPercent}%;"></div></div>
+                    <strong><c:out value="${bannedUserCount}"/>명</strong>
+                </div>
+                <div class="chart-row">
+                    <span class="chart-label">탈퇴</span>
+                    <div class="chart-track"><div class="chart-bar deleted" style="width:${deletedUserPercent}%;"></div></div>
+                    <strong><c:out value="${deletedUserCount}"/>명</strong>
+                </div>
+            </div>
+        </div>
 
         <form class="controls-bar" action="${pageContext.request.contextPath}/admin/user/list.do" method="get">
             <div class="controls-left">
@@ -51,6 +84,7 @@
                     <option value="">상태 : 전체</option>
                     <option value="banned" ${param.status eq 'banned' ? 'selected' : ''}>상태 : 정지</option>
                     <option value="active" ${param.status eq 'active' ? 'selected' : ''}>상태 : 정상</option>
+                    <option value="deleted" ${param.status eq 'deleted' ? 'selected' : ''}>상태 : 탈퇴</option>
                 </select>
             </div>
         </form>

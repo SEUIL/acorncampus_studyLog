@@ -76,9 +76,15 @@ public class UserDao {
 
     /** 관리자 - 사용자 목록 조회 (keyword: 이메일/닉네임 검색, null이면 전체) */
     public List<UserDetailDto> findAll(String keyword, int offset, int limit) {
+        return findAll(keyword, null, offset, limit);
+    }
+
+    /** 관리자 - 사용자 목록 조회 (검색어와 상태 필터 적용) */
+    public List<UserDetailDto> findAll(String keyword, String status, int offset, int limit) {
         String like = (keyword != null && !keyword.trim().isEmpty()) ? "%" + keyword.trim() + "%" : "%";
+        String statusCondition = getStatusCondition(status);
         String sql = "SELECT user_id, email, nickname, bio, avatar_url, role, is_banned, created_at, deleted_at " +
-                     "FROM users WHERE deleted_at IS NULL AND (email LIKE ? OR nickname LIKE ?) " +
+                     "FROM users WHERE (email LIKE ? OR nickname LIKE ?) " + statusCondition +
                      "ORDER BY created_at DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         List<UserDetailDto> list = new ArrayList<>();
         Connection conn = null;
@@ -103,8 +109,14 @@ public class UserDao {
 
     /** 관리자 - 검색 조건 포함 전체 사용자 수 */
     public int countAll(String keyword) {
+        return countAll(keyword, null);
+    }
+
+    /** 관리자 - 검색 조건과 상태 필터를 포함한 사용자 수 */
+    public int countAll(String keyword, String status) {
         String like = (keyword != null && !keyword.trim().isEmpty()) ? "%" + keyword.trim() + "%" : "%";
-        String sql = "SELECT COUNT(*) FROM users WHERE deleted_at IS NULL AND (email LIKE ? OR nickname LIKE ?)";
+        String statusCondition = getStatusCondition(status);
+        String sql = "SELECT COUNT(*) FROM users WHERE (email LIKE ? OR nickname LIKE ?) " + statusCondition;
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -117,6 +129,25 @@ public class UserDao {
             return rs.next() ? rs.getInt(1) : 0;
         } catch (SQLException e) {
             throw new RuntimeException("UserDao.countAll 실패", e);
+        } finally {
+            DBUtil.close(conn, pstmt, rs);
+        }
+    }
+
+    /** 관리자 회원관리 통계용 상태별 사용자 수 */
+    public int countByStatus(String status) {
+        String statusCondition = getStatusCondition(status);
+        String sql = "SELECT COUNT(*) FROM users WHERE 1 = 1 " + statusCondition;
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            conn = DBUtil.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            rs = pstmt.executeQuery();
+            return rs.next() ? rs.getInt(1) : 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("UserDao.countByStatus 실패", e);
         } finally {
             DBUtil.close(conn, pstmt, rs);
         }
@@ -282,5 +313,18 @@ public class UserDao {
         u.setCreatedAt(rs.getTimestamp("created_at"));
         u.setDeletedAt(rs.getTimestamp("deleted_at"));
         return u;
+    }
+
+    private String getStatusCondition(String status) {
+        if ("active".equals(status)) {
+            return "AND deleted_at IS NULL AND is_banned = 'N' ";
+        }
+        if ("banned".equals(status)) {
+            return "AND deleted_at IS NULL AND is_banned = 'Y' ";
+        }
+        if ("deleted".equals(status)) {
+            return "AND deleted_at IS NOT NULL ";
+        }
+        return "AND deleted_at IS NULL ";
     }
 }
