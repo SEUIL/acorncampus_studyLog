@@ -9,6 +9,10 @@
     <title>스터디로그 - 시리즈 상세</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/global_theme.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/typography.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/layout.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/button.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/ui.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/series/series_detail.css">
 </head>
 <body>

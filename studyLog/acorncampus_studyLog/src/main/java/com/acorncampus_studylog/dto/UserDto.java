@@ -3,11 +3,12 @@ package com.acorncampus_studylog.dto;
 /** 사용자 정보 DTO. 로그인 후 세션(loginUser)에 저장됨 */
 public class UserDto {
 
-    private int    userId;    // PK
-    private String username;  // 닉네임
-    private String email;     // 로그인 ID
-    private String role;      // 권한: "USER" | "ADMIN"
-    private String isBanned;  // 정지 여부: "Y" | "N"
+    private int    userId;     // PK
+    private String username;   // 닉네임
+    private String email;      // 로그인 ID
+    private String role;       // 권한: "USER" | "ADMIN"
+    private String isBanned;   // 정지 여부: "Y" | "N"
+    private String avatarUrl;  // 프로필 사진 경로
 
     public int getUserId()                       { return userId; }
     public void setUserId(int userId)            { this.userId = userId; }
@@ -23,4 +24,7 @@ public class UserDto {
 
     public String getIsBanned()                  { return isBanned; }
     public void setIsBanned(String isBanned)     { this.isBanned = isBanned; }
+
+    public String getAvatarUrl()                 { return avatarUrl; }
+    public void setAvatarUrl(String avatarUrl)   { this.avatarUrl = avatarUrl; }
 }
