@@ -24,6 +24,7 @@ public class UserDetailDto {
         dto.setEmail(email);
         dto.setRole(role);
         dto.setIsBanned(isBanned);
+        dto.setAvatarUrl(avatarUrl);
         return dto;
     }
 
