@@ -132,7 +132,28 @@ public class UserService {
      */
     public boolean changePassword(int userId, String oldPassword, String newPassword) {
         // TODO: findById → BCryptUtil.check(oldPw) → hash(newPw) → updatePassword
-        return false;
+
+        // 사용자 조회
+        UserDetailDto user = userDao.findById(userId);
+
+        // 사용자 없으면 실패
+        if ( user == null){
+            return false;
+        }
+
+        // 현재 비밀번호 확인
+        boolean ok = BCryptUtil.check(oldPassword, user.getPassword());
+
+        // 현재 비밀번호 불일치 시 false
+        if (!ok){
+            return false;
+        }
+
+        // 새 비밀번호
+        String hashed = BCryptUtil.hash(newPassword);
+
+        userDao.updatePassword(userId, hashed);
+        return true;
     }
 
     /**
@@ -142,8 +163,23 @@ public class UserService {
      */
     public boolean deleteAccount(int userId, String rawPassword) {
         // TODO: 비밀번호 확인 → userDao.softDelete
-        return false;
+
+        // 사용자 조회
+        UserDetailDto user = userDao.findById(userId);
+
+        // 비밀번호 확인
+        boolean ok = BCryptUtil.check(rawPassword, user.getPassword());
+
+        // 틀릴 경우 실패
+        if (!ok){
+            return false;
+        }
+
+        // 소프트 삭제
+        userDao.softDelete(userId);
+        return true;
     }
+
 
     // ── 관리자 전용 ──────────────────────────────────────────────────────────
 
@@ -154,27 +190,86 @@ public class UserService {
      */
     public List<UserDetailDto> getUserList(String keyword, int pageNo) {
         // TODO: countAll → PageDto → findAll(keyword, offset, pageSize)
-        return null;
+
+        // 한 페이지당 개수
+        int pageSize = 10;
+
+        // 전체 회원 수
+        int totalCount = userDao.countAll(keyword);
+
+        // 페이지 계산
+        PageDto pageDto = new PageDto(pageNo, pageSize, totalCount);
+
+        // 시작 위치 계산
+        int offset = (pageNo -1) * pageSize;
+
+        // 조회
+        return  userDao.findAll(keyword,offset, pageSize);
+
     }
 
     /** 관리자 - 페이지 정보 반환 */
     public PageDto getUserPage(String keyword, int pageNo) {
         // TODO: countAll → new PageDto(pageNo, 10, totalCount)
-        return null;
+
+        // 전체 회원 조회
+        int totalCount = userDao.countAll(keyword);
+
+        // 페이지 정보 생성
+        PageDto pageDto = new PageDto(pageNo, 10, totalCount);
+
+        // 반환
+        return pageDto;
     }
 
     /** 관리자 - 계정 정지 */
     public void banUser(int userId) {
         // TODO: userDao.ban(userId)
+
+        // 사용자 조회
+        UserDetailDto user = userDao.findById(userId);
+
+        // 사용자가 없으면 종료
+        if ( user == null){
+            return;
+        }
+
+        // 계정 정지
+        userDao.ban(userId);
+
     }
 
     /** 관리자 - 계정 정지 해제 */
     public void unbanUser(int userId) {
         // TODO: userDao.unban(userId)
+
+        // 사용자 조회
+        UserDetailDto user = userDao.findById(userId);
+
+        // 사용자 없으면 종료
+        if ( user == null){
+            return;
+        }
+
+        // 계정 정지 해제
+        userDao.unban(userId);
+
     }
 
     /** 관리자 - 계정 강제 삭제 */
     public void forceDeleteUser(int userId) {
         // TODO: userDao.hardDelete(userId)
+
+        // 사용자 조회
+        UserDetailDto user = userDao.findById(userId);
+
+        // 사용자 없으면 종료
+        if ( user == null){
+            return;
+        }
+
+        // 계정 강제 삭제
+        userDao.hardDelete(userId);
+
     }
 }
