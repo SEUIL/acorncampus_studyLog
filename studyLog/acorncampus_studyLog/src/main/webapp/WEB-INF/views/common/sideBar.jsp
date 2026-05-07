@@ -10,6 +10,8 @@
   의존 세션: loginUser (UserDto)
 --%>
 <script src="${pageContext.request.contextPath}/resources/js/page-transition.js"></script>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/button.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/jandi.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/common/sidebar.css">
 
 <!-- 🟢 1. 테마 즉시 복구 (깜빡임 방지를 위해 최상단 배치) -->

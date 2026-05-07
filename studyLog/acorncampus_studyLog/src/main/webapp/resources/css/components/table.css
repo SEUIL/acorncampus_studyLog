@@ -1,0 +1,31 @@
+/* ==========================================================================
+   table.css — 관리자용 테이블 컴포넌트
+   의존: global_theme.css
+   사용: 관리자 페이지 (게시글, 회원, 태그, 신고 목록)
+   ========================================================================== */
+
+/* 1. 테이블 래퍼 */
+.admin-table-wrapper {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-top: 20px;
+}
+
+/* 2. 테이블 */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: center;
+}
+.admin-table th,
+.admin-table td {
+    border-bottom: 1px solid var(--border-color);
+    padding: 12px;
+    color: var(--text-main);
+}
+.admin-table th { background-color: var(--list-hover); font-weight: 700; }
+.admin-table tr:hover { background-color: rgba(0, 0, 0, 0.02); }
+.dark-theme .admin-table tr:hover { background-color: rgba(255, 255, 255, 0.02); }

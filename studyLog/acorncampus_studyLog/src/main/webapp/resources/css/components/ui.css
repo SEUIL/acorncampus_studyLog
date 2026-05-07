@@ -1,0 +1,44 @@
+/* ==========================================================================
+   ui.css — 공통 UI 컴포넌트 (브레드크럼, 태그, 빈 상태 등)
+   의존: global_theme.css
+   사용: 전체 페이지
+   ========================================================================== */
+
+/* 1. 브레드크럼 (뒤로가기 / 경로 표시) */
+.breadcrumb {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-sub);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    transition: var(--transition-base);
+    text-decoration: none;
+    cursor: pointer;
+}
+.breadcrumb:hover { color: var(--text-main); background-color: var(--list-hover); }
+
+/* 2. 태그 */
+.tag {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    color: var(--accent-color);
+    display: inline-block;
+}
+
+/* 3. 빈 상태 메시지 */
+.empty-state {
+    color: var(--text-sub);
+    font-size: 14px;
+    padding: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    text-align: center;
+}
