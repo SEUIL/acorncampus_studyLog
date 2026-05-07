@@ -12,8 +12,6 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/post/post_detail.css">
 </head>
 <body>
-<%@ include file="/WEB-INF/views/common/header.jsp" %>
-<%@ include file="/WEB-INF/views/common/sideBar.jsp" %>
 <div class="dashboard-wrapper">
     <jsp:include page="/WEB-INF/views/common/sideBar.jsp">
         <jsp:param name="activeMenu" value="community"/>
