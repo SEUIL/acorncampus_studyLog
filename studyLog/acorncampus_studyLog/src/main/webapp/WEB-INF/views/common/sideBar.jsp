@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="c"  uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%--
   공통 사이드바 fragment
   사용법: <jsp:include page="/WEB-INF/views/common/sideBar.jsp">
@@ -38,9 +39,30 @@
             <div class="grass-node level-4"></div><div class="grass-node level-2"></div><div class="grass-node"></div><div class="grass-node level-1"></div><div class="grass-node level-3"></div><div class="grass-node"></div><div class="grass-node level-2"></div>
         </div>
     </div>
-    <div class="profile-section">
+    <div class="profile-section" title="프로필 수정"
+         onclick="navigateWithTransition('${pageContext.request.contextPath}/l_check/user/update.do')"
+         style="cursor: pointer;">
         <div class="profile-avatar">
-            <i class="fa-solid fa-user"></i>
+            <c:choose>
+                <c:when test="${not empty loginUser.avatarUrl}">
+                    <%-- 외부 URL(http로 시작)이면 contextPath 없이, 로컬 파일이면 contextPath 붙임 --%>
+                    <c:choose>
+                        <c:when test="${fn:startsWith(loginUser.avatarUrl, 'http')}">
+                            <img src="<c:out value='${loginUser.avatarUrl}'/>"
+                                 alt="프로필 사진"
+                                 style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                        </c:when>
+                        <c:otherwise>
+                            <img src="${pageContext.request.contextPath}<c:out value='${loginUser.avatarUrl}'/>"
+                                 alt="프로필 사진"
+                                 style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                        </c:otherwise>
+                    </c:choose>
+                </c:when>
+                <c:otherwise>
+                    <i class="fa-solid fa-user"></i>
+                </c:otherwise>
+            </c:choose>
         </div>
         <div class="profile-info">
             <h2><c:out value="${loginUser.username}"/></h2>

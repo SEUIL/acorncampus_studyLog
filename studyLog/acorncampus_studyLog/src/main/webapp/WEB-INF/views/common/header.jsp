@@ -55,10 +55,6 @@
         </c:choose>
     </div>
     <div class="nav-right">
-        <button class="icon-btn" title="설정"
-                onclick="navigateWithTransition('${pageContext.request.contextPath}/l_check/user/update.do')">
-            <i class="fa-solid fa-gear"></i>
-        </button>
     </div>
 </div>
 <%-- navigateWithTransition() 은 page-transition.js (sideBar.jsp 에서 로드) 에 정의됨 --%>

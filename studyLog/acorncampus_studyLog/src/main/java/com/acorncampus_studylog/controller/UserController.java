@@ -210,7 +210,7 @@ public class UserController extends HttpServlet {
         }
 
         // 세션 사용자 정보
-        UserDetailDto loginUser = (UserDetailDto) session.getAttribute("loginUser");
+        UserDto loginUser = (UserDto) session.getAttribute("loginUser");
         int userId = loginUser.getUserId();
 
         // 입력값 받기
@@ -247,7 +247,7 @@ public class UserController extends HttpServlet {
         }
 
         // 세션 사용자 정보
-        UserDetailDto loginUser = (UserDetailDto) session.getAttribute("loginUser");
+        UserDto loginUser = (UserDto) session.getAttribute("loginUser");
         int userId = loginUser.getUserId();
 
         // 비밀번호 확인
