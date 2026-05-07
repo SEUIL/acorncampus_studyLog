@@ -21,7 +21,6 @@
             <li onclick="location.href='${pageContext.request.contextPath}/admin/tag/list.do'"><i class="fa-solid fa-tags"></i> 태그 관리</li>
         </ul>
     </aside>
-
     <main class="main-content">
         <div class="admin-header">
             <h1><i class="fa-solid fa-file-lines"></i> 게시글 및 시리즈 관리</h1>
@@ -93,6 +92,8 @@
         </div>
     </main>
 </div>
+<%-- 관리자 화면 표시용 전환 스크립트 --%>
+<script src="${pageContext.request.contextPath}/resources/js/page-transition.js"></script>
 </body>
 </html>
 
