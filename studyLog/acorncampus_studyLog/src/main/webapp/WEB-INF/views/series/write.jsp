@@ -61,17 +61,14 @@
                         <span id="toggleTextRight" style="color: var(--text-main);">공개</span>
                     </div>
 
-                    <%-- 수정 모드일 때만 삭제 버튼 표시 --%>
+                    <%-- 수정 모드일 때만 삭제 버튼 표시
+                         form 중첩 불가(HTML 스펙) → 버튼은 외부 deleteForm을 JS로 submit --%>
                     <c:if test="${not empty series}">
-                        <form action="${pageContext.request.contextPath}/l_check/series/delete.do"
-                              method="post" style="display:inline;"
-                              onsubmit="return confirm('시리즈를 삭제하면 소속 게시글의 시리즈 연결이 해제됩니다. 삭제하시겠습니까?')">
-                            <input type="hidden" name="seriesId" value="${series.seriesId}">
-                            <button type="submit" class="btn btn-outline"
-                                    style="color:#ef5350; border-color:#ef5350;">
-                                <i class="fa-regular fa-trash-can"></i> 시리즈 삭제
-                            </button>
-                        </form>
+                        <button type="button" class="btn btn-outline"
+                                style="color:#ef5350; border-color:#ef5350;"
+                                onclick="if(confirm('시리즈를 삭제하면 소속 게시글의 시리즈 연결이 해제됩니다. 삭제하시겠습니까?')) document.getElementById('deleteSeriesForm').submit()">
+                            <i class="fa-regular fa-trash-can"></i> 시리즈 삭제
+                        </button>
                     </c:if>
 
                     <button type="submit" class="btn btn-primary" style="padding: 10px 24px; font-size: 15px;">
@@ -85,6 +82,16 @@
         </form>
     </main>
 </div>
+
+<%-- 삭제 전용 form: write-container form 중첩 불가로 외부에 분리
+     버튼에서 JS로 submit() 호출 --%>
+<c:if test="${not empty series}">
+    <form id="deleteSeriesForm"
+          action="${pageContext.request.contextPath}/l_check/series/delete.do"
+          method="post">
+        <input type="hidden" name="seriesId" value="${series.seriesId}">
+    </form>
+</c:if>
 
 <script>
     const toggle = document.getElementById('publicToggle');
