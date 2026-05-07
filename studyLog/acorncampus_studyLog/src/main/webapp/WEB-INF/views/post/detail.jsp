@@ -72,12 +72,15 @@
                 </c:if>
             </header>
 
-            <div class="post-body">
-                <%-- escapeXml="false": Toast UI Editor가 HTML을 생성하므로 raw 출력이 불가피함
-                     XSS 방지는 게시글 저장 시 서버에서 jsoup 같은 라이브러리로 sanitize해야 함
-                     현재는 미구현 상태이므로 추후 PostService.createPost/updatePost에 sanitize 추가 필요 --%>
-                <c:out value="${post.content}" escapeXml="false"/>
-            </div>
+            <%-- white-space: pre-wrap: 텍스트 입력 시 줄바꿈(\n)과 공백을 그대로 유지
+                 pre-wrap을 쓰는 이유: pre는 줄바꿈 유지, wrap은 창 너비 초과 시 자동 줄바꿈 --%>
+            <%-- escapeXml="false": Toast UI Editor가 HTML을 생성하므로 raw 출력이 불가피함
+                 XSS 방지는 게시글 저장 시 서버에서 jsoup 같은 라이브러리로 sanitize해야 함
+                 현재는 미구현 상태이므로 추후 PostService.createPost/updatePost에 sanitize 추가 필요
+                 white-space: pre-wrap — 줄바꿈(\n)과 공백 유지
+                 태그 안쪽에 공백 없이 바로 c:out을 붙인 이유:
+                 pre-wrap이 적용된 상태에서 태그 내부 들여쓰기 공백까지 그대로 출력되기 때문 --%>
+            <div class="post-body" style="white-space: pre-wrap;"><c:out value="${post.content}" escapeXml="false"/></div>
             <div class="post-actions-bottom" style="text-align: center; margin-top: 40px; margin-bottom: 40px;">
                             <c:choose>
                                 <c:when test="${not empty loginUser}">

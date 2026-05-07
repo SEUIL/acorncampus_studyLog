@@ -200,9 +200,18 @@ public class PostController extends HttpServlet {
         List<SeriesDto> seriesList = seriesService.getSeriesByUser(loginUser.getUserId());
         if (seriesList == null) seriesList = Collections.emptyList();
 
+        // tagList는 List<TagDto>이므로 JSP input value에 바로 쓸 수 없음
+        // 쉼표 구분 문자열로 미리 변환해서 전달: [java, oracle] → "java, oracle"
+        String tagStr = (post.getTagList() == null) ? "" :
+                post.getTagList().stream()
+                        .map(com.acorncampus_studylog.dto.TagDto::getName)
+                        .collect(Collectors.joining(", "));
+
         req.setAttribute("post",       post);
+        req.setAttribute("tagStr",     tagStr);
         req.setAttribute("seriesList", seriesList);
-        req.getRequestDispatcher("/WEB-INF/views/post/update.jsp").forward(req, resp);
+        // write.jsp에서 ${post} 유무로 생성/수정 모드를 구분하므로 write.jsp로 통합
+        req.getRequestDispatcher("/WEB-INF/views/post/write.jsp").forward(req, resp);
     }
 
     // ── POST 핸들러 ─────────────────────────────────────────────────────────

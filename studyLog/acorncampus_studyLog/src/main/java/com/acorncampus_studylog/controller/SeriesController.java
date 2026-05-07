@@ -111,8 +111,9 @@ public class SeriesController extends HttpServlet {
             return;
         }
 
+        // series/write.jsp에서 ${series} 유무로 생성/수정 모드를 구분하므로 write.jsp로 통합
         req.setAttribute("series", series);
-        req.getRequestDispatcher("/WEB-INF/views/series/update.jsp").forward(req, resp);
+        req.getRequestDispatcher("/WEB-INF/views/series/write.jsp").forward(req, resp);
     }
 
     private void handleWrite(HttpServletRequest req, HttpServletResponse resp)
