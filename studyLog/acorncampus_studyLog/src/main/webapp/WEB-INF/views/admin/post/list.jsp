@@ -81,7 +81,7 @@
                                     </c:choose>
                                 </td>
                                 <td>
-                                    <form action="${pageContext.request.contextPath}/admin/post/delete.do" method="post" style="display:inline;">
+                                    <form action="${pageContext.request.contextPath}/admin/post/delete.do" method="post" style="display:inline;" data-ajax-form="true">
                                         <input type="hidden" name="postId" value="${post.postId}">
                                         <button type="submit" class="btn-sm btn-danger">강제 삭제</button>
                                     </form>
@@ -100,6 +100,36 @@
 </div>
 <%-- 관리자 화면 표시용 전환 스크립트 --%>
 <script src="${pageContext.request.contextPath}/resources/js/page-transition.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('form[data-ajax-form="true"]').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // CLAUDE.md AJAX 패턴: Controller가 req.getParameter("postId")로 읽을 수 있도록
+                // FormData를 URLSearchParams로 변환해 application/x-www-form-urlencoded 형식으로 전송
+                const params = new URLSearchParams(new FormData(form));
+
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: params
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.status === 'ok') {
+                        window.location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('서버 통신 중 오류가 발생했습니다.');
+                });
+            });
+        });
+    });
+</script>
 </body>
 </html>
 

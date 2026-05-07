@@ -7,12 +7,16 @@ import com.acorncampus_studylog.service.ReportService;
 import com.acorncampus_studylog.service.TagService;
 import com.acorncampus_studylog.service.UserService;
 
+import com.google.gson.Gson;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * 관리자 화면의 요청을 한 곳에서 분기하는 컨트롤러.
@@ -29,6 +33,7 @@ public class AdminController extends HttpServlet {
     private final CommentService commentService = new CommentService();
     private final ReportService reportService = new ReportService();
     private final TagService tagService = new TagService();
+    private final Gson gson = new Gson();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -170,8 +175,8 @@ public class AdminController extends HttpServlet {
      */
     private void handleUserBan(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        userService.banUser(parseInt(req.getParameter("userId"), 0));
-        resp.sendRedirect(req.getContextPath() + "/admin/user/list.do");
+        writeActionJson(resp, () -> userService.banUser(parseInt(req.getParameter("userId"), 0)),
+                "회원 정지 완료");
     }
 
     /**
@@ -183,8 +188,8 @@ public class AdminController extends HttpServlet {
      */
     private void handleUserUnban(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        userService.unbanUser(parseInt(req.getParameter("userId"), 0));
-        resp.sendRedirect(req.getContextPath() + "/admin/user/list.do");
+        writeActionJson(resp, () -> userService.unbanUser(parseInt(req.getParameter("userId"), 0)),
+                "회원 정지 해제 완료");
     }
 
     /**
@@ -197,8 +202,8 @@ public class AdminController extends HttpServlet {
      */
     private void handleUserDelete(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        userService.forceDeleteUser(parseInt(req.getParameter("userId"), 0));
-        resp.sendRedirect(req.getContextPath() + "/admin/user/list.do");
+        writeActionJson(resp, () -> userService.forceDeleteUser(parseInt(req.getParameter("userId"), 0)),
+                "회원 삭제 완료");
     }
 
     private void routePostGet(String action, HttpServletRequest req, HttpServletResponse resp)
@@ -247,8 +252,8 @@ public class AdminController extends HttpServlet {
      */
     private void handlePostDelete(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        postService.forceDeletePost(parseInt(req.getParameter("postId"), 0));
-        resp.sendRedirect(req.getContextPath() + "/admin/post/list.do");
+        writeActionJson(resp, () -> postService.forceDeletePost(parseInt(req.getParameter("postId"), 0)),
+                "게시글 삭제 완료");
     }
 
     private void routeCommentGet(String action, HttpServletRequest req, HttpServletResponse resp)
@@ -297,8 +302,8 @@ public class AdminController extends HttpServlet {
      */
     private void handleCommentDelete(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        commentService.deleteComment(parseInt(req.getParameter("commentId"), 0));
-        resp.sendRedirect(req.getContextPath() + "/admin/comment/list.do");
+        writeActionJson(resp, () -> commentService.deleteComment(parseInt(req.getParameter("commentId"), 0)),
+                "댓글 삭제 완료");
     }
 
     private void routeReportGet(String action, HttpServletRequest req, HttpServletResponse resp)
@@ -351,8 +356,8 @@ public class AdminController extends HttpServlet {
      */
     private void handleReportResolve(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        reportService.resolveReport(parseInt(req.getParameter("reportId"), 0));
-        resp.sendRedirect(req.getContextPath() + "/admin/report/list.do");
+        writeActionJson(resp, () -> reportService.resolveReport(parseInt(req.getParameter("reportId"), 0)),
+                "신고 처리 완료");
     }
 
     /**
@@ -364,8 +369,8 @@ public class AdminController extends HttpServlet {
      */
     private void handleReportDismiss(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        reportService.dismissReport(parseInt(req.getParameter("reportId"), 0));
-        resp.sendRedirect(req.getContextPath() + "/admin/report/list.do");
+        writeActionJson(resp, () -> reportService.dismissReport(parseInt(req.getParameter("reportId"), 0)),
+                "신고 기각 완료");
     }
 
     private void routeTagGet(String action, HttpServletRequest req, HttpServletResponse resp)
@@ -413,8 +418,28 @@ public class AdminController extends HttpServlet {
      */
     private void handleTagDelete(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        tagService.deleteTag(parseInt(req.getParameter("tagId"), 0));
-        resp.sendRedirect(req.getContextPath() + "/admin/tag/list.do");
+        writeActionJson(resp, () -> tagService.deleteTag(parseInt(req.getParameter("tagId"), 0)),
+                "태그 삭제 완료");
+    }
+
+    private void writeActionJson(HttpServletResponse resp, AdminAction action, String successMessage)
+            throws IOException {
+        Map<String, Object> result = new LinkedHashMap<>();
+        try {
+            action.execute();
+            result.put("status", "ok");
+            result.put("message", successMessage);
+        } catch (Exception e) {
+            result.put("status", "error");
+            result.put("message", e.getMessage() == null ? "관리자 작업 처리 중 오류가 발생했습니다." : e.getMessage());
+        }
+
+        resp.setContentType("application/json; charset=UTF-8");
+        resp.getWriter().write(gson.toJson(result));
+    }
+
+    private interface AdminAction {
+        void execute();
     }
 
     private int parseInt(String value, int defaultValue) {
