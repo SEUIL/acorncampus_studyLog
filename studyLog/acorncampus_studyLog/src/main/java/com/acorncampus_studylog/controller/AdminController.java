@@ -139,16 +139,25 @@ public class AdminController extends HttpServlet {
     private void handleUserList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         String keyword = req.getParameter("keyword");
+        String status = normalizeUserStatus(req.getParameter("status"));
         int pageNo = parseInt(req.getParameter("page"), 1);
-        PageDto page = userService.getUserPage(keyword, pageNo);
+        PageDto page = userService.getUserPage(keyword, status, pageNo);
+        int totalUserCount = userService.getUserCountByStatus(null);
+        int activeUserCount = userService.getUserCountByStatus("active");
+        int bannedUserCount = userService.getUserCountByStatus("banned");
+        int deletedUserCount = userService.getUserCountByStatus("deleted");
+        int graphTotal = Math.max(totalUserCount + deletedUserCount, 1);
 
-        req.setAttribute("userList", userService.getUserList(keyword, pageNo));
+        req.setAttribute("userList", userService.getUserList(keyword, status, pageNo));
         req.setAttribute("page", page);
-        req.setAttribute("totalUserCount", page.getTotalCount());
-        // TODO: UserService에 상태별 회원 수 메서드가 생기면 실제 정상/정지/탈퇴 수로 교체
-        req.setAttribute("activeUserCount", 0);
-        req.setAttribute("bannedUserCount", 0);
-        req.setAttribute("deletedUserCount", 0);
+        // 회원관리 상단 통계와 그래프는 필터와 별개로 전체 회원 상태를 기준으로 표시
+        req.setAttribute("totalUserCount", totalUserCount);
+        req.setAttribute("activeUserCount", activeUserCount);
+        req.setAttribute("bannedUserCount", bannedUserCount);
+        req.setAttribute("deletedUserCount", deletedUserCount);
+        req.setAttribute("activeUserPercent", toPercent(activeUserCount, graphTotal));
+        req.setAttribute("bannedUserPercent", toPercent(bannedUserCount, graphTotal));
+        req.setAttribute("deletedUserPercent", toPercent(deletedUserCount, graphTotal));
         req.getRequestDispatcher("/WEB-INF/views/admin/user/list.jsp").forward(req, resp);
     }
 
@@ -421,5 +430,16 @@ public class AdminController extends HttpServlet {
             return status;
         }
         return null;
+    }
+
+    private String normalizeUserStatus(String status) {
+        if ("active".equals(status) || "banned".equals(status) || "deleted".equals(status)) {
+            return status;
+        }
+        return null;
+    }
+
+    private int toPercent(int count, int total) {
+        return Math.round(count * 100f / total);
     }
 }

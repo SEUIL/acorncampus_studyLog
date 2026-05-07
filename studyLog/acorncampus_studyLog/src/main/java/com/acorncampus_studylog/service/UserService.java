@@ -189,37 +189,33 @@ public class UserService {
      * @param pageNo 현재 페이지 (1-based)
      */
     public List<UserDetailDto> getUserList(String keyword, int pageNo) {
-        // TODO: countAll → PageDto → findAll(keyword, offset, pageSize)
+        return getUserList(keyword, null, pageNo);
+    }
 
-        // 한 페이지당 개수
+    /**
+     * 관리자 - 사용자 목록 조회
+     * 검색어와 상태 필터를 함께 적용해서 회원관리 화면의 select와 실제 목록을 맞춘다.
+     */
+    public List<UserDetailDto> getUserList(String keyword, String status, int pageNo) {
         int pageSize = 10;
-
-        // 전체 회원 수
-        int totalCount = userDao.countAll(keyword);
-
-        // 페이지 계산
-        PageDto pageDto = new PageDto(pageNo, pageSize, totalCount);
-
-        // 시작 위치 계산
-        int offset = (pageNo -1) * pageSize;
-
-        // 조회
-        return  userDao.findAll(keyword,offset, pageSize);
-
+        PageDto pageDto = getUserPage(keyword, status, pageNo);
+        return userDao.findAll(keyword, normalizeAdminStatus(status), pageDto.getOffset(), pageSize);
     }
 
     /** 관리자 - 페이지 정보 반환 */
     public PageDto getUserPage(String keyword, int pageNo) {
-        // TODO: countAll → new PageDto(pageNo, 10, totalCount)
+        return getUserPage(keyword, null, pageNo);
+    }
 
-        // 전체 회원 조회
-        int totalCount = userDao.countAll(keyword);
+    /** 관리자 - 검색어와 상태 필터가 반영된 페이지 정보 반환 */
+    public PageDto getUserPage(String keyword, String status, int pageNo) {
+        int totalCount = userDao.countAll(keyword, normalizeAdminStatus(status));
+        return new PageDto(pageNo, 10, totalCount);
+    }
 
-        // 페이지 정보 생성
-        PageDto pageDto = new PageDto(pageNo, 10, totalCount);
-
-        // 반환
-        return pageDto;
+    /** 관리자 - 상태별 회원 수 통계 */
+    public int getUserCountByStatus(String status) {
+        return userDao.countByStatus(normalizeAdminStatus(status));
     }
 
     /** 관리자 - 계정 정지 */
@@ -271,5 +267,12 @@ public class UserService {
         // 계정 강제 삭제
         userDao.hardDelete(userId);
 
+    }
+
+    private String normalizeAdminStatus(String status) {
+        if ("active".equals(status) || "banned".equals(status) || "deleted".equals(status)) {
+            return status;
+        }
+        return null;
     }
 }
