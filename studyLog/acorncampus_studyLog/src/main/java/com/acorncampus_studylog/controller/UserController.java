@@ -1,5 +1,6 @@
 package com.acorncampus_studylog.controller;
 
+import com.acorncampus_studylog.dto.UserDetailDto;
 import com.acorncampus_studylog.dto.UserDto;
 import com.acorncampus_studylog.service.UserService;
 import com.google.gson.Gson;
@@ -105,7 +106,8 @@ public class UserController extends HttpServlet {
             throws IOException {
         String email = req.getParameter("email");
         // TODO: boolean available = userService.checkEmailAvailable(email)
-        boolean available = email != null && !email.trim().isEmpty();
+
+        boolean available = userService.checkEmailAvailable(email);
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("available", available);
@@ -126,35 +128,146 @@ public class UserController extends HttpServlet {
 
     private void handleLogin(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+
         String email = req.getParameter("email");
+        String password = req.getParameter("password");
 
         // TODO: UserDto user = userService.login(email, password) → 실패 시 errorMsg + index.jsp(authMode=login) forward
-        UserDto tempUser = new UserDto();
-        tempUser.setUserId(1);
-        tempUser.setEmail(email != null ? email : "temp@studylog.dev");
-        tempUser.setUsername("임시사용자");
-        tempUser.setRole("ADMIN");
-        tempUser.setIsBanned("N");
 
-        req.getSession(true).setAttribute("loginUser", tempUser);
-        resp.sendRedirect(req.getContextPath() + "/l_check/user/mypage.do");
+        // 로그인
+        UserDetailDto user = userService.login(email, password);
+
+        // 로그인 실패
+        if (user == null) {
+            req.setAttribute("errorMsg", "이메일 또는 비밀번호가 올바르지 않습니다.");
+            req.getRequestDispatcher("/index.jsp?authMode=login").forward(req,resp);
+
+            return;
+        }
+
+        // 세션 생성
+        HttpSession session = req.getSession();
+
+        // 세션에 로그인 사용자 저장
+        session.setAttribute("loginUser", user.toSessionDto());
+
+        // 마이페이지 이동
+        resp.sendRedirect(req.getContextPath() +"/l_check/user/mypage.do");
+
     }
 
     private void handleRegister(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         // TODO: 입력값 검증 → userService.register → redirect
+
+        String email = req.getParameter("email");
+        String nickname = req.getParameter("nickname");
+        String password = req.getParameter("password");
+
+        // 입력값 검증
+        if (email == null || email.trim().isEmpty()
+            || nickname == null || nickname.trim().isEmpty()
+            || password == null || password.trim().isEmpty()){
+
+            req.setAttribute("errorMsg", "모든 정보를 입력해주세요");
+
+            // 회원가입 창 실행
+            req.getRequestDispatcher("/index.jsp?authMode=register").forward(req, resp);
+
+            return;
+        }
+
+        // 회원가입
+        int userId = userService.register(email, nickname, password);
+
+        // 회원가입 실패
+        if (userId == 0 ) {
+
+            req.setAttribute("errorMsg", "이미 사용 중인 이메일 또는 닉네임입니다.");
+
+            req.getRequestDispatcher("/index.jsp?authMode=register").forward(req,resp);
+
+            return;
+        }
+
+        // 회원가입 성공
         resp.sendRedirect(req.getContextPath() + "/user/login.do");
     }
+
 
     private void handlePassword(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         // TODO: 세션에서 userId → userService.changePassword
+
+        // 세션 가져오기
+        HttpSession session = req.getSession(false);
+
+        // 로그인 확인
+        if (session == null || session.getAttribute("loginUser")== null){
+            resp.sendRedirect(req.getContextPath() + "/user/login.do");
+            return;
+
+        }
+
+        // 세션 사용자 정보
+        UserDetailDto loginUser = (UserDetailDto) session.getAttribute("loginUser");
+        int userId = loginUser.getUserId();
+
+        // 입력값 받기
+        String oldPassword = req.getParameter("oldPassword");
+        String newPassword = req.getParameter("newPassword");
+
+        // 비밀번호 변경
+        boolean ok = userService.changePassword(userId, oldPassword, newPassword);
+
+        // 실패
+        if (!ok){
+            req.setAttribute("errorMsg", "현재 비밀번호가 일치하지 않습니다");
+            req.getRequestDispatcher("/WEB-INF/views/user/password.jsp").forward(req, resp);
+
+            return;
+        }
+
+        // 성공
         resp.sendRedirect(req.getContextPath() + "/l_check/user/mypage.do");
     }
 
     private void handleDelete(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         // TODO: userService.deleteAccount(userId, password) → session.invalidate
+
+        // 세션 가져오기
+        HttpSession session = req.getSession(false);
+
+        // 로그인 확인
+        if (session == null || session.getAttribute("loginUser")== null){
+            resp.sendRedirect(req.getContextPath() + "/user/login.do");
+            return;
+
+        }
+
+        // 세션 사용자 정보
+        UserDetailDto loginUser = (UserDetailDto) session.getAttribute("loginUser");
+        int userId = loginUser.getUserId();
+
+        // 비밀번호 확인
+        String password = req.getParameter("password");
+
+        // 탈퇴 처리
+        boolean ok = userService.deleteAccount(userId,password);
+
+        // 실패
+        if ( !ok) {
+            req.setAttribute("errorMsg", "비밀번호가 일치하지 않습니다");
+            req.getRequestDispatcher("/WEB-INF/views/user/mypage.jsp").forward(req,resp);
+
+            return;
+        }
+
+        // 성공
+        session.invalidate();
+
+        // 로그인 페이지 이동
         resp.sendRedirect(req.getContextPath() + "/user/login.do");
     }
 }
