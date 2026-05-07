@@ -28,7 +28,7 @@
     <button class="sidebar-toggle" id="sidebarToggle" title="사이드바 접기/펼치기">
         <i class="fa-solid fa-chevron-left" id="sidebarToggleIcon"></i>
     </button>
-    <a class="brand-logo" href="${pageContext.request.contextPath}/">
+    <a class="brand-logo" href="${pageContext.request.contextPath}/l_check/user/mypage.do">
         <i class="fa-solid fa-book-open"></i>
         <span class="sidebar-text">스터디로그</span>
     </a>
