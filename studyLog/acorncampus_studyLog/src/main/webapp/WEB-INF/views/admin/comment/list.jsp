@@ -79,7 +79,6 @@
         </div>
     </main>
 </div>
-<%-- 누락된 /admin/comment/list.do 라우트가 500이 나지 않도록 추가한 댓글 관리 JSP --%>
 <script src="${pageContext.request.contextPath}/resources/js/page-transition.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -87,7 +86,6 @@
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
 
-                // Controller가 req.getParameter("commentId")로 읽을 수 있도록 form-urlencoded로 전송한다.
                 const params = new URLSearchParams(new FormData(form));
 
                 fetch(form.action, {

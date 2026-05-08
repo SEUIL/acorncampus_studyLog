@@ -49,7 +49,7 @@
             <table class="admin-table">
                 <thead>
                 <tr>
-                    <th>신고ID</th><th>신고유형</th><th>대상 요약</th><th>신고자</th><th>상태</th><th>신고일</th><th>사유</th><th>관리</th>
+                    <th>신고ID</th><th>신고유형</th><th>대상 요약</th><th>신고자</th><th>신고당한 사람</th><th>상태</th><th>신고일</th><th>사유</th><th>관리</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -59,8 +59,9 @@
                             <tr>
                                 <td><c:out value="${report.reportId}"/></td>
                                 <td><c:out value="${report.targetType}"/></td>
-                                <td><c:out value="${report.targetSummary}"/></td>
+                                <td><c:out value="${empty report.targetSummary ? '-' : report.targetSummary}"/></td>
                                 <td><c:out value="${report.reporterName}"/></td>
+                                <td><c:out value="${empty report.targetAuthorName ? '-' : report.targetAuthorName}"/></td>
                                 <td><c:out value="${report.status}"/></td>
                                 <td><c:out value="${report.createdAt}"/></td>
                                 <td class="reason-box"><c:out value="${report.reason}"/></td>
@@ -103,6 +104,14 @@
                                                     <dd><c:out value="${report.reporterName}"/></dd>
                                                 </div>
                                                 <div>
+                                                    <dt>신고당한 사람</dt>
+                                                    <dd><c:out value="${empty report.targetAuthorName ? '-' : report.targetAuthorName}"/></dd>
+                                                </div>
+                                                <div>
+                                                    <dt>대상 작성자 이메일</dt>
+                                                    <dd><c:out value="${empty report.targetAuthorEmail ? '-' : report.targetAuthorEmail}"/></dd>
+                                                </div>
+                                                <div>
                                                     <dt>상태</dt>
                                                     <dd><c:out value="${report.status}"/></dd>
                                                 </div>
@@ -126,7 +135,7 @@
                         </c:forEach>
                     </c:when>
                     <c:otherwise>
-                        <tr><td colspan="8">신고 내역이 없습니다.</td></tr>
+                        <tr><td colspan="9">신고 내역이 없습니다.</td></tr>
                     </c:otherwise>
                 </c:choose>
                 </tbody>
