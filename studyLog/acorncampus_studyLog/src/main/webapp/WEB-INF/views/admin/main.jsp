@@ -9,6 +9,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/typography.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/layout.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/common/sidebar.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/button.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/admin/admin_main.css">
 </head>
