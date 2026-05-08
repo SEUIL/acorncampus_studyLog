@@ -79,7 +79,8 @@ public class PasswordResetController extends HttpServlet {
     private void handleForgotForm(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         // TODO: req.getRequestDispatcher("/WEB-INF/views/user/forgot_password.jsp").forward(req, resp);
-        throw new UnsupportedOperationException("handleForgotForm 미구현");
+
+        req.getRequestDispatcher("/WEB-INF/views/user/forgot_password.jsp").forward(req, resp);
     }
 
     /**
@@ -98,7 +99,16 @@ public class PasswordResetController extends HttpServlet {
     private void handleResetForm(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         // TODO: 구현 필요
-        throw new UnsupportedOperationException("handleResetForm 미구현");
+
+        // 토큰 추출
+        String token = req.getParameter("token");
+
+        // 유효성 확인
+        if (token == null || resetService.validateToken(token) == null ) {
+            req.setAttribute("errorMsg", "유효하지 않거나 만료된 링크입니다.");
+            req.getRequestDispatcher("/WEB-INF/views/user/reset_password.jsp").forward(req,resp);
+        }
+
     }
 
     // ── POST 핸들러 ───────────────────────────────────────────────────────────
@@ -119,7 +129,22 @@ public class PasswordResetController extends HttpServlet {
     private void handleForgotSubmit(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         // TODO: 구현 필요
-        throw new UnsupportedOperationException("handleForgotSubmit 미구현");
+
+        String email = req.getParameter("email");
+
+        // 이메일 추출 후  null/blank 검증
+        if(email == null || email.trim().isEmpty()){
+            req.setAttribute("errorMsg", "유효하지 않거나 만료된 링크입니다.");
+            req.getRequestDispatcher("/WEB-INF/views/user/forgot_password.jsp").forward(req,resp);
+            return;
+        }
+
+        resetService.requestReset(email);
+
+        // 성공/실패 모두 동일한 메시지
+        req.setAttribute("successMsg", "입력하신 이메일로 재설정 링크를 보냈습니다.");
+        req.getRequestDispatcher("/WEB-INF/views/user/forgot_password.jsp").forward(req,resp);
+
     }
 
     /**
@@ -139,6 +164,29 @@ public class PasswordResetController extends HttpServlet {
     private void handleResetSubmit(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         // TODO: 구현 필요
-        throw new UnsupportedOperationException("handleResetSubmit 미구현");
+
+        String token = req.getParameter("token");
+        String newPassword =  req.getParameter("newPassword");
+
+        // 입력값 검증
+        if (token == null || newPassword == null || newPassword.trim().length() <6 ){
+            req.setAttribute("errorMsg" ,"비밀번호는 6 자리 이상 입력해주세요");
+            req.setAttribute("token", token);
+            req.getRequestDispatcher("/WEB-INF/views/user/reset_password.jsp").forward(req,resp);
+            return;
+        }
+
+        // 비밀번호 재설정
+        boolean ok = resetService.resetPassword(token, newPassword.trim());
+
+        // 실패
+        if (!ok) {
+            req.setAttribute("errorMsg", "유효하지 않거나 만료된 링크입니다");
+            req.getRequestDispatcher("/WEB-INF/views/user/reset_password.jsp").forward(req,resp);
+            return;
+        }
+
+        resp.sendRedirect(req.getContextPath() + "/user/login.do");
+
     }
 }
