@@ -253,6 +253,16 @@ public class UserService {
     }
 
     /** 관리자 - 계정 강제 삭제 */
+    public void deleteUserByAdmin(int userId) {
+        // 관리자 삭제도 일반 탈퇴와 같은 soft delete로 통일한다.
+        // users를 hard delete하면 posts/comments/reports/likes의 FK 참조 때문에 실패할 수 있다.
+        UserDetailDto user = userDao.findById(userId);
+        if (user == null) {
+            return;
+        }
+        userDao.softDelete(userId);
+    }
+
     public void forceDeleteUser(int userId) {
         // TODO: userDao.hardDelete(userId)
 
