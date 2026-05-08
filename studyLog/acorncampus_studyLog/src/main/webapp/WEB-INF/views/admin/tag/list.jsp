@@ -35,19 +35,30 @@
             <button class="btn-sm" style="padding: 10px 20px; font-size: 14px;">유해 태그 관리</button>
         </div>
 
+        <c:set var="currentSort" value="${empty param.sort ? 'count' : param.sort}" />
+        <c:url var="countSortUrl" value="/admin/tag/list.do">
+            <c:param name="sort" value="count" />
+            <c:param name="keyword" value="${param.keyword}" />
+        </c:url>
+        <c:url var="latestSortUrl" value="/admin/tag/list.do">
+            <c:param name="sort" value="latest" />
+            <c:param name="keyword" value="${param.keyword}" />
+        </c:url>
+        <c:url var="nameSortUrl" value="/admin/tag/list.do">
+            <c:param name="sort" value="name" />
+            <c:param name="keyword" value="${param.keyword}" />
+        </c:url>
+
         <div class="controls-bar">
             <div class="tag-tabs">
-                <div class="tag-tab active">사용빈도순</div>
-                <div class="tag-tab">최신 등록</div>
-                <div class="tag-tab">이름순</div>
+                <a class="tag-tab ${currentSort eq 'count' ? 'active' : ''}" href="${countSortUrl}">사용빈도순</a>
+                <a class="tag-tab ${currentSort eq 'latest' ? 'active' : ''}" href="${latestSortUrl}">최신 등록</a>
+                <a class="tag-tab ${currentSort eq 'name' ? 'active' : ''}" href="${nameSortUrl}">이름순</a>
             </div>
             <form action="${pageContext.request.contextPath}/admin/tag/list.do" method="get" style="display:flex; gap:10px;">
+                <input type="hidden" name="sort" value="${currentSort}">
                 <input type="text" name="keyword" class="admin-input" placeholder="검색" value="<c:out value='${param.keyword}'/>">
-                <select class="admin-select" name="sort">
-                    <option value="count">사용빈도</option>
-                    <option value="latest">최신순</option>
-                    <option value="name">이름순</option>
-                </select>
+                <button class="btn-sm" type="submit">검색</button>
             </form>
         </div>
 
