@@ -94,6 +94,21 @@ public class PostService {
     }
 
     /**
+     * 특정 사용자의 공개 게시글 목록 (타인 프로필 페이지 — 비공개 제외)
+     * @param pageNo 현재 페이지 (1-based)
+     */
+    public List<PostDto> getPublicPostsByUser(int userId, int pageNo) {
+        int total = postDao.countPublicByUserId(userId);
+        PageDto page = new PageDto(pageNo, PAGE_SIZE, total);
+        return postDao.findPublicByUserId(userId, page.getOffset(), PAGE_SIZE);
+    }
+
+    /** 타인 프로필 페이지 정보 반환 */
+    public PageDto getPublicPostPageByUser(int userId, int pageNo) {
+        return new PageDto(pageNo, PAGE_SIZE, postDao.countPublicByUserId(userId));
+    }
+
+    /**
      * 태그별 공개 게시글 목록 조회
      * @param tagName 태그명 (예: "Java")
      * @param pageNo 현재 페이지 (1-based)
