@@ -316,9 +316,11 @@ public class AdminController extends HttpServlet {
     private void handleReportList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         String status = normalizeReportStatus(req.getParameter("status"));
+        String keyword = req.getParameter("keyword");
         int pageNo = parseInt(req.getParameter("page"), 1);
-        req.setAttribute("reportList", reportService.getReportList(status, pageNo));
-        req.setAttribute("page", reportService.getReportPage(status, pageNo));
+        // 신고 관리 검색창의 keyword를 실제 목록/페이지 조회 조건으로 전달한다.
+        req.setAttribute("reportList", reportService.getReportList(status, keyword, pageNo));
+        req.setAttribute("page", reportService.getReportPage(status, keyword, pageNo));
         req.getRequestDispatcher("/WEB-INF/views/admin/report/list.jsp").forward(req, resp);
     }
 
@@ -370,7 +372,10 @@ public class AdminController extends HttpServlet {
      */
     private void handleTagList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        req.setAttribute("tagList", tagService.getAllTagsForAdmin());
+        String keyword = req.getParameter("keyword");
+        String sort = normalizeTagSort(req.getParameter("sort"));
+        // 태그 관리 검색/정렬 UI를 실제 태그 조회 조건으로 전달한다.
+        req.setAttribute("tagList", tagService.getAllTagsForAdmin(keyword, sort));
         req.getRequestDispatcher("/WEB-INF/views/admin/tag/list.jsp").forward(req, resp);
     }
 
@@ -431,6 +436,13 @@ public class AdminController extends HttpServlet {
             return status;
         }
         return null;
+    }
+
+    private String normalizeTagSort(String sort) {
+        if ("latest".equals(sort) || "name".equals(sort)) {
+            return sort;
+        }
+        return "count";
     }
 
     private int toPercent(int count, int total) {
