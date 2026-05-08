@@ -16,6 +16,18 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
+    <!-- 잔디(기여도 그래프) 데이터 주입: 모든 요청에 적용
+         - 로그인 유저에게만 DB 조회 수행 (비로그인/정적 리소스는 필터 내부에서 즉시 통과)
+         - EncodingFilter 다음, LoginCheckFilter 전에 위치해야 함 -->
+    <filter>
+        <filter-name>JandiFilter</filter-name>
+        <filter-class>com.acorncampus_studylog.filter.JandiFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>JandiFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
     <!-- 로그인/권한 체크: /l_check/* (로그인 필수) + /admin/* (ADMIN 역할 필수) -->
     <filter>
         <filter-name>LoginCheckFilter</filter-name>

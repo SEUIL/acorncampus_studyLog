@@ -11,7 +11,7 @@
 --%>
 <script src="${pageContext.request.contextPath}/resources/js/page-transition.js"></script>
 <script src="${pageContext.request.contextPath}/resources/js/background-effect.js"></script>
-<script defer src="${pageContext.request.contextPath}/resources/js/interactions.js"></script>
+<script defer src="${pageContext.request.contextPath}/resources/js/interactions.js?v=3"></script>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/button.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/jandi.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/common/sidebar.css">
@@ -35,12 +35,20 @@
         <span class="sidebar-text">스터디로그</span>
     </a>
     <div class="grass-section">
-        <span class="grass-title">Yearly Contributions</span>
+        <span class="grass-title">Contributions (12w)</span>
         <div class="grass-grid">
-            <%-- TODO: 실제 기여도 데이터로 동적 렌더링 --%>
-            <div class="grass-node level-4"></div><div class="grass-node level-2"></div><div class="grass-node"></div><div class="grass-node level-1"></div><div class="grass-node level-3"></div><div class="grass-node"></div><div class="grass-node level-2"></div>
-            <div class="grass-node level-1"></div><div class="grass-node level-4"></div><div class="grass-node"></div><div class="grass-node level-2"></div><div class="grass-node level-3"></div><div class="grass-node level-1"></div><div class="grass-node"></div>
-            <div class="grass-node level-4"></div><div class="grass-node level-2"></div><div class="grass-node"></div><div class="grass-node level-1"></div><div class="grass-node level-3"></div><div class="grass-node"></div><div class="grass-node level-2"></div>
+            <%--
+                JandiFilter가 request에 주입한 jandiLevels (List<Integer>, 168개)를 순회.
+                인덱스 0 = 167일 전(가장 오래된 날), 인덱스 167 = 오늘.
+                grid-auto-flow: column 방향으로 렌더링되어 7행 × 24열(주) 구조가 됨.
+                레벨 0: 활동 없음(기본 회색) / 1~4: 활동량 증가에 따라 진한 색상.
+                비로그인이거나 jandiLevels가 없으면 이 블록은 출력되지 않음.
+            --%>
+            <c:if test="${not empty jandiLevels}">
+                <c:forEach items="${jandiLevels}" var="lvl">
+                    <div class="grass-node<c:if test="${lvl > 0}"> level-${lvl}</c:if>"></div>
+                </c:forEach>
+            </c:if>
         </div>
     </div>
     <div class="profile-section" title="프로필 수정"

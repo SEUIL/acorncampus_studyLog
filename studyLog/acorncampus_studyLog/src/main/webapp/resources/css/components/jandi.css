@@ -4,14 +4,16 @@
    사용: 사이드바 (sideBar.jsp)
    ========================================================================== */
 
-/* 1. 잔디 레벨 색상 — Light 테마 */
-.level-1 { background-color: rgba(96, 125, 139, 0.3); }
-.level-2 { background-color: rgba(96, 125, 139, 0.6); }
-.level-3 { background-color: rgba(96, 125, 139, 0.8); }
-.level-4 { background-color: var(--accent-color); }
+/* 1. 잔디 레벨 색상 — Light 테마
+   .grass-node.level-X 이중 클래스로 특이도를 높여
+   sidebar.css의 .grass-node 기본 배경색이 덮어쓰지 못하게 함 */
+.grass-node.level-1 { background-color: rgba(96, 125, 139, 0.3); }
+.grass-node.level-2 { background-color: rgba(96, 125, 139, 0.6); }
+.grass-node.level-3 { background-color: rgba(96, 125, 139, 0.8); }
+.grass-node.level-4 { background-color: var(--accent-color); }
 
 /* 2. 잔디 레벨 색상 — Dark 테마 */
-.dark-theme .level-1 { background-color: #0e4429; }
-.dark-theme .level-2 { background-color: #006d32; }
-.dark-theme .level-3 { background-color: #26a641; }
-.dark-theme .level-4 { background-color: #39d353; }
+.dark-theme .grass-node.level-1 { background-color: #0e4429; }
+.dark-theme .grass-node.level-2 { background-color: #006d32; }
+.dark-theme .grass-node.level-3 { background-color: #26a641; }
+.dark-theme .grass-node.level-4 { background-color: #39d353; }
