@@ -74,6 +74,14 @@ public class ReportService {
         return reportDao.findAll(status, offset, limit);
     }
 
+    public List<ReportDto> getReportList(String status, String keyword, int pageNo) {
+        int limit = 10;
+        int offset = (pageNo - 1) * limit;
+
+        // 신고 관리 검색어를 목록 조회와 같은 페이징 기준에 반영한다.
+        return reportDao.findAll(status, keyword, offset, limit);
+    }
+
     /** 관리자 - 신고 목록 페이지 정보 */
     public PageDto getReportPage(String status, int pageNo) {
         int limit = 10;
@@ -82,6 +90,11 @@ public class ReportService {
         int totalCount = reportDao.countAll(status);
 
         return new PageDto(pageNo, limit, totalCount);
+    }
+
+    public PageDto getReportPage(String status, String keyword, int pageNo) {
+        int limit = 10;
+        return new PageDto(pageNo, limit, reportDao.countAll(status, keyword));
     }
 
     /**
