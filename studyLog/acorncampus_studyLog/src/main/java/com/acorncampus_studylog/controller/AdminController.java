@@ -252,7 +252,9 @@ public class AdminController extends HttpServlet {
      */
     private void handlePostDelete(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        writeActionJson(resp, () -> postService.forceDeletePost(parseInt(req.getParameter("postId"), 0)),
+        // 관리자 게시글 삭제도 soft delete로 통일한다.
+        // posts에 연결된 댓글/좋아요/신고 FK 때문에 hard delete는 운영 중 실패할 수 있다.
+        writeActionJson(resp, () -> postService.deletePost(parseInt(req.getParameter("postId"), 0)),
                 "게시글 삭제 완료");
     }
 
