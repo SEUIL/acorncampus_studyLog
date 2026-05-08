@@ -5,7 +5,9 @@ import com.acorncampus_studylog.util.DBUtil;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /** users 테이블 CRUD — 모든 쿼리는 PreparedStatement 사용 */
 public class UserDao {
@@ -156,6 +158,63 @@ public class UserDao {
     // ── 삽입 ────────────────────────────────────────────────────────────────
 
     /** 회원가입 — 생성된 user_id 반환 */
+    /** Admin dashboard - count users registered today. */
+    public int countTodayCreated() {
+        String sql = "SELECT COUNT(*) FROM users " +
+                     "WHERE deleted_at IS NULL AND TRUNC(created_at) = TRUNC(SYSTIMESTAMP)";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            conn = DBUtil.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            rs = pstmt.executeQuery();
+            return rs.next() ? rs.getInt(1) : 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("UserDao.countTodayCreated failed", e);
+        } finally {
+            DBUtil.close(conn, pstmt, rs);
+        }
+    }
+
+    /** Admin dashboard - daily registered user counts for the last 7 days. */
+    public List<Map<String, Object>> countDailyCreatedLast7Days() {
+        String sql =
+                "SELECT TO_CHAR(d.stat_date, 'MM/DD') AS label, NVL(u.user_count, 0) AS user_count " +
+                "FROM ( " +
+                "    SELECT TRUNC(CAST(SYSTIMESTAMP AS DATE)) - 7 + LEVEL AS stat_date " +
+                "    FROM dual CONNECT BY LEVEL <= 7 " +
+                ") d " +
+                "LEFT JOIN ( " +
+                "    SELECT TRUNC(CAST(created_at AS DATE)) AS stat_date, COUNT(*) AS user_count " +
+                "    FROM users " +
+                "    WHERE deleted_at IS NULL " +
+                "      AND created_at >= TRUNC(CAST(SYSTIMESTAMP AS DATE)) - 6 " +
+                "    GROUP BY TRUNC(CAST(created_at AS DATE)) " +
+                ") u ON u.stat_date = d.stat_date " +
+                "ORDER BY d.stat_date";
+        List<Map<String, Object>> list = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            conn = DBUtil.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            rs = pstmt.executeQuery();
+            while (rs.next()) {
+                Map<String, Object> item = new LinkedHashMap<>();
+                item.put("label", rs.getString("label"));
+                item.put("count", rs.getInt("user_count"));
+                list.add(item);
+            }
+            return list;
+        } catch (SQLException e) {
+            throw new RuntimeException("UserDao.countDailyCreatedLast7Days failed", e);
+        } finally {
+            DBUtil.close(conn, pstmt, rs);
+        }
+    }
+
     public int insert(String email, String nickname, String hashedPassword) {
         Connection conn = null;
         PreparedStatement pstmt = null;

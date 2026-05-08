@@ -6,6 +6,7 @@ import com.acorncampus_studylog.dto.UserDetailDto;
 import com.acorncampus_studylog.util.BCryptUtil;
 
 import java.util.List;
+import java.util.Map;
 
 /** 회원 관련 비즈니스 로직 (로그인, 가입, 프로필, 탈퇴) */
 public class UserService {
@@ -219,6 +220,25 @@ public class UserService {
     }
 
     /** 관리자 - 계정 정지 */
+    /** Admin dashboard - today registered user count. */
+    public int getTodayUserCount() {
+        return userDao.countTodayCreated();
+    }
+
+    /** Admin dashboard - daily registered user counts for the last 7 days. */
+    public List<Map<String, Object>> getRecentUserStats() {
+        List<Map<String, Object>> stats = userDao.countDailyCreatedLast7Days();
+        int maxCount = 1;
+        for (Map<String, Object> item : stats) {
+            maxCount = Math.max(maxCount, ((Number) item.get("count")).intValue());
+        }
+        for (Map<String, Object> item : stats) {
+            int count = ((Number) item.get("count")).intValue();
+            item.put("percent", count == 0 ? 0 : Math.max(8, Math.round(count * 100f / maxCount)));
+        }
+        return stats;
+    }
+
     public void banUser(int userId) {
         // TODO: userDao.ban(userId)
 
