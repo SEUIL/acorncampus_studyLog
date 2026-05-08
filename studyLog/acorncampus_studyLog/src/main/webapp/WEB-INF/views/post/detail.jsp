@@ -88,10 +88,10 @@
             <div class="post-actions-bottom" style="text-align: center; margin-top: 40px; margin-bottom: 40px;">
                             <c:choose>
                                 <c:when test="${not empty loginUser}">
-                                    <button type="button" class="btn btn-outline ${myLike eq 'L' ? 'active' : ''}" onclick="togglePostLike(${post.postId}, 'L')">
+                                    <button type="button" class="btn btn-outline ${myLike eq 'L' ? 'active' : ''}" onclick="togglePostLike(this, ${post.postId}, 'L')">
                                         <i class="fa-solid fa-thumbs-up"></i> 추천 <span id="like-count">${post.likeCount}</span>
                                     </button>
-                                    <button type="button" class="btn btn-outline ${myLike eq 'D' ? 'active-dislike' : ''}" onclick="togglePostLike(${post.postId}, 'D')" style="margin-left: 10px;">
+                                    <button type="button" class="btn btn-outline ${myLike eq 'D' ? 'active-dislike' : ''}" onclick="togglePostLike(this, ${post.postId}, 'D')" style="margin-left: 10px;">
                                         <i class="fa-solid fa-thumbs-down"></i> 비추천 <span id="dislike-count">${post.dislikeCount}</span>
                                     </button>
                                 </c:when>
@@ -192,8 +192,8 @@
         document.getElementById('reportModal').style.display = show ? 'flex' : 'none';
     }
 
-    // 2. 게시글 좋아요/싫어요 토글 AJAX (복구 완료!)
-    function togglePostLike(postId, likeType) {
+    // 2. 게시글 좋아요/싫어요 토글 AJAX
+    function togglePostLike(btn, postId, likeType) {
         const params = new URLSearchParams();
         params.append('postId', postId);
         params.append('likeType', likeType);
@@ -206,8 +206,20 @@
         .then(response => response.json())
         .then(data => {
             if (data.status === 'ok') {
-                // 색상 활성화 상태도 함께 갱신하기 위해 페이지 새로고침
-                window.location.reload();
+                // 이모지 버스트 애니메이션
+                if (typeof window.spawnLikeReaction === 'function') {
+                    window.spawnLikeReaction(btn, likeType);
+                }
+                // 카운트 숫자 갱신
+                document.getElementById('like-count').textContent    = data.likeCount;
+                document.getElementById('dislike-count').textContent = data.dislikeCount;
+                // 버튼 활성 상태 갱신 (새로고침 없이)
+                const likeBtn    = document.querySelector('.btn-outline:first-of-type');
+                const dislikeBtn = document.querySelector('.btn-outline:last-of-type');
+                if (likeBtn && dislikeBtn) {
+                    likeBtn.classList.toggle('active',         data.myLike === 'L');
+                    dislikeBtn.classList.toggle('active-dislike', data.myLike === 'D');
+                }
             } else {
                 alert('오류 발생: ' + data.message);
             }

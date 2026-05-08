@@ -4,7 +4,16 @@
 .brand-logo { font-size: 22px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 10px; cursor: pointer; text-decoration: none; }
 .grass-section { padding-bottom: 20px; border-bottom: 1px solid var(--border-color); }
 .grass-title { font-size: 12px; font-weight: 700; color: var(--text-sub); margin-bottom: 10px; display: block; }
-.grass-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.grass-grid {
+    display: grid;
+    /* 12열을 1fr씩 균등 분할 → 사이드바 폭에 맞춰 자동으로 꽉 채움
+       grid-auto-flow: column → 셀이 위→아래(요일) 방향으로 먼저 채워지고
+       다 차면 다음 열(다음 주)로 이동 — GitHub 잔디와 동일한 방향 */
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(7, auto);  /* auto → 셀의 aspect-ratio에 맞춰 행 높이 자동 결정 */
+    grid-auto-flow: column;
+    gap: 3px;
+}
 .grass-node { aspect-ratio: 1; border-radius: 2px; background-color: var(--tag-bg); }
 .profile-section { text-align: center; }
 .profile-avatar { width: 80px; height: 80px; background-color: var(--accent-color); color: var(--accent-contrast); border-radius: 50%; margin: 0 auto 15px; display: flex; justify-content: center; align-items: center; font-size: 32px; overflow: hidden; }
