@@ -11,7 +11,7 @@
 .error-banner { background-color: rgba(239,83,80,0.1); border: 1px solid #ef5350; color: #ef5350; padding: 10px 16px; border-radius: var(--radius-sm); font-size: 14px; margin-bottom: 12px; }
 
 /* 3. 글쓰기 컨테이너 */
-.write-container { flex: 1; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); display: flex; flex-direction: column; overflow: hidden; }
+.write-container { flex: 1; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--shadow-sm); }
 
 /* 4. 제목 영역 */
 .title-area { padding: 20px 30px; border-bottom: 1px solid var(--border-color); }

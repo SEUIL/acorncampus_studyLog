@@ -24,21 +24,23 @@
 .tag {
     font-size: 11px;
     font-weight: 700;
-    padding: 4px 8px;
-    border-radius: 4px;
+    padding: 4px 10px;
+    border-radius: 999px;
     background-color: var(--tag-bg);
     border: 1px solid var(--tag-border);
     color: var(--accent-color);
     display: inline-block;
+    letter-spacing: 0.03em;
 }
 
 /* 3. 빈 상태 메시지 */
 .empty-state {
     color: var(--text-sub);
     font-size: 14px;
-    padding: 24px;
+    padding: 48px 24px;
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     text-align: center;
+    box-shadow: var(--shadow-sm);
 }

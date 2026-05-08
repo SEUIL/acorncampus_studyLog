@@ -15,7 +15,7 @@
 .btn-report:hover { background-color: rgba(239, 83, 80, 0.1); color: #ef5350; }
 
 /* 3. 게시글 본문 컨테이너 */
-.post-container { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 40px; margin-bottom: 30px; }
+.post-container { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 40px; margin-bottom: 30px; box-shadow: var(--shadow-sm); }
 
 /* 4. 게시글 헤더 */
 .post-header { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color); }
@@ -35,7 +35,7 @@
 .post-body pre { background-color: var(--list-hover); padding: 15px; border-radius: 6px; overflow-x: auto; font-family: monospace; font-size: 14px; border: 1px solid var(--border-color); }
 
 /* 7. 댓글 섹션 */
-.comments-section { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 30px; }
+.comments-section { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 30px; box-shadow: var(--shadow-sm); }
 .comments-header { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: var(--text-main); }
 .comment-input-box { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
 .comment-input { width: 100%; min-height: 80px; padding: 15px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background-color: var(--input-bg); color: var(--text-main); font-family: inherit; resize: vertical; }

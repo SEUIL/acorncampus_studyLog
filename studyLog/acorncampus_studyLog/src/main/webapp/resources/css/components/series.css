@@ -22,10 +22,11 @@
     flex-direction: column;
     justify-content: space-between;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
     text-decoration: none;
+    box-shadow: var(--shadow-sm);
 }
-.series-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-sm); border-color: var(--accent-color); }
+.series-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); border-color: var(--accent-color); }
 
 /* 3. 카드 내부 — 정보 영역 */
 .series-info h3 { font-size: 16px; margin: 0 0 8px 0; color: var(--text-main); line-height: 1.4; }
