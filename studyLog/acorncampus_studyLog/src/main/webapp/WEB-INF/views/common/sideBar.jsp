@@ -10,6 +10,8 @@
   의존 세션: loginUser (UserDto)
 --%>
 <script src="${pageContext.request.contextPath}/resources/js/page-transition.js"></script>
+<script src="${pageContext.request.contextPath}/resources/js/background-effect.js"></script>
+<script defer src="${pageContext.request.contextPath}/resources/js/interactions.js"></script>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/button.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/jandi.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/common/sidebar.css">
@@ -109,17 +111,39 @@
 
 <script>
 // 🟢 3. 테마 토글 함수 정의
+let _themeTransitioning = false;
+
 function toggleTheme() {
-    const isDark = document.body.classList.toggle('dark-theme');
+    if (_themeTransitioning) return;   /* 전환 중 중복 클릭 차단 */
+
+    _themeTransitioning = true;
+
+    const btn       = document.querySelector('.logout-btn .btn-outline');
     const themeIcon = document.getElementById('themeToggleIcon');
 
-    // 로컬 스토리지에 현재 상태 저장
+    /* 버튼 시각적 비활성화 */
+    if (btn) {
+        btn.style.opacity      = '0.4';
+        btn.style.pointerEvents = 'none';
+        btn.style.cursor        = 'not-allowed';
+    }
+
+    const isDark = document.body.classList.toggle('dark-theme');
     localStorage.setItem('studyLogTheme', isDark ? 'dark' : 'light');
 
-    // 아이콘 변경
     if (themeIcon) {
         themeIcon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
     }
+
+    /* 전환 애니메이션 총 시간(~2.3s) 후 버튼 복구 */
+    setTimeout(function () {
+        if (btn) {
+            btn.style.opacity       = '';
+            btn.style.pointerEvents = '';
+            btn.style.cursor        = '';
+        }
+        _themeTransitioning = false;
+    }, 2400);
 }
 
 // 초기 로딩 시 아이콘 모양 맞추기 (DOM이 다 그려진 후 실행)

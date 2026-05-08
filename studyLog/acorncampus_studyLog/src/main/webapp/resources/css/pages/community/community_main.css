@@ -12,21 +12,21 @@
 
 /* 3. 인기글 카드 그리드 */
 .popular-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-.popular-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; display: flex; flex-direction: column; justify-content: space-between; min-height: 140px; text-decoration: none; }
-.popular-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-sm); border-color: var(--accent-color); }
+.popular-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; cursor: pointer; transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease; display: flex; flex-direction: column; justify-content: space-between; min-height: 140px; text-decoration: none; box-shadow: var(--shadow-sm); }
+.popular-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); border-color: var(--accent-color); }
 .popular-card h3 { font-size: 15px; margin: 0 0 10px 0; color: var(--text-main); line-height: 1.4; }
 .popular-meta { font-size: 12px; color: var(--text-sub); display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: auto; }
 .popular-meta .stats { display: flex; gap: 10px; }
 
 /* 4. 검색 패널 */
-.search-panel { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+.search-panel { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; display: flex; flex-direction: column; gap: 15px; box-shadow: var(--shadow-sm); }
 .search-input-wrapper { position: relative; display: flex; align-items: center; }
 .search-input-wrapper i { position: absolute; left: 12px; color: var(--text-sub); font-size: 14px; }
 .search-input-wrapper input { width: 100%; padding: 10px 12px 10px 35px; background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-family: inherit; font-size: 13px; transition: var(--transition-base); }
 .search-input-wrapper input:focus { outline: none; border-color: var(--accent-color); }
 
 /* 5. 피드 */
-.community-feed { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; }
+.community-feed { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); }
 .feed-header { padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background-color: rgba(0,0,0,0.02); }
 .dark-theme .feed-header { background-color: rgba(255,255,255,0.02); }
 .feed-header h3 { margin: 0; font-size: 16px; color: var(--text-main); }
