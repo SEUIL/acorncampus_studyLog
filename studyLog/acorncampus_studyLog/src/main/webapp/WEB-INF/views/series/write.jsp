@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/typography.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/layout.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/button.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/ui.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/post/post_write.css">
 </head>
 <body>
