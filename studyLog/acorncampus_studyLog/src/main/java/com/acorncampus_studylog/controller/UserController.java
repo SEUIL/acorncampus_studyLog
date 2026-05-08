@@ -123,7 +123,7 @@ public class UserController extends HttpServlet {
             return;
         }
 
-        req.getRequestDispatcher("/WEB-INF/views/user/password.jsp").forward(req, resp);
+        req.getRequestDispatcher("/WEB-INF/views/user/forgot_password.jsp").forward(req, resp);
     }
 
     private void handleLogin(HttpServletRequest req, HttpServletResponse resp)
@@ -223,7 +223,7 @@ public class UserController extends HttpServlet {
         // 실패
         if (!ok){
             req.setAttribute("errorMsg", "현재 비밀번호가 일치하지 않습니다");
-            req.getRequestDispatcher("/WEB-INF/views/user/password.jsp").forward(req, resp);
+            req.getRequestDispatcher("/WEB-INF/views/user/forgot_password.jsp").forward(req, resp);
 
             return;
         }
