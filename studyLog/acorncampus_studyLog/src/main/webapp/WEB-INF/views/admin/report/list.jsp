@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/button.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/form.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/table.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/admin/admin_report_list.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/admin/admin_report_list.css?v=modal-20260508">
 </head>
 <body>
 <div class="dashboard-wrapper">
@@ -23,6 +23,7 @@
             <li onclick="location.href='${pageContext.request.contextPath}/admin/main.do'"><i class="fa-solid fa-chart-pie"></i> 대시보드 메인</li>
             <li onclick="location.href='${pageContext.request.contextPath}/admin/user/list.do'"><i class="fa-solid fa-users"></i> 회원 관리</li>
             <li onclick="location.href='${pageContext.request.contextPath}/admin/post/list.do'"><i class="fa-solid fa-file-lines"></i> 게시글 관리</li>
+            <li onclick="location.href='${pageContext.request.contextPath}/admin/comment/list.do'"><i class="fa-solid fa-comments"></i> 댓글 관리</li>
             <li class="active" onclick="location.href='${pageContext.request.contextPath}/admin/report/list.do'"><i class="fa-solid fa-triangle-exclamation"></i> 신고 관리</li>
             <li onclick="location.href='${pageContext.request.contextPath}/admin/tag/list.do'"><i class="fa-solid fa-tags"></i> 태그 관리</li>
         </ul>
@@ -65,6 +66,7 @@
                                 <td class="reason-box"><c:out value="${report.reason}"/></td>
                                 <td>
                                     <div class="action-group">
+                                        <button type="button" class="btn-sm detail-open-btn" data-modal-target="reportDetailModal-${report.reportId}">상세보기</button>
                                         <form action="${pageContext.request.contextPath}/admin/report/resolve.do" method="post" data-ajax-form="true">
                                             <input type="hidden" name="reportId" value="${report.reportId}">
                                             <button type="submit" class="btn-sm btn-danger">승인</button>
@@ -73,6 +75,51 @@
                                             <input type="hidden" name="reportId" value="${report.reportId}">
                                             <button type="submit" class="btn-sm">기각</button>
                                         </form>
+                                    </div>
+                                    <div class="admin-detail-modal" id="reportDetailModal-${report.reportId}" aria-hidden="true" hidden>
+                                        <div class="admin-detail-backdrop" data-modal-close></div>
+                                        <div class="admin-detail-panel" role="dialog" aria-modal="true" aria-labelledby="reportDetailTitle-${report.reportId}">
+                                            <div class="admin-detail-header">
+                                                <h2 id="reportDetailTitle-${report.reportId}">신고 상세보기</h2>
+                                                <button type="button" class="admin-detail-close" data-modal-close aria-label="닫기">
+                                                    <i class="fa-solid fa-xmark"></i>
+                                                </button>
+                                            </div>
+                                            <dl class="admin-detail-list">
+                                                <div>
+                                                    <dt>신고ID</dt>
+                                                    <dd><c:out value="${report.reportId}"/></dd>
+                                                </div>
+                                                <div>
+                                                    <dt>신고유형</dt>
+                                                    <dd><c:out value="${report.targetType}"/></dd>
+                                                </div>
+                                                <div>
+                                                    <dt>대상ID</dt>
+                                                    <dd><c:out value="${report.targetId}"/></dd>
+                                                </div>
+                                                <div>
+                                                    <dt>신고자</dt>
+                                                    <dd><c:out value="${report.reporterName}"/></dd>
+                                                </div>
+                                                <div>
+                                                    <dt>상태</dt>
+                                                    <dd><c:out value="${report.status}"/></dd>
+                                                </div>
+                                                <div>
+                                                    <dt>신고일</dt>
+                                                    <dd><c:out value="${report.createdAt}"/></dd>
+                                                </div>
+                                                <div class="detail-wide">
+                                                    <dt>대상 요약</dt>
+                                                    <dd><c:out value="${empty report.targetSummary ? '-' : report.targetSummary}"/></dd>
+                                                </div>
+                                                <div class="detail-wide">
+                                                    <dt>신고 사유</dt>
+                                                    <dd><c:out value="${empty report.reason ? '-' : report.reason}"/></dd>
+                                                </div>
+                                            </dl>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
@@ -115,6 +162,28 @@
                     console.error('Error:', error);
                     alert('서버 통신 중 오류가 발생했습니다.');
                 });
+            });
+        });
+
+        document.querySelectorAll('.detail-open-btn').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const modal = document.getElementById(button.dataset.modalTarget);
+                if (modal) {
+                    modal.hidden = false;
+                    modal.classList.add('is-open');
+                    modal.setAttribute('aria-hidden', 'false');
+                }
+            });
+        });
+
+        document.querySelectorAll('[data-modal-close]').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const modal = button.closest('.admin-detail-modal');
+                if (modal) {
+                    modal.classList.remove('is-open');
+                    modal.setAttribute('aria-hidden', 'true');
+                    modal.hidden = true;
+                }
             });
         });
     });

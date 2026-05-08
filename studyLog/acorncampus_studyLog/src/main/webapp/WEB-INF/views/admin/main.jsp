@@ -21,6 +21,7 @@
             <li class="active" onclick="location.href='${pageContext.request.contextPath}/admin/main.do'"><i class="fa-solid fa-chart-pie"></i> 대시보드 메인</li>
             <li onclick="location.href='${pageContext.request.contextPath}/admin/user/list.do'"><i class="fa-solid fa-users"></i> 회원 관리</li>
             <li onclick="location.href='${pageContext.request.contextPath}/admin/post/list.do'"><i class="fa-solid fa-file-lines"></i> 게시글 관리</li>
+            <li onclick="location.href='${pageContext.request.contextPath}/admin/comment/list.do'"><i class="fa-solid fa-comments"></i> 댓글 관리</li>
             <li onclick="location.href='${pageContext.request.contextPath}/admin/report/list.do'"><i class="fa-solid fa-triangle-exclamation"></i> 신고 관리</li>
             <li onclick="location.href='${pageContext.request.contextPath}/admin/tag/list.do'"><i class="fa-solid fa-tags"></i> 태그 관리</li>
         </ul>
@@ -78,6 +79,7 @@
             <div class="menu-grid">
                 <a class="menu-card" href="${pageContext.request.contextPath}/admin/user/list.do">회원 관리</a>
                 <a class="menu-card" href="${pageContext.request.contextPath}/admin/post/list.do">게시글 관리</a>
+                <a class="menu-card" href="${pageContext.request.contextPath}/admin/comment/list.do">댓글 관리</a>
                 <a class="menu-card" href="${pageContext.request.contextPath}/admin/report/list.do">신고 관리</a>
                 <a class="menu-card" href="${pageContext.request.contextPath}/admin/tag/list.do">태그 관리</a>
             </div>
