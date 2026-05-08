@@ -430,6 +430,19 @@ public class PostDao {
     }
 
     /** 관리자 - 게시글 하드 삭제 */
+    /** 트랜잭션 안에서 같은 Connection으로 게시글을 소프트 삭제한다. */
+    public int softDelete(int postId, Connection conn) throws SQLException {
+        String sql = "UPDATE posts SET deleted_at = SYSTIMESTAMP WHERE post_id = ?";
+        PreparedStatement pstmt = null;
+        try {
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, postId);
+            return pstmt.executeUpdate();
+        } finally {
+            if (pstmt != null) pstmt.close();
+        }
+    }
+
     public void hardDelete(int postId) {
         String sql = "DELETE FROM posts WHERE post_id = ?";
         Connection conn = null;
