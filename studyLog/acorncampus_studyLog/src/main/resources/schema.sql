@@ -139,6 +139,18 @@ CREATE INDEX idx_reports_status   ON reports(status);
 CREATE INDEX idx_reports_target   ON reports(target_type, target_id);
 CREATE INDEX idx_series_user      ON series(user_id);
 
+-- ── 비밀번호 재설정 토큰 ────────────────────────────────────
+CREATE TABLE password_reset_tokens (
+    token      VARCHAR2(64)  PRIMARY KEY,             -- SecureRandom hex 64자
+    user_id    NUMBER        NOT NULL,
+    expires_at TIMESTAMP     NOT NULL,                -- 생성 시각 + 30분
+    used_yn    CHAR(1)       DEFAULT 'N' NOT NULL,    -- N: 미사용 / Y: 사용 완료
+    CONSTRAINT fk_prt_user  FOREIGN KEY (user_id) REFERENCES users(user_id),
+    CONSTRAINT chk_prt_used CHECK (used_yn IN ('Y', 'N'))
+);
+
+CREATE INDEX idx_prt_user_id ON password_reset_tokens(user_id);
+
 -- ── 확인 쿼리 ───────────────────────────────────────────────
 -- SELECT table_name FROM user_tables ORDER BY table_name;
 -- SELECT sequence_name FROM user_sequences ORDER BY sequence_name;

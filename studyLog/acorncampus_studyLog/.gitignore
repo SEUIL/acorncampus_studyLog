@@ -52,5 +52,8 @@ src/main/webapp/resources/upload/*
 ### Claude Code 전용 설정 파일 ###
 .claude/settings.local.json
 
+### 메일 설정 (SMTP 자격증명 — 절대 커밋 금지) ###
+src/main/resources/mail.properties
+
 ### 로그 ###
 *.log

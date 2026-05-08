@@ -1,5 +1,7 @@
 # 나만의 학습 기록 블로그 플랫폼
 
+> 최종 업데이트: 2026-05-08
+
 ## 기술 스택
 - Java 17 / Java EE 8 (javax.*)
 - Servlet 기반 MVC2 패턴
@@ -11,39 +13,93 @@
 ```
 com.acorncampus_studylog
 ├── controller/   # @WebServlet 서블릿 — URL 라우팅 및 View 포워딩
-├── service/      # 비즈니스 로직 (TODO 채워넣는 곳)
+├── service/      # 비즈니스 로직 (전원 구현 완료)
 ├── dao/          # DB 쿼리 (PreparedStatement, Oracle SQL 완전 구현)
 ├── dto/          # 데이터 전달 객체
 ├── filter/       # EncodingFilter, LoginCheckFilter
 └── util/         # DBUtil, BCryptUtil
 ```
 
-## 구현된 클래스 목록
+## 구현 완료 현황 (2026-05-08 기준)
 
-### Controller (11개)
-| 클래스 | URL 패턴 | 역할 |
-|--------|---------|------|
-| MainController | `/` | 메인 페이지 |
-| UserController | `/user/*` | 로그인·가입·비번변경 |
-| MypageController | `/l_check/user/*` | 마이페이지·프로필 수정 |
-| PostController | `/post/*`, `/l_check/post/*` | 게시글 CRUD + 이미지 업로드 |
-| CommentController | `/l_check/comment/*` | 댓글·대댓글 AJAX |
-| TagController | `/tag/*` | 태그 클라우드 |
-| SeriesController | `/series/*`, `/l_check/series/*` | 시리즈 CRUD |
-| SearchController | `/search.do` | 키워드 검색 |
-| LikeController | `/l_check/like/*` | 좋아요·싫어요 AJAX |
-| ReportController | `/l_check/report/*` | 신고 AJAX |
-| AdminController | `/admin/*` | 관리자 (회원·글·댓글·신고·태그) |
+### Controller (11개 — 전원 완료)
+| 클래스 | URL 패턴 | 역할 | 상태 |
+|--------|---------|------|------|
+| MainController | `/` | 메인 페이지 | ✅ |
+| UserController | `/user/*` | 로그인·가입·비번변경·탈퇴 | ✅ |
+| MypageController | `/l_check/user/*` | 마이페이지·프로필 수정(파일업로드) | ✅ |
+| PostController | `/post/*`, `/l_check/post/*` | 게시글 CRUD + 이미지 업로드 | ✅ |
+| CommentController | `/l_check/comment/*` | 댓글·대댓글 AJAX | ✅ |
+| TagController | `/tag/*` | 태그 클라우드 | ✅ |
+| SeriesController | `/series/*`, `/l_check/series/*` | 시리즈 CRUD | ✅ |
+| SearchController | `/search.do` | 키워드 검색 | ✅ |
+| LikeController | `/l_check/like/*` | 좋아요·싫어요 AJAX | ✅ |
+| ReportController | `/l_check/report/*` | 신고 AJAX | ✅ |
+| AdminController | `/admin/*` | 관리자 (회원·글·댓글·신고·태그) AJAX 리팩토링 완료 | ✅ |
 
-### Service / DAO / DTO
-- Service 7개: UserService, PostService, CommentService, TagService, SeriesService, LikeService, ReportService
+### Service (7개 — 전원 완료)
+| 클래스 | 상태 | 비고 |
+|--------|------|------|
+| UserService | ✅ | login, register, 프로필수정, 비번변경, 탈퇴, ban/unban/forceDelete |
+| PostService | ✅ | CRUD, 검색, 이미지저장, 관리자 기능 |
+| CommentService | ✅ | 트리 조립, CRUD, 관리자 기능 |
+| SeriesService | ✅ | CRUD, 입력값 검증 포함 |
+| LikeService | ✅ | 게시글/댓글 좋아요·싫어요 상태머신 |
+| ReportService | ✅ | 신고 접수(중복방지), 관리자 처리 |
+| TagService | ✅ | 태그 클라우드, 관리자 삭제 |
+
+### DAO / DTO
 - DAO 7개: UserDao, PostDao, CommentDao, TagDao, SeriesDao, LikeDao, ReportDao (Oracle SQL 완전 구현)
-- DTO 8개: UserDto(기존), UserDetailDto, PostDto, CommentDto, TagDto, SeriesDto, ReportDto, PageDto
+- DTO 8개: UserDto(세션용), UserDetailDto, PostDto, CommentDto, TagDto, SeriesDto, ReportDto, PageDto
+
+### JSP Views
+| 경로 | 상태 | 비고                                         |
+|------|------|--------------------------------------------|
+| `views/main.jsp` | ✅ | 커뮤니티 메인                                    |
+| `views/common/header.jsp` | ✅ | 네비게이션, 로그인 상태                              |
+| `views/common/sideBar.jsp` | ✅ | 사이드바 (테마 유지 포함)                            |
+| `views/user/login.jsp` | ✅ | index.jsp authMode=login                   |
+| `views/user/register.jsp` | ✅ | index.jsp authMode=register                |
+| `views/user/password.jsp` | ✅ | 비밀번호 변경                                    |
+| `views/user/mypage.jsp` | ✅ | 마이페이지                                      |
+| `views/user/update.jsp` | ✅ | 프로필 수정                                     |
+| `views/post/list.jsp` | ✅ | 게시글 목록                                     |
+| `views/post/detail.jsp` | ✅ | 게시글 상세 + 댓글                                |
+| `views/post/write.jsp` | ✅ | 작성/수정 통합 폼                                 |
+| `views/series/list.jsp` | ✅ | 시리즈 목록                                     |
+| `views/series/detail.jsp` | ✅ | 시리즈 상세                                     |
+| `views/series/write.jsp` | ✅ | 시리즈 작성/수정 통합                               |
+| `views/search/result.jsp` | ✅ | 검색 결과                                      |
+| `views/admin/main.jsp` | ✅ | 관리자 대시보드                                   |
+| `views/admin/user/list.jsp` | ✅ | 회원 관리                                      |
+| `views/admin/post/list.jsp` | ✅ | 게시글 관리                                     |
+| `views/admin/report/list.jsp` | ✅ | 신고 관리                                      |
+| `views/admin/tag/list.jsp` | ✅ | 태그 관리                                      |
+| `views/admin/comment/list.jsp` | ❌ | **누락** — AdminController가 참조하나 파일 없음       |
+
+### CSS 아키텍처 (3계층, 리팩토링 완료)
+```
+resources/css/
+├── global_theme.css        # CSS 변수, 다크/라이트 테마
+├── style.css               # 진입점
+├── components/             # 재사용 컴포넌트
+│   ├── button.css, form.css, layout.css, typography.css
+│   ├── ui.css, table.css, tabs.css, series.css, jandi.css
+└── pages/                  # 페이지별
+    ├── admin/              # admin_main, post_list, report_list, tag_list, user_list
+    ├── auth/               # index, login, register
+    ├── common/             # sidebar
+    ├── community/          # community_main
+    ├── post/               # post_detail, post_list, post_write
+    ├── series/             # series_detail, series_list
+    ├── user/               # profile_update
+    └── workspace/          # workspace_main
+```
 
 ### 기타
 - `src/main/resources/schema.sql` — Oracle DDL (9테이블 + 6시퀀스 + 인덱스)
-- `BACKEND.md` — 팀원 온보딩 문서 (URL 흐름, 코딩 규칙, 작업 분담 가이드)
-- `src/test/java/com/acorncampus_studylog/dao/DaoIntegrationTest.java` — DAO·DTO·schema 통합 검증 테스트 (JUnit 5, 실 DB 연결, 22개 케이스)
+- `docs/분업/분업_가이드.md` — 팀원 온보딩 문서
+- `src/test/java/com/acorncampus_studylog/dao/DaoIntegrationTest.java` — DAO 통합 테스트 (JUnit 5, 실 DB, 22개 케이스)
 
 ## 테스트 실행
 ```bash
@@ -52,11 +108,17 @@ mvn test -Dtest=DaoIntegrationTest
 - 전제조건: Oracle testdb 실행 중, `blog` 계정 + schema.sql 테이블 생성 완료
 - `@AfterAll`에서 테스트 데이터 자동 하드 삭제 → 반복 실행 가능
 
-## 알려진 수정 이력
-| 파일 | 내용 |
-|------|------|
-| `PostDao.java` | `mapRow`에서 `series_id`, `updated_at` 컬럼을 try/catch 없이 읽어 `search`·`findByTag` 호출 시 "부적합한 열 이름" 오류 발생 → try/catch로 수정 완료 |
-| `pom.xml` | `maven-surefire-plugin 3.2.5` 추가 (JUnit 5 mvn test 실행에 필요) |
+## 알려진 이슈 및 수정 이력
+| 파일 | 내용 | 심각도 |
+|------|------|--------|
+| `views/admin/comment/list.jsp` | **파일 누락** — AdminController가 참조하지만 없음. GET `/admin/comment/list.do` 접근 시 500 에러 | HIGH |
+| `CommentController`, `LikeController`, `ReportController` | JSON을 Gson 대신 문자열 연결로 조립 → 에러 메시지 특수문자 포함 시 JSON 깨질 수 있음 | MEDIUM |
+| `PostController.handleDetail()` | `LikeService`를 필드가 아닌 메서드 내 지역 변수로 생성 (매 요청마다 객체 생성) | MEDIUM |
+| `UserService` | TODO 주석이 이미 구현된 코드 위에 남아있어 혼란 야기 — 정리 필요 | LOW |
+| `PostDao.java` | `mapRow`에서 `series_id`, `updated_at` 컬럼 → try/catch로 수정 완료 | 완료 |
+| `pom.xml` | `maven-surefire-plugin 3.2.5` 추가 (JUnit 5 mvn test 실행에 필요) | 완료 |
+| `AdminController` (건희) | ban/unban/강제삭제/신고처리 AJAX 방식으로 리팩토링 완료 | 완료 |
+| CSS | 단일 파일에서 3계층 아키텍처로 리팩토링 완료 | 완료 |
 
 ## 핵심 규칙
 - DB 쿼리: `PreparedStatement` 만 사용, `Statement` 금지 (SQL Injection 방지)
