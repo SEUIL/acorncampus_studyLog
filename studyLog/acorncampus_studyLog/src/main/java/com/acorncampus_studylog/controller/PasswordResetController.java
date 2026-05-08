@@ -106,8 +106,13 @@ public class PasswordResetController extends HttpServlet {
         // 유효성 확인
         if (token == null || resetService.validateToken(token) == null ) {
             req.setAttribute("errorMsg", "유효하지 않거나 만료된 링크입니다.");
-            req.getRequestDispatcher("/WEB-INF/views/user/reset_password.jsp").forward(req,resp);
+            req.getRequestDispatcher("/WEB-INF/views/user/forgot_password.jsp").forward(req,resp);
+
+            return;
         }
+
+        req.setAttribute("token", token);
+        req.getRequestDispatcher("/WEB-INF/views/user/reset_password.jsp").forward(req,resp);
 
     }
 
@@ -134,7 +139,7 @@ public class PasswordResetController extends HttpServlet {
 
         // 이메일 추출 후  null/blank 검증
         if(email == null || email.trim().isEmpty()){
-            req.setAttribute("errorMsg", "유효하지 않거나 만료된 링크입니다.");
+            req.setAttribute("errorMsg", "이메일을 입력해주세요");
             req.getRequestDispatcher("/WEB-INF/views/user/forgot_password.jsp").forward(req,resp);
             return;
         }
@@ -169,8 +174,9 @@ public class PasswordResetController extends HttpServlet {
         String newPassword =  req.getParameter("newPassword");
 
         // 입력값 검증
-        if (token == null || newPassword == null || newPassword.trim().length() <6 ){
-            req.setAttribute("errorMsg" ,"비밀번호는 6 자리 이상 입력해주세요");
+        if (token == null || token.trim().isEmpty()
+                || newPassword == null || newPassword.trim().length() < 6 ){
+            req.setAttribute("errorMsg" ,"비밀번호는 6자리 이상 입력해주세요");
             req.setAttribute("token", token);
             req.getRequestDispatcher("/WEB-INF/views/user/reset_password.jsp").forward(req,resp);
             return;
@@ -182,6 +188,8 @@ public class PasswordResetController extends HttpServlet {
         // 실패
         if (!ok) {
             req.setAttribute("errorMsg", "유효하지 않거나 만료된 링크입니다");
+            req.setAttribute("token", token);
+
             req.getRequestDispatcher("/WEB-INF/views/user/reset_password.jsp").forward(req,resp);
             return;
         }
