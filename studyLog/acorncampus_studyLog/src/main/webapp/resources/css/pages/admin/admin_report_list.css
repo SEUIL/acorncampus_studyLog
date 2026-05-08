@@ -16,3 +16,18 @@
 
 /* 4. 신고 테이블 td 상단 정렬 (긴 텍스트 대응) */
 .admin-table td { vertical-align: top; }
+
+/* 5. 상세보기 모달 */
+.admin-detail-modal { position: fixed; inset: 0; z-index: 1000; display: none; align-items: center; justify-content: center; padding: 24px; }
+.admin-detail-modal.is-open { display: flex; }
+.admin-detail-backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.45); }
+.admin-detail-panel { position: relative; width: min(620px, 100%); max-height: calc(100vh - 48px); overflow-y: auto; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: var(--shadow-md); padding: 24px; text-align: left; }
+.admin-detail-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.admin-detail-header h2 { margin: 0; font-size: 18px; color: var(--text-main); }
+.admin-detail-close { width: 34px; height: 34px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-card); color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.admin-detail-close:hover { background: var(--list-hover); }
+.admin-detail-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 0; }
+.admin-detail-list div { min-width: 0; }
+.admin-detail-list .detail-wide { grid-column: 1 / -1; }
+.admin-detail-list dt { font-size: 12px; font-weight: 700; color: var(--text-sub); margin-bottom: 6px; }
+.admin-detail-list dd { margin: 0; color: var(--text-main); font-size: 14px; line-height: 1.6; word-break: break-word; }
