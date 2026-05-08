@@ -68,6 +68,37 @@ public class PostDao {
         return queryList(sql, offset, limit);
     }
 
+    public List<PostDto> findAllForAdmin(String keyword, String status, int offset, int limit) {
+        String normalizedKeyword = normalizeKeyword(keyword);
+        StringBuilder sql = new StringBuilder()
+            .append("SELECT p.post_id, p.user_id, p.series_id, p.title, p.thumbnail_url, p.is_public, ")
+            .append("       p.view_count, p.created_at, p.updated_at, p.deleted_at, u.nickname AS author_name, ")
+            .append("       NVL((SELECT COUNT(*) FROM comments WHERE post_id = p.post_id AND deleted_at IS NULL), 0) AS comment_count ")
+            .append("FROM posts p JOIN users u ON p.user_id = u.user_id ")
+            .append("WHERE p.deleted_at IS NULL ");
+        appendAdminPostFilters(sql, normalizedKeyword, status);
+        sql.append("ORDER BY p.created_at DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+
+        List<PostDto> list = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            conn = DBUtil.getConnection();
+            pstmt = conn.prepareStatement(sql.toString());
+            int idx = bindAdminPostFilters(pstmt, normalizedKeyword, status, 1);
+            pstmt.setInt(idx++, offset);
+            pstmt.setInt(idx, limit);
+            rs = pstmt.executeQuery();
+            while (rs.next()) list.add(mapRow(rs, false));
+            return list;
+        } catch (SQLException e) {
+            throw new RuntimeException("PostDao.findAllForAdmin 검색 실패", e);
+        } finally {
+            DBUtil.close(conn, pstmt, rs);
+        }
+    }
+
     /** 특정 사용자의 게시글 목록 (마이페이지 — 비공개 포함, 페이지네이션) */
     public List<PostDto> findByUserId(int userId, int offset, int limit) {
         String sql =
@@ -168,6 +199,29 @@ public class PostDao {
     /** 전체 게시글 수 (관리자용, 비공개 포함) */
     public int countAllForAdmin() {
         return countBySql("SELECT COUNT(*) FROM posts WHERE deleted_at IS NULL");
+    }
+
+    public int countAllForAdmin(String keyword, String status) {
+        String normalizedKeyword = normalizeKeyword(keyword);
+        StringBuilder sql = new StringBuilder()
+            .append("SELECT COUNT(*) FROM posts p JOIN users u ON p.user_id = u.user_id ")
+            .append("WHERE p.deleted_at IS NULL ");
+        appendAdminPostFilters(sql, normalizedKeyword, status);
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            conn = DBUtil.getConnection();
+            pstmt = conn.prepareStatement(sql.toString());
+            bindAdminPostFilters(pstmt, normalizedKeyword, status, 1);
+            rs = pstmt.executeQuery();
+            return rs.next() ? rs.getInt(1) : 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("PostDao.countAllForAdmin 검색 실패", e);
+        } finally {
+            DBUtil.close(conn, pstmt, rs);
+        }
     }
 
     /** 특정 사용자의 게시글 수 */
@@ -390,6 +444,38 @@ public class PostDao {
      * ResultSet 한 행 → PostDto 변환
      * @param withDetail true이면 like_count, dislike_count, comment_count 포함
      */
+    private void appendAdminPostFilters(StringBuilder sql, String keyword, String status) {
+        if (keyword != null) {
+            // 게시글 관리 검색창 기준: 제목 또는 작성자 닉네임으로 검색한다.
+            sql.append("AND (LOWER(p.title) LIKE LOWER(?) OR LOWER(u.nickname) LIKE LOWER(?)) ");
+        }
+        if (status != null) {
+            sql.append("AND p.is_public = ? ");
+        }
+    }
+
+    private int bindAdminPostFilters(PreparedStatement pstmt, String keyword, String status, int startIndex)
+            throws SQLException {
+        int idx = startIndex;
+        if (keyword != null) {
+            String like = "%" + keyword + "%";
+            pstmt.setString(idx++, like);
+            pstmt.setString(idx++, like);
+        }
+        if (status != null) {
+            pstmt.setString(idx++, status);
+        }
+        return idx;
+    }
+
+    private String normalizeKeyword(String keyword) {
+        if (keyword == null) {
+            return null;
+        }
+        String trimmed = keyword.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
     private PostDto mapRow(ResultSet rs, boolean withDetail) throws SQLException {
         PostDto p = new PostDto();
         p.setPostId(rs.getInt("post_id"));
