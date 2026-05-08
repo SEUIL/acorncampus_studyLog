@@ -42,6 +42,45 @@ public class TagDao {
     }
 
     /** 태그명으로 단건 조회 */
+    public List<TagDto> findAll(String keyword, String sort) {
+        String normalizedKeyword = normalizeKeyword(keyword);
+        String orderBy = getAdminOrderBy(sort);
+        StringBuilder sql = new StringBuilder()
+            .append("SELECT t.tag_id, t.name, ")
+            .append("       NVL((SELECT COUNT(*) FROM post_tags pt ")
+            .append("            JOIN posts p ON pt.post_id = p.post_id ")
+            .append("            WHERE pt.tag_id = t.tag_id AND p.deleted_at IS NULL AND p.is_public = 'Y'), 0) AS post_count ")
+            .append("FROM tags t WHERE 1=1 ");
+        if (normalizedKeyword != null) {
+            // 태그 관리 검색은 태그명을 기준으로 처리한다.
+            sql.append("AND LOWER(t.name) LIKE LOWER(?) ");
+        }
+        sql.append(orderBy);
+
+        List<TagDto> list = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            conn = DBUtil.getConnection();
+            pstmt = conn.prepareStatement(sql.toString());
+            if (normalizedKeyword != null) {
+                pstmt.setString(1, "%" + normalizedKeyword + "%");
+            }
+            rs = pstmt.executeQuery();
+            while (rs.next()) {
+                TagDto t = new TagDto(rs.getInt("tag_id"), rs.getString("name"));
+                t.setPostCount(rs.getInt("post_count"));
+                list.add(t);
+            }
+            return list;
+        } catch (SQLException e) {
+            throw new RuntimeException("TagDao.findAll 검색 실패", e);
+        } finally {
+            DBUtil.close(conn, pstmt, rs);
+        }
+    }
+
     public TagDto findByName(String name) {
         String sql = "SELECT tag_id, name FROM tags WHERE name = ?";
         Connection conn = null;
@@ -199,5 +238,23 @@ public class TagDao {
         } finally {
             DBUtil.close(conn, pstmt, null);
         }
+    }
+
+    private String getAdminOrderBy(String sort) {
+        if ("latest".equals(sort)) {
+            return "ORDER BY t.tag_id DESC";
+        }
+        if ("name".equals(sort)) {
+            return "ORDER BY t.name ASC";
+        }
+        return "ORDER BY post_count DESC, t.name ASC";
+    }
+
+    private String normalizeKeyword(String keyword) {
+        if (keyword == null) {
+            return null;
+        }
+        String trimmed = keyword.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 }
