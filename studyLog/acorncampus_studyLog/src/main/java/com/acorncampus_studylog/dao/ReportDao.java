@@ -42,6 +42,36 @@ public class ReportDao {
         }
     }
 
+    public List<ReportDto> findAll(String status, String keyword, int offset, int limit) {
+        String normalizedKeyword = normalizeKeyword(keyword);
+        StringBuilder sql = new StringBuilder()
+            .append("SELECT r.report_id, r.reporter_id, r.target_type, r.target_id, r.reason, r.status, r.created_at, ")
+            .append("       u.nickname AS reporter_name ")
+            .append("FROM reports r JOIN users u ON r.reporter_id = u.user_id ")
+            .append("WHERE 1=1 ");
+        appendReportFilters(sql, status, normalizedKeyword);
+        sql.append("ORDER BY r.created_at DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+
+        List<ReportDto> list = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            conn = DBUtil.getConnection();
+            pstmt = conn.prepareStatement(sql.toString());
+            int idx = bindReportFilters(pstmt, status, normalizedKeyword, 1);
+            pstmt.setInt(idx++, offset);
+            pstmt.setInt(idx, limit);
+            rs = pstmt.executeQuery();
+            while (rs.next()) list.add(mapRow(rs));
+            return list;
+        } catch (SQLException e) {
+            throw new RuntimeException("ReportDao.findAll 검색 실패", e);
+        } finally {
+            DBUtil.close(conn, pstmt, rs);
+        }
+    }
+
     /** report_id로 신고 단건 조회 */
     public ReportDto findById(int reportId) {
         String sql =
@@ -110,6 +140,30 @@ public class ReportDao {
         }
     }
 
+    public int countAll(String status, String keyword) {
+        String normalizedKeyword = normalizeKeyword(keyword);
+        StringBuilder sql = new StringBuilder()
+            .append("SELECT COUNT(*) ")
+            .append("FROM reports r JOIN users u ON r.reporter_id = u.user_id ")
+            .append("WHERE 1=1 ");
+        appendReportFilters(sql, status, normalizedKeyword);
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            conn = DBUtil.getConnection();
+            pstmt = conn.prepareStatement(sql.toString());
+            bindReportFilters(pstmt, status, normalizedKeyword, 1);
+            rs = pstmt.executeQuery();
+            return rs.next() ? rs.getInt(1) : 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("ReportDao.countAll 검색 실패", e);
+        } finally {
+            DBUtil.close(conn, pstmt, rs);
+        }
+    }
+
     // ── 삽입 / 수정 ─────────────────────────────────────────────────────────
 
     /** 신고 등록 — 생성된 report_id 반환 */
@@ -167,6 +221,43 @@ public class ReportDao {
     }
 
     // ── 내부 헬퍼 ───────────────────────────────────────────────────────────
+
+    private void appendReportFilters(StringBuilder sql, String status, String keyword) {
+        if (status != null && !status.isEmpty()) {
+            sql.append("AND r.status = ? ");
+        }
+        if (keyword != null) {
+            // 신고 검색은 신고자, 사유, 대상 타입, 대상 ID를 기준으로 처리한다.
+            sql.append("AND (LOWER(u.nickname) LIKE LOWER(?) ")
+               .append("OR LOWER(r.reason) LIKE LOWER(?) ")
+               .append("OR LOWER(r.target_type) LIKE LOWER(?) ")
+               .append("OR TO_CHAR(r.target_id) LIKE ?) ");
+        }
+    }
+
+    private int bindReportFilters(PreparedStatement pstmt, String status, String keyword, int startIndex)
+            throws SQLException {
+        int idx = startIndex;
+        if (status != null && !status.isEmpty()) {
+            pstmt.setString(idx++, status);
+        }
+        if (keyword != null) {
+            String like = "%" + keyword + "%";
+            pstmt.setString(idx++, like);
+            pstmt.setString(idx++, like);
+            pstmt.setString(idx++, like);
+            pstmt.setString(idx++, like);
+        }
+        return idx;
+    }
+
+    private String normalizeKeyword(String keyword) {
+        if (keyword == null) {
+            return null;
+        }
+        String trimmed = keyword.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
 
     private ReportDto mapRow(ResultSet rs) throws SQLException {
         ReportDto r = new ReportDto();
