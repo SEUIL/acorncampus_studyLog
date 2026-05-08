@@ -155,8 +155,9 @@ public class MypageController extends HttpServlet {
             return;
         }
 
-        // 세션 닉네임·아바타 업데이트 → 사이드바 즉시 반영
+        // 세션 닉네임·아바타·bio 업데이트 → 사이드바·대시보드 즉시 반영
         loginUser.setUsername(nickname.trim());
+        loginUser.setBio(bio);
         if (avatarUrl != null) loginUser.setAvatarUrl(avatarUrl);
         req.getSession(false).setAttribute("loginUser", loginUser);
 

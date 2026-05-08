@@ -78,7 +78,11 @@
         </div>
         <div class="profile-info">
             <h2><c:out value="${loginUser.username}"/></h2>
-            <p>Learning &amp; Recording...</p>
+            <%-- bio가 있으면 본인 설정 인사말, 없으면 기본 문구 --%>
+            <p><c:choose>
+                <c:when test="${not empty loginUser.bio}"><c:out value="${loginUser.bio}"/></c:when>
+                <c:otherwise>Learning &amp; Recording...</c:otherwise>
+            </c:choose></p>
         </div>
     </div>
     <ul class="nav-menu">
