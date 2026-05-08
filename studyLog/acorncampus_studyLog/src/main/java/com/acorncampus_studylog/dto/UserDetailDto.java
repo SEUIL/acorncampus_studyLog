@@ -25,6 +25,7 @@ public class UserDetailDto {
         dto.setRole(role);
         dto.setIsBanned(isBanned);
         dto.setAvatarUrl(avatarUrl);
+        dto.setBio(bio);   // 한 줄 소개 — 사이드바·대시보드 표시용
         return dto;
     }
 
