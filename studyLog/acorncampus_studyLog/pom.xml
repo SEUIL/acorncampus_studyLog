@@ -52,6 +52,13 @@
             <version>2.15.1</version>
         </dependency>
 
+        <!-- JavaMail (이메일 발송) -->
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+            <version>1.6.2</version>
+        </dependency>
+
         <!-- Gson (AJAX JSON 직렬화) -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
