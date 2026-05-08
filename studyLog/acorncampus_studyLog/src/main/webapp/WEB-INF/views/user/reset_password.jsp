@@ -117,7 +117,7 @@
                        id="newPassword"
                        name="newPassword"
                        class="input-control"
-                       placeholder="6자리 이상 입력"
+                       placeholder="8자리 이상 영문,숫자 포함 입력"
                        minlength="6"
                        required>
             </div>
