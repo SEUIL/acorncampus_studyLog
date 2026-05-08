@@ -51,7 +51,8 @@ public class PostDao {
         String sql =
             "SELECT p.post_id, p.user_id, p.series_id, p.title, p.thumbnail_url, p.is_public, " +
             "       p.view_count, p.created_at, p.updated_at, u.nickname AS author_name, " +
-            "       NVL((SELECT COUNT(*) FROM comments WHERE post_id = p.post_id AND deleted_at IS NULL), 0) AS comment_count " +
+            "       NVL((SELECT COUNT(*) FROM post_likes  WHERE post_id = p.post_id AND like_type = 'L'), 0) AS like_count, " +
+            "       NVL((SELECT COUNT(*) FROM comments    WHERE post_id = p.post_id AND deleted_at IS NULL), 0) AS comment_count " +
             "FROM posts p JOIN users u ON p.user_id = u.user_id " +
             "WHERE p.deleted_at IS NULL AND p.is_public = 'Y' " +
             "ORDER BY p.created_at DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
@@ -541,6 +542,7 @@ public class PostDao {
             p.setDislikeCount(rs.getInt("dislike_count"));
             p.setCommentCount(rs.getInt("comment_count"));
         } else {
+            try { p.setLikeCount(rs.getInt("like_count")); }    catch (SQLException ignored) {}
             try { p.setCommentCount(rs.getInt("comment_count")); } catch (SQLException ignored) {}
         }
         return p;

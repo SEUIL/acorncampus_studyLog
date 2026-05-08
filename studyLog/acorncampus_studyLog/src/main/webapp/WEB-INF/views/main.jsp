@@ -91,6 +91,13 @@
         </div>
     </main>
 </div>
+<script>
+    /* bfcache 대응 — 뒤로 가기로 복원된 페이지는 좋아요 수가 stale할 수 있으므로 재요청
+       event.persisted: 브라우저가 bfcache에서 페이지를 복원했을 때 true */
+    window.addEventListener('pageshow', function (e) {
+        if (e.persisted) window.location.reload();
+    });
+</script>
 </body>
 </html>
 
