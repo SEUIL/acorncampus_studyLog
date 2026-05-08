@@ -51,6 +51,7 @@ public class PostDao {
         String sql =
             "SELECT p.post_id, p.user_id, p.series_id, p.title, p.thumbnail_url, p.is_public, " +
             "       p.view_count, p.created_at, p.updated_at, u.nickname AS author_name, " +
+            "       u.avatar_url AS author_avatar_url, " +
             "       NVL((SELECT COUNT(*) FROM post_likes  WHERE post_id = p.post_id AND like_type = 'L'), 0) AS like_count, " +
             "       NVL((SELECT COUNT(*) FROM comments    WHERE post_id = p.post_id AND deleted_at IS NULL), 0) AS comment_count " +
             "FROM posts p JOIN users u ON p.user_id = u.user_id " +
@@ -125,6 +126,56 @@ public class PostDao {
             return list;
         } catch (SQLException e) {
             throw new RuntimeException("PostDao.findByUserId 실패", e);
+        } finally {
+            DBUtil.close(conn, pstmt, rs);
+        }
+    }
+
+    /**
+     * 특정 사용자의 공개 게시글 목록 (타인 프로필 페이지 — is_public='Y' 만)
+     * 비공개 글은 본인만 볼 수 있으므로 공개 프로필에서는 제외
+     */
+    public List<PostDto> findPublicByUserId(int userId, int offset, int limit) {
+        String sql =
+            "SELECT p.post_id, p.user_id, p.series_id, p.title, p.thumbnail_url, p.is_public, " +
+            "       p.view_count, p.created_at, p.updated_at, u.nickname AS author_name " +
+            "FROM posts p JOIN users u ON p.user_id = u.user_id " +
+            "WHERE p.user_id = ? AND p.deleted_at IS NULL AND p.is_public = 'Y' " +
+            "ORDER BY p.created_at DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        List<PostDto> list = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            conn = DBUtil.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, userId);
+            pstmt.setInt(2, offset);
+            pstmt.setInt(3, limit);
+            rs = pstmt.executeQuery();
+            while (rs.next()) list.add(mapRow(rs, false));
+            return list;
+        } catch (SQLException e) {
+            throw new RuntimeException("PostDao.findPublicByUserId 실패", e);
+        } finally {
+            DBUtil.close(conn, pstmt, rs);
+        }
+    }
+
+    /** 특정 사용자의 공개 게시글 수 (타인 프로필용) */
+    public int countPublicByUserId(int userId) {
+        String sql = "SELECT COUNT(*) FROM posts WHERE user_id = ? AND deleted_at IS NULL AND is_public = 'Y'";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            conn = DBUtil.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, userId);
+            rs = pstmt.executeQuery();
+            return rs.next() ? rs.getInt(1) : 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("PostDao.countPublicByUserId 실패", e);
         } finally {
             DBUtil.close(conn, pstmt, rs);
         }
@@ -499,10 +550,7 @@ public class PostDao {
         }
     }
 
-    /**
-     * ResultSet 한 행 → PostDto 변환
-     * @param withDetail true이면 like_count, dislike_count, comment_count 포함
-     */
+    /** 관리자 검색 조건 SQL 절 동적 추가 (keyword: 제목·닉네임, status: is_public 값) */
     private void appendAdminPostFilters(StringBuilder sql, String keyword, String status) {
         if (keyword != null) {
             // 게시글 관리 검색창 기준: 제목 또는 작성자 닉네임으로 검색한다.
@@ -513,6 +561,7 @@ public class PostDao {
         }
     }
 
+    /** 관리자 검색 조건 바인딩 — appendAdminPostFilters와 파라미터 순서 동기화 필수 */
     private int bindAdminPostFilters(PreparedStatement pstmt, String keyword, String status, int startIndex)
             throws SQLException {
         int idx = startIndex;
@@ -527,6 +576,7 @@ public class PostDao {
         return idx;
     }
 
+    /** null·빈 문자열 keyword를 null로 정규화 (동적 쿼리 분기용) */
     private String normalizeKeyword(String keyword) {
         if (keyword == null) {
             return null;
@@ -535,6 +585,11 @@ public class PostDao {
         return trimmed.isEmpty() ? null : trimmed;
     }
 
+    /**
+     * ResultSet 한 행 → PostDto 변환
+     * @param withDetail true이면 like_count, dislike_count, comment_count 포함
+     *                   false이면 목록 조회용 — 해당 컬럼 없을 수 있으므로 try/catch로 읽음
+     */
     private PostDto mapRow(ResultSet rs, boolean withDetail) throws SQLException {
         PostDto p = new PostDto();
         p.setPostId(rs.getInt("post_id"));
@@ -548,8 +603,9 @@ public class PostDao {
         p.setCreatedAt(rs.getTimestamp("created_at"));
         try { p.setUpdatedAt(rs.getTimestamp("updated_at")); } catch (SQLException ignored) {}
         try { p.setDeletedAt(rs.getTimestamp("deleted_at")); } catch (SQLException ignored) {}
-        try { p.setAuthorName(rs.getString("author_name")); } catch (SQLException ignored) {}
-        try { p.setSeriesName(rs.getString("series_name")); } catch (SQLException ignored) {}
+        try { p.setAuthorName(rs.getString("author_name")); }      catch (SQLException ignored) {}
+        try { p.setAuthorAvatarUrl(rs.getString("author_avatar_url")); } catch (SQLException ignored) {}
+        try { p.setSeriesName(rs.getString("series_name")); }      catch (SQLException ignored) {}
         if (withDetail) {
             p.setLikeCount(rs.getInt("like_count"));
             p.setDislikeCount(rs.getInt("dislike_count"));

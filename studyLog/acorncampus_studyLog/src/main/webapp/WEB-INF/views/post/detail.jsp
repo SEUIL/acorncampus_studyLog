@@ -51,7 +51,12 @@
                     <div class="meta-left">
                         <div class="author-info">
                             <span class="author-avatar"><i class="fa-solid fa-user" style="font-size: 11px;"></i></span>
-                            <c:out value="${post.authorName}"/>
+                            <a href="${pageContext.request.contextPath}/user/profile.do?id=${post.userId}"
+                               style="color:inherit; font-weight:600; text-decoration:none;"
+                               onmouseover="this.style.color='var(--accent-color)'"
+                               onmouseout="this.style.color='inherit'">
+                                <c:out value="${post.authorName}"/>
+                            </a>
                         </div>
                         <span><c:out value="${post.createdAt}"/></span>
                         <c:if test="${not empty post.seriesName}">

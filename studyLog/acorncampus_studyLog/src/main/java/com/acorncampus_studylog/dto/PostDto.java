@@ -21,7 +21,8 @@ public class PostDto {
     private Timestamp deletedAt;
 
     // --- JOIN / 집계 필드 (DB 저장 X, 조회 시 채움) ---
-    private String authorName;     // users.nickname
+    private String authorName;      // users.nickname
+    private String authorAvatarUrl; // users.avatar_url (카드 썸네일 표시용)
     private int likeCount;
     private int dislikeCount;
     private int commentCount;
@@ -63,6 +64,9 @@ public class PostDto {
 
     public String getAuthorName() { return authorName; }
     public void setAuthorName(String authorName) { this.authorName = authorName; }
+
+    public String getAuthorAvatarUrl() { return authorAvatarUrl; }
+    public void setAuthorAvatarUrl(String authorAvatarUrl) { this.authorAvatarUrl = authorAvatarUrl; }
 
     public int getLikeCount() { return likeCount; }
     public void setLikeCount(int likeCount) { this.likeCount = likeCount; }

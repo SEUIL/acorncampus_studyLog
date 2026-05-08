@@ -16,7 +16,8 @@ public class SeriesDto {
     private Timestamp createdAt;
 
     // --- JOIN / 집계 필드 (DB 저장 X, 조회 시 채움) ---
-    private String authorName;  // users.nickname
+    private String authorName;       // users.nickname
+    private String authorAvatarUrl;  // users.avatar_url (카드 아바타 표시용)
     private int postCount;
     private List<PostDto> postList = new ArrayList<>();  // 시리즈 상세 조회 시 사용
 
@@ -40,6 +41,9 @@ public class SeriesDto {
 
     public String getAuthorName() { return authorName; }
     public void setAuthorName(String authorName) { this.authorName = authorName; }
+
+    public String getAuthorAvatarUrl() { return authorAvatarUrl; }
+    public void setAuthorAvatarUrl(String authorAvatarUrl) { this.authorAvatarUrl = authorAvatarUrl; }
 
     public int getPostCount() { return postCount; }
     public void setPostCount(int postCount) { this.postCount = postCount; }
