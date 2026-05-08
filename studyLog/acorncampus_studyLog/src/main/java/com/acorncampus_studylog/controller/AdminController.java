@@ -93,12 +93,14 @@ public class AdminController extends HttpServlet {
         PageDto postPage = postService.getPostPageForAdmin(1);
         PageDto pendingReportPage = reportService.getReportPage("PENDING", 1);
         req.setAttribute("totalUserCount", userPage.getTotalCount());
-        req.setAttribute("todayUserCount", 0);
+        // Admin dashboard uses the actual count instead of a temporary zero.
+        req.setAttribute("todayUserCount", userService.getTodayUserCount());
         req.setAttribute("totalPostCount", postPage.getTotalCount());
         req.setAttribute("todayPostCount", 0);
         req.setAttribute("pendingReportCount", pendingReportPage.getTotalCount());
         // TODO: 날짜별 게시글 통계 Service가 생기면 최근 7일 그래프 데이터로 교체한다.
-        req.setAttribute("recentPostStats", "최근 작성 흐름");
+        // Admin dashboard chart - recent 7 days registered users.
+        req.setAttribute("recentUserStats", userService.getRecentUserStats());
         req.getRequestDispatcher("/WEB-INF/views/admin/main.jsp").forward(req, resp);
     }
 

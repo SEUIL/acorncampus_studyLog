@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/layout.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/common/sidebar.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/button.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/admin/admin_main.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/admin/admin_main.css?v=20260508">
 </head>
 <body>
 <div class="dashboard-wrapper">
@@ -41,9 +41,20 @@
         </div>
         <div class="admin-main-layout">
             <section class="graph-area">
-                <h2 style="margin:0; font-size:18px; color:var(--text-main);">최근 7일 게시글 작성 현황</h2>
+                <h2 style="margin:0; font-size:18px; color:var(--text-main);">최근 7일 가입자 현황</h2>
                 <div class="graph-placeholder">
-                    <c:out value="${empty recentPostStats ? '그래프 데이터 영역' : recentPostStats}"/>
+                    <%-- 최근 7일 가입자 수를 아래에서 위로 올라가는 막대그래프로 표시 --%>
+                    <div class="dashboard-bar-chart">
+                        <c:forEach var="stat" items="${recentUserStats}">
+                            <div class="dashboard-bar-item">
+                                <span class="dashboard-bar-value"><c:out value="${stat.count}"/></span>
+                                <div class="dashboard-bar-track">
+                                    <div class="dashboard-bar-fill" style="height:${stat.percent}%;"></div>
+                                </div>
+                                <span class="dashboard-bar-label"><c:out value="${stat.label}"/></span>
+                            </div>
+                        </c:forEach>
+                    </div>
                 </div>
                 <div class="summary-grid">
                     <div class="summary-card">
