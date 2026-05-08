@@ -5,7 +5,9 @@ import com.acorncampus_studylog.util.DBUtil;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /** posts 테이블 CRUD — 모든 쿼리는 PreparedStatement 사용, 소프트 삭제 적용 */
 public class PostDao {
@@ -49,7 +51,8 @@ public class PostDao {
         String sql =
             "SELECT p.post_id, p.user_id, p.series_id, p.title, p.thumbnail_url, p.is_public, " +
             "       p.view_count, p.created_at, p.updated_at, u.nickname AS author_name, " +
-            "       NVL((SELECT COUNT(*) FROM comments WHERE post_id = p.post_id AND deleted_at IS NULL), 0) AS comment_count " +
+            "       NVL((SELECT COUNT(*) FROM post_likes  WHERE post_id = p.post_id AND like_type = 'L'), 0) AS like_count, " +
+            "       NVL((SELECT COUNT(*) FROM comments    WHERE post_id = p.post_id AND deleted_at IS NULL), 0) AS comment_count " +
             "FROM posts p JOIN users u ON p.user_id = u.user_id " +
             "WHERE p.deleted_at IS NULL AND p.is_public = 'Y' " +
             "ORDER BY p.created_at DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
@@ -219,6 +222,49 @@ public class PostDao {
             return rs.next() ? rs.getInt(1) : 0;
         } catch (SQLException e) {
             throw new RuntimeException("PostDao.countAllForAdmin 검색 실패", e);
+        } finally {
+            DBUtil.close(conn, pstmt, rs);
+        }
+    }
+
+    /**
+     * 잔디(Contributions) 데이터 조회 — 최근 1년간 날짜별 게시글 수
+     *
+     * <p>posts 테이블에서 로그인 유저의 글을 날짜(TRUNC) 기준으로 GROUP BY하여
+     * "yyyy-MM-dd" 형식 문자열 → 해당 날짜 게시글 수 Map을 반환한다.
+     * 삭제된 글(deleted_at IS NOT NULL)은 집계에서 제외한다.</p>
+     *
+     * @param userId 조회할 사용자 ID (sessions의 loginUser.userId)
+     * @return 날짜 문자열("2025-03-01") → 게시글 수 Map (글이 없는 날짜는 포함되지 않음)
+     */
+    public Map<String, Integer> getActivityMap(int userId) {
+        // TRUNC(created_at)으로 시각을 날짜로 내림, TO_CHAR로 "yyyy-MM-dd" 포맷
+        // ADD_MONTHS(SYSDATE, -12): 오늘로부터 정확히 12개월 전 이후의 글만 집계
+        String sql =
+            "SELECT TO_CHAR(TRUNC(created_at), 'YYYY-MM-DD') AS post_date, COUNT(*) AS cnt " +
+            "FROM posts " +
+            "WHERE user_id = ? " +
+            "  AND deleted_at IS NULL " +
+            "  AND created_at >= ADD_MONTHS(SYSDATE, -12) " +
+            "GROUP BY TRUNC(created_at) " +
+            "ORDER BY TRUNC(created_at)";
+
+        // LinkedHashMap: 날짜 오름차순 삽입 순서 유지
+        Map<String, Integer> activityMap = new LinkedHashMap<>();
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            conn = DBUtil.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, userId);
+            rs = pstmt.executeQuery();
+            while (rs.next()) {
+                activityMap.put(rs.getString("post_date"), rs.getInt("cnt"));
+            }
+            return activityMap;
+        } catch (SQLException e) {
+            throw new RuntimeException("PostDao.getActivityMap 실패", e);
         } finally {
             DBUtil.close(conn, pstmt, rs);
         }
@@ -496,6 +542,7 @@ public class PostDao {
             p.setDislikeCount(rs.getInt("dislike_count"));
             p.setCommentCount(rs.getInt("comment_count"));
         } else {
+            try { p.setLikeCount(rs.getInt("like_count")); }    catch (SQLException ignored) {}
             try { p.setCommentCount(rs.getInt("comment_count")); } catch (SQLException ignored) {}
         }
         return p;
