@@ -348,4 +348,63 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     tick();
+
+    /* ---------------------------------------------------------------
+       인트로: 불끄기 → 불켜기 연출
+       #intro-overlay 가 없으면(회원가입 페이지 등) 이 블록은 실행되지 않음
+    --------------------------------------------------------------- */
+    var introOverlay = document.getElementById('intro-overlay');
+    var lightBtn     = document.getElementById('light-switch-btn');
+
+    if (introOverlay && lightBtn) {
+
+        /* 초기 상태: 모든 캐릭터 수면 모드 (눈 감기 + 좌우 교대로 살짝 기울기) */
+        mode = 'sleeping';
+        for (var si = 0; si < chars.length; si++) {
+            var sc  = chars[si];
+            var dir = (si % 2 === 0) ? -1 : 1;          /* 짝수=왼쪽, 홀수=오른쪽 기울기 */
+            sc.eyeClose        = 1;                       /* lerp 없이 즉시 눈 닫기 */
+            sc.targetEyeClose  = 1;
+            sc.ox              = dir * sc.def.maxLean * 0.28;
+            sc.targetOx        = dir * sc.def.maxLean * 0.28;
+        }
+
+        /* 전구 버튼 클릭 → 기상 연출 */
+        lightBtn.addEventListener('click', function () {
+
+            /* 1. 오버레이 페이드 아웃 (flash-on 애니메이션) */
+            introOverlay.classList.add('lights-on');
+
+            /* 2. Zzz 숨기기 */
+            var zzzGroup = document.getElementById('zzz-group');
+            if (zzzGroup) zzzGroup.style.opacity = '0';
+
+            /* 3. 캐릭터들 순서대로 깨어나기 */
+            for (var wi = 0; wi < chars.length; wi++) {
+                (function (wc, delay) {
+                    setTimeout(function () {
+                        wc.targetEyeClose = 0;     /* 눈 뜨기 */
+                        wc.targetOx       = 0;     /* 기울기 복귀 */
+                        /* 위로 통통 튀기 */
+                        wc.targetOy = -wc.def.maxStretch;
+                        setTimeout(function () { wc.targetOy = 0; }, 420);
+                    }, delay);
+                })(chars[wi], 300 + wi * 160);
+            }
+
+            /* 4. 로그인 폼 슬라이드인 */
+            setTimeout(function () {
+                mode = 'idle';
+                var loginSection = document.querySelector('.login-section');
+                if (loginSection) loginSection.classList.add('revealed');
+            }, 900);
+
+            /* 5. 오버레이 DOM 제거 (애니메이션 끝난 뒤) */
+            setTimeout(function () {
+                if (introOverlay.parentNode) {
+                    introOverlay.parentNode.removeChild(introOverlay);
+                }
+            }, 1400);
+        });
+    }
 });

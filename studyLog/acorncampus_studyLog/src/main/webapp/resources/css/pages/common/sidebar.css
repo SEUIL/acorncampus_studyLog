@@ -20,6 +20,7 @@
 .nav-admin { margin-top: 20px; color: #ef5350 !important; }
 .nav-admin i { color: #ef5350 !important; }
 .logout-btn { margin-top: auto; border-top: 1px solid var(--border-color); padding-top: 20px; }
+.logout-btn .sidebar-text { display: none; }  /* 테마 버튼 텍스트 숨김 — 아이콘만 표시 */
 
 .sidebar {
     width: 280px;
