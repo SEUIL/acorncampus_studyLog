@@ -47,7 +47,27 @@ public class PasswordResetService {
      */
     public void requestReset(String email) {
         // TODO: 구현 필요
-        throw new UnsupportedOperationException("requestReset 미구현");
+
+        // 사용자 조회
+        UserDetailDto user = userDao.findByEmail(email);
+
+        // 사용자 없으면 조용히 반환
+        if (user == null) {
+            return;
+        }
+
+        // 사용자 있으면 토큰 생성
+        String token = generateToken();
+
+        // 만료 시각 계산
+        Timestamp expiresAt = toTimestamp(LocalDateTime.now().plusMinutes(TOKEN_EXPIRE_MIN));
+
+        // DB 저장
+        resetDao.insertToken(user.getUserId(), token, expiresAt);
+
+        // 이메일 발송
+        MailUtil.sendPasswordResetEmail(email,token);
+
     }
 
     /**
@@ -65,7 +85,16 @@ public class PasswordResetService {
      */
     public PasswordResetTokenDto validateToken(String token) {
         // TODO: 구현 필요
-        throw new UnsupportedOperationException("validateToken 미구현");
+
+        // DB 조회
+        PasswordResetTokenDto dto = resetDao.findValidToken(token);
+
+        // null 이면 null 반환, null 아니면 PasswordResetTokenDto 반환
+        if (dto == null){
+            return null;
+        }
+        return dto;
+
     }
 
     /**
@@ -86,7 +115,24 @@ public class PasswordResetService {
      */
     public boolean resetPassword(String token, String newPassword) {
         // TODO: 구현 필요
-        throw new UnsupportedOperationException("resetPassword 미구현");
+
+        // 유효성 재확인
+        PasswordResetTokenDto dto  =  validateToken(token);
+        if (dto == null){
+            return false;
+        }
+
+        // 새 비밀번호 해싱
+        String hashed =  BCryptUtil.hash(newPassword);
+
+        // DB 업데이트
+        userDao.updatePassword(dto.userId(), hashed);
+
+        // 토큰 무효화
+        resetDao.markUsed(token);
+
+        // 성공 시 true 반환
+        return  true;
     }
 
     // ── 내부 헬퍼 ────────────────────────────────────────────────────────────

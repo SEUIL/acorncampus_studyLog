@@ -3,7 +3,23 @@
    의존: global_theme.css, components/layout.css, components/series.css
    ========================================================================== */
 
-/* 1. 작업 공간 헤더 */
+/* 1. 인사말 배너 */
+.greeting-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--accent-color);
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+}
+.greeting-banner .greeting-icon { font-size: 22px; flex-shrink: 0; }
+.greeting-banner p { margin: 0; font-size: 15px; color: var(--text-main); font-weight: 500; }
+
+/* 2. 작업 공간 헤더 */
 .workspace-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
 .workspace-header h1 { margin: 0; border-bottom: none; padding-bottom: 0; font-size: 24px; }
 

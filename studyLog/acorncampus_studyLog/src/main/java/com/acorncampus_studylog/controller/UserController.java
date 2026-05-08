@@ -2,6 +2,8 @@ package com.acorncampus_studylog.controller;
 
 import com.acorncampus_studylog.dto.UserDetailDto;
 import com.acorncampus_studylog.dto.UserDto;
+import com.acorncampus_studylog.service.PostService;
+import com.acorncampus_studylog.service.SeriesService;
 import com.acorncampus_studylog.service.UserService;
 import com.google.gson.Gson;
 
@@ -18,7 +20,9 @@ import java.util.Map;
 @WebServlet("/user/*")
 public class UserController extends HttpServlet {
 
-    private final UserService userService = new UserService();
+    private final UserService   userService   = new UserService();
+    private final PostService   postService   = new PostService();
+    private final SeriesService seriesService = new SeriesService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -43,6 +47,9 @@ public class UserController extends HttpServlet {
                 break;
             case "/password.do":
                 handlePasswordForm(req, resp);
+                break;
+            case "/profile.do":
+                handlePublicProfile(req, resp);
                 break;
             default:
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -73,6 +80,52 @@ public class UserController extends HttpServlet {
             default:
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
+    }
+
+    /**
+     * GET /user/profile.do?id={userId}
+     * 타인(또는 본인)의 공개 프로필 + 공개 시리즈 + 공개 게시글 표시
+     * 로그인 불필요 — /user/* 패턴이므로 LoginCheckFilter 미적용
+     */
+    private void handlePublicProfile(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+
+        // 1. userId 파라미터 파싱 — 없거나 숫자가 아니면 404
+        int targetUserId;
+        try {
+            targetUserId = Integer.parseInt(req.getParameter("id"));
+        } catch (Exception e) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
+        // 2. 대상 사용자 정보 조회 — 탈퇴·밴 유저는 404 처리
+        UserDetailDto targetUser = userService.getUserById(targetUserId);
+        if (targetUser == null || "Y".equals(targetUser.getIsBanned())) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
+        // 3. 공개 시리즈 목록
+        java.util.List<com.acorncampus_studylog.dto.SeriesDto> seriesList =
+                seriesService.getSeriesByUser(targetUserId);
+        if (seriesList == null) seriesList = java.util.Collections.emptyList();
+
+        // 4. 공개 게시글 목록 (비공개 제외)
+        int pageNo;
+        try {
+            pageNo = Integer.parseInt(req.getParameter("page"));
+            if (pageNo < 1) pageNo = 1;
+        } catch (Exception e) {
+            pageNo = 1;
+        }
+
+        // 5. request에 데이터 세팅 후 뷰 포워드
+        req.setAttribute("targetUser",  targetUser);
+        req.setAttribute("seriesList",  seriesList);
+        req.setAttribute("postList",    postService.getPublicPostsByUser(targetUserId, pageNo));
+        req.setAttribute("postPage",    postService.getPublicPostPageByUser(targetUserId, pageNo));
+        req.getRequestDispatcher("/WEB-INF/views/user/public_profile.jsp").forward(req, resp);
     }
 
     private void handleLoginForm(HttpServletRequest req, HttpServletResponse resp)
@@ -123,7 +176,7 @@ public class UserController extends HttpServlet {
             return;
         }
 
-        req.getRequestDispatcher("/WEB-INF/views/user/password.jsp").forward(req, resp);
+        req.getRequestDispatcher("/WEB-INF/views/user/forgot_password.jsp").forward(req, resp);
     }
 
     private void handleLogin(HttpServletRequest req, HttpServletResponse resp)
@@ -223,7 +276,7 @@ public class UserController extends HttpServlet {
         // 실패
         if (!ok){
             req.setAttribute("errorMsg", "현재 비밀번호가 일치하지 않습니다");
-            req.getRequestDispatcher("/WEB-INF/views/user/password.jsp").forward(req, resp);
+            req.getRequestDispatcher("/WEB-INF/views/user/forgot_password.jsp").forward(req, resp);
 
             return;
         }

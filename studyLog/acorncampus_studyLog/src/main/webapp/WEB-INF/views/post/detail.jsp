@@ -51,7 +51,12 @@
                     <div class="meta-left">
                         <div class="author-info">
                             <span class="author-avatar"><i class="fa-solid fa-user" style="font-size: 11px;"></i></span>
-                            <c:out value="${post.authorName}"/>
+                            <a href="${pageContext.request.contextPath}/user/profile.do?id=${post.userId}"
+                               style="color:inherit; font-weight:600; text-decoration:none;"
+                               onmouseover="this.style.color='var(--accent-color)'"
+                               onmouseout="this.style.color='inherit'">
+                                <c:out value="${post.authorName}"/>
+                            </a>
                         </div>
                         <span><c:out value="${post.createdAt}"/></span>
                         <c:if test="${not empty post.seriesName}">
@@ -123,22 +128,101 @@
                 <c:choose>
                     <c:when test="${not empty comments}">
                         <c:forEach var="comment" items="${comments}">
-                            <li class="comment-item">
+                            <li class="comment-item" id="comment-${comment.commentId}">
+                                <%-- 메타 (작성자 + 날짜) --%>
                                 <div class="comment-meta">
                                     <span class="comment-author"><c:out value="${comment.authorName}"/></span>
                                     <span class="comment-date"><c:out value="${comment.createdAt}"/></span>
                                 </div>
-                                <div class="comment-content"><c:out value="${comment.content}"/></div>
 
+                                <%-- 본문 (수정 모드 전환 시 숨김) --%>
+                                <div class="comment-content" id="comment-content-${comment.commentId}">
+                                    <c:out value="${comment.content}"/>
+                                </div>
+
+                                <%-- 인라인 수정 폼 (기본 숨김) --%>
+                                <c:if test="${not empty loginUser and loginUser.userId eq comment.userId}">
+                                <div class="edit-form" id="edit-form-${comment.commentId}" style="display:none;">
+                                    <textarea class="reply-textarea"
+                                              id="edit-content-${comment.commentId}"><c:out value="${comment.content}"/></textarea>
+                                    <div class="reply-form-actions">
+                                        <button class="btn btn-primary btn-sm"
+                                                onclick="submitEdit(${comment.commentId})">수정 완료</button>
+                                        <button class="btn btn-outline btn-sm"
+                                                onclick="cancelEdit(${comment.commentId})">취소</button>
+                                    </div>
+                                </div>
+                                </c:if>
+
+                                <%-- 액션 버튼 행 --%>
+                                <div class="comment-actions">
+                                    <%-- 답글 버튼 — 로그인한 사용자에게만 표시 --%>
+                                    <c:if test="${not empty loginUser}">
+                                        <button class="comment-action-btn"
+                                                onclick="toggleReplyForm(${comment.commentId})">
+                                            <i class="fa-regular fa-comment"></i> 답글
+                                        </button>
+                                    </c:if>
+                                    <%-- 수정 / 삭제 — 본인 댓글 또는 ADMIN --%>
+                                    <c:if test="${not empty loginUser and (loginUser.userId eq comment.userId or loginUser.role eq 'ADMIN')}">
+                                        <button class="comment-action-btn"
+                                                onclick="toggleEditForm(${comment.commentId})">수정</button>
+                                        <button class="comment-action-btn delete-btn"
+                                                onclick="deleteComment(${comment.commentId})">삭제</button>
+                                    </c:if>
+                                </div>
+
+                                <%-- 인라인 답글 입력 폼 (기본 숨김) --%>
+                                <c:if test="${not empty loginUser}">
+                                <div class="reply-form" id="reply-form-${comment.commentId}" style="display:none;">
+                                    <textarea class="reply-textarea"
+                                              id="reply-content-${comment.commentId}"
+                                              placeholder="답글을 작성해 주세요..."></textarea>
+                                    <div class="reply-form-actions">
+                                        <button class="btn btn-primary btn-sm"
+                                                onclick="submitReply(${comment.commentId}, ${post.postId})">답글 등록</button>
+                                        <button class="btn btn-outline btn-sm"
+                                                onclick="toggleReplyForm(${comment.commentId})">취소</button>
+                                    </div>
+                                </div>
+                                </c:if>
+
+                                <%-- 기존 대댓글 목록 --%>
                                 <c:if test="${not empty comment.replies}">
                                     <div class="reply-list">
                                         <c:forEach var="reply" items="${comment.replies}">
-                                            <div class="reply-item">
+                                            <div class="reply-item" id="comment-${reply.commentId}">
                                                 <div class="comment-meta">
                                                     <span class="comment-author"><c:out value="${reply.authorName}"/></span>
                                                     <span class="comment-date"><c:out value="${reply.createdAt}"/></span>
                                                 </div>
-                                                <div class="comment-content"><c:out value="${reply.content}"/></div>
+                                                <div class="comment-content" id="comment-content-${reply.commentId}">
+                                                    <c:out value="${reply.content}"/>
+                                                </div>
+
+                                                <%-- 대댓글 인라인 수정 폼 --%>
+                                                <c:if test="${not empty loginUser and loginUser.userId eq reply.userId}">
+                                                <div class="edit-form" id="edit-form-${reply.commentId}" style="display:none;">
+                                                    <textarea class="reply-textarea"
+                                                              id="edit-content-${reply.commentId}"><c:out value="${reply.content}"/></textarea>
+                                                    <div class="reply-form-actions">
+                                                        <button class="btn btn-primary btn-sm"
+                                                                onclick="submitEdit(${reply.commentId})">수정 완료</button>
+                                                        <button class="btn btn-outline btn-sm"
+                                                                onclick="cancelEdit(${reply.commentId})">취소</button>
+                                                    </div>
+                                                </div>
+                                                </c:if>
+
+                                                <%-- 대댓글 액션 (수정/삭제만 — 답글에 답글 없음) --%>
+                                                <c:if test="${not empty loginUser and (loginUser.userId eq reply.userId or loginUser.role eq 'ADMIN')}">
+                                                <div class="comment-actions">
+                                                    <button class="comment-action-btn"
+                                                            onclick="toggleEditForm(${reply.commentId})">수정</button>
+                                                    <button class="comment-action-btn delete-btn"
+                                                            onclick="deleteComment(${reply.commentId})">삭제</button>
+                                                </div>
+                                                </c:if>
                                             </div>
                                         </c:forEach>
                                     </div>
@@ -228,6 +312,108 @@
             console.error('Error:', error);
             alert('서버 통신 중 오류가 발생했습니다.');
         });
+    }
+
+    /* ── 답글 폼 토글 ──────────────────────────────────────────── */
+    function toggleReplyForm(commentId) {
+        var form = document.getElementById('reply-form-' + commentId);
+        if (!form) return;
+        var isOpen = form.style.display !== 'none';
+        form.style.display = isOpen ? 'none' : 'block';
+        if (!isOpen) document.getElementById('reply-content-' + commentId).focus();
+    }
+
+    /* ── 답글 등록 AJAX ─────────────────────────────────────── */
+    function submitReply(parentCommentId, postId) {
+        var textarea = document.getElementById('reply-content-' + parentCommentId);
+        var content  = textarea ? textarea.value.trim() : '';
+        if (!content) { alert('답글 내용을 입력해 주세요.'); return; }
+
+        var params = new URLSearchParams();
+        params.append('postId', postId);
+        params.append('parentCommentId', parentCommentId);
+        params.append('content', content);
+
+        fetch('${pageContext.request.contextPath}/l_check/comment/reply.do', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.status === 'ok') {
+                window.location.reload();
+            } else {
+                alert('답글 등록 실패: ' + data.message);
+            }
+        })
+        .catch(function() { alert('서버 통신 중 오류가 발생했습니다.'); });
+    }
+
+    /* ── 댓글 수정 폼 토글 ─────────────────────────────────── */
+    function toggleEditForm(commentId) {
+        var contentDiv = document.getElementById('comment-content-' + commentId);
+        var editForm   = document.getElementById('edit-form-' + commentId);
+        if (!contentDiv || !editForm) return;
+        contentDiv.style.display = 'none';
+        editForm.style.display   = 'block';
+        document.getElementById('edit-content-' + commentId).focus();
+    }
+
+    function cancelEdit(commentId) {
+        var contentDiv = document.getElementById('comment-content-' + commentId);
+        var editForm   = document.getElementById('edit-form-' + commentId);
+        if (contentDiv) contentDiv.style.display = '';
+        if (editForm)   editForm.style.display   = 'none';
+    }
+
+    /* ── 댓글 수정 완료 AJAX ────────────────────────────────── */
+    function submitEdit(commentId) {
+        var textarea = document.getElementById('edit-content-' + commentId);
+        var content  = textarea ? textarea.value.trim() : '';
+        if (!content) { alert('내용을 입력해 주세요.'); return; }
+
+        var params = new URLSearchParams();
+        params.append('commentId', commentId);
+        params.append('content', content);
+
+        fetch('${pageContext.request.contextPath}/l_check/comment/update.do', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.status === 'ok') {
+                window.location.reload();
+            } else {
+                alert('수정 실패: ' + data.message);
+            }
+        })
+        .catch(function() { alert('서버 통신 중 오류가 발생했습니다.'); });
+    }
+
+    /* ── 댓글 삭제 AJAX ────────────────────────────────────── */
+    function deleteComment(commentId) {
+        if (!confirm('댓글을 삭제하시겠습니까?')) return;
+
+        var params = new URLSearchParams();
+        params.append('commentId', commentId);
+
+        fetch('${pageContext.request.contextPath}/l_check/comment/delete.do', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.status === 'ok') {
+                window.location.reload();
+            } else {
+                alert('삭제 실패: ' + data.message);
+            }
+        })
+        .catch(function() { alert('서버 통신 중 오류가 발생했습니다.'); });
     }
 
     document.addEventListener('DOMContentLoaded', function() {

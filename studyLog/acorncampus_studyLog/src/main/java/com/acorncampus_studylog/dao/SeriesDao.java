@@ -67,7 +67,7 @@ public class SeriesDao {
     public List<SeriesDto> findAll(int offset, int limit) {
         String sql =
             "SELECT s.series_id, s.user_id, s.name, s.description, s.is_public, s.created_at, " +
-            "       u.nickname AS author_name, " +
+            "       u.nickname AS author_name, u.avatar_url AS author_avatar_url, " +
             "       NVL((SELECT COUNT(*) FROM posts WHERE series_id = s.series_id AND deleted_at IS NULL), 0) AS post_count " +
             "FROM series s JOIN users u ON s.user_id = u.user_id " +
             "WHERE s.is_public = 'Y' ORDER BY s.created_at DESC " +
@@ -244,8 +244,9 @@ public class SeriesDao {
         s.setDescription(rs.getString("description"));
         s.setIsPublic(rs.getString("is_public"));
         s.setCreatedAt(rs.getTimestamp("created_at"));
-        try { s.setAuthorName(rs.getString("author_name")); } catch (SQLException ignored) {}
-        try { s.setPostCount(rs.getInt("post_count")); } catch (SQLException ignored) {}
+        try { s.setAuthorName(rs.getString("author_name")); }          catch (SQLException ignored) {}
+        try { s.setAuthorAvatarUrl(rs.getString("author_avatar_url")); } catch (SQLException ignored) {}
+        try { s.setPostCount(rs.getInt("post_count")); }               catch (SQLException ignored) {}
         return s;
     }
 }
