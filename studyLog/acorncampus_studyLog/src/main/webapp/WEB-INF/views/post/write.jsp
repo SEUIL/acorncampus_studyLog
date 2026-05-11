@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/button.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/ui.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/post/post_write.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/milkdown.css">
 </head>
 <body>
 <div class="dashboard-wrapper">
@@ -85,16 +86,12 @@
             </div>
 
             <div class="editor-area">
-                <%-- 수정 모드: 기존 본문 / 생성 모드: param.content (에러 복귀 시 입력값 유지) --%>
-                <textarea name="content" class="editor-textarea"
-                          placeholder="마크다운 형식으로 학습 내용을 기록해 보세요..."
-                          required><c:out value="${not empty post ? post.content : param.content}" escapeXml="false"/></textarea>
+                <div id="editor"></div>
+                <input type="hidden" name="content" id="contentHidden">
             </div>
 
             <div class="write-footer">
-                <button type="button" class="attachment-btn">
-                    <i class="fa-regular fa-image"></i> 이미지 첨부
-                </button>
+                <div></div><%-- 이미지 업로드는 에디터 툴바에서 처리 --%>
 
                 <div class="footer-right">
                     <div class="visibility-toggle">
@@ -138,6 +135,51 @@
 
     toggle.addEventListener('change', syncVisibilityText);
     syncVisibilityText();
+</script>
+
+<%-- 서버에서 내려온 초기 본문(마크다운)을 textarea에 보관 — JS가 꺼내서 에디터에 주입 --%>
+<textarea id="milkdown-init" hidden><c:out value="${not empty post ? post.content : param.content}" escapeXml="false"/></textarea>
+
+<script type="module">
+    import { initEditor, getMarkdown } from '${pageContext.request.contextPath}/resources/js/milkdown-editor.js';
+    import { initSlashCommand }        from '${pageContext.request.contextPath}/resources/js/milkdown-slash.js';
+
+    const initialContent = document.getElementById('milkdown-init').value;
+    const editorEl       = document.getElementById('editor');
+    const form           = document.querySelector('form.write-container');
+    let   milkdownOk     = false;
+
+    try {
+        await initEditor(editorEl, initialContent);
+        initSlashCommand(editorEl, '${pageContext.request.contextPath}');
+        milkdownOk = true;
+    } catch (err) {
+        console.error('[Milkdown] 초기화 실패, 폴백 textarea로 전환합니다.', err);
+        editorEl.innerHTML = '';
+        const ta = document.createElement('textarea');
+        ta.id        = 'fallback-textarea';
+        ta.value     = initialContent;
+        ta.style.cssText = [
+            'width:100%', 'min-height:450px', 'padding:24px 30px',
+            'border:none', 'outline:none', 'resize:vertical',
+            'background:transparent', 'color:var(--text-main)',
+            'font-family:inherit', 'font-size:16px', 'line-height:1.8'
+        ].join(';');
+        editorEl.appendChild(ta);
+    }
+
+    form.addEventListener('submit', function (e) {
+        const content = milkdownOk
+            ? getMarkdown().trim()
+            : (document.getElementById('fallback-textarea')?.value ?? '').trim();
+
+        if (!content) {
+            e.preventDefault();
+            alert('내용을 입력해주세요.');
+            return;
+        }
+        document.getElementById('contentHidden').value = content;
+    });
 </script>
 </body>
 </html>
