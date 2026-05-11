@@ -38,8 +38,8 @@
         </div>
 
         <div class="board-tabs">
-            <a class="board-tab" href="${pageContext.request.contextPath}/post/list.do">게시글</a>
-            <a class="board-tab active" href="${pageContext.request.contextPath}/series/list.do">시리즈</a>
+            <a class="board-tab" href="${pageContext.request.contextPath}/post/list.do?keyword=${param.keyword}">게시글</a>
+            <a class="board-tab active" href="${pageContext.request.contextPath}/series/list.do?keyword=${param.keyword}">시리즈</a>
         </div>
 
         <form class="controls-bar" action="${pageContext.request.contextPath}/series/list.do" method="get">

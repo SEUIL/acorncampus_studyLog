@@ -46,18 +46,28 @@ public class PostDao {
         }
     }
 
-    /** 공개 게시글 목록 (최신순, 페이지네이션) */
-    public List<PostDto> findAll(int offset, int limit) {
+    /** 공개 게시글 목록 (페이지네이션, 정렬 지원) */
+    public List<PostDto> findAll(int offset, int limit, String sort) {
+        String order;
+        if      ("views".equals(sort)) order = "p.view_count DESC";
+        else if ("likes".equals(sort)) order = "like_count DESC";
+        else                           order = "p.created_at DESC";
         String sql =
             "SELECT p.post_id, p.user_id, p.series_id, p.title, p.thumbnail_url, p.is_public, " +
             "       p.view_count, p.created_at, p.updated_at, u.nickname AS author_name, " +
-            "       u.avatar_url AS author_avatar_url, " +
+            "       u.avatar_url AS author_avatar_url, s.name AS series_name, " +
             "       NVL((SELECT COUNT(*) FROM post_likes  WHERE post_id = p.post_id AND like_type = 'L'), 0) AS like_count, " +
             "       NVL((SELECT COUNT(*) FROM comments    WHERE post_id = p.post_id AND deleted_at IS NULL), 0) AS comment_count " +
             "FROM posts p JOIN users u ON p.user_id = u.user_id " +
+            "LEFT JOIN series s ON p.series_id = s.series_id " +
             "WHERE p.deleted_at IS NULL AND p.is_public = 'Y' " +
-            "ORDER BY p.created_at DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+            "ORDER BY " + order + " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         return queryList(sql, offset, limit);
+    }
+
+    /** 하위 호환 — 정렬 없이 최신순 */
+    public List<PostDto> findAll(int offset, int limit) {
+        return findAll(offset, limit, "latest");
     }
 
     /** 관리자 - 전체 게시글 목록 (공개/비공개 포함, 페이지네이션) */
@@ -216,9 +226,10 @@ public class PostDao {
     public List<PostDto> search(String keyword, int offset, int limit) {
         String like = "%" + keyword + "%";
         String sql =
-            "SELECT p.post_id, p.user_id, p.title, p.thumbnail_url, p.is_public, p.view_count, p.created_at, " +
-            "       u.nickname AS author_name " +
+            "SELECT p.post_id, p.user_id, p.series_id, p.title, p.thumbnail_url, p.is_public, p.view_count, p.created_at, " +
+            "       u.nickname AS author_name, s.name AS series_name " +
             "FROM posts p JOIN users u ON p.user_id = u.user_id " +
+            "LEFT JOIN series s ON p.series_id = s.series_id " +
             "WHERE p.deleted_at IS NULL AND p.is_public = 'Y' " +
             "AND (LOWER(p.title) LIKE LOWER(?) OR LOWER(p.content) LIKE LOWER(?)) " +
             "ORDER BY p.created_at DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";

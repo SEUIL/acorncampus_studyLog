@@ -16,26 +16,22 @@
     <div class="nav-left">
         <c:choose>
             <c:when test="${param.activeMenu eq 'mypage'}">
-                <a class="breadcrumb"
-                   href="${pageContext.request.contextPath}/community.do"
-                   onclick="event.preventDefault(); navigateWithTransition(this.href)">
+                <span class="breadcrumb">
                     <i class="fa-solid fa-house"></i> Home
                     <span style="color: var(--border-color);">/</span>
                     내 작업 공간
-                </a>
+                </span>
                 <button class="btn btn-outline" style="padding: 6px 12px; font-size: 13px;"
                         onclick="navigateWithTransition('${pageContext.request.contextPath}/community.do')">
                     <i class="fa-solid fa-globe"></i> 커뮤니티로 전환
                 </button>
             </c:when>
             <c:when test="${param.activeMenu eq 'community'}">
-                <a class="breadcrumb"
-                   href="${pageContext.request.contextPath}/l_check/user/mypage.do"
-                   onclick="event.preventDefault(); navigateWithTransition(this.href)">
+                <span class="breadcrumb">
                     <i class="fa-solid fa-house"></i> Home
                     <span style="color: var(--border-color);">/</span>
                     커뮤니티
-                </a>
+                </span>
                 <button class="btn btn-outline" style="padding: 6px 12px; font-size: 13px;"
                         onclick="navigateWithTransition('${pageContext.request.contextPath}/l_check/user/mypage.do')">
                     <i class="fa-solid fa-desktop"></i> 내 작업 공간으로
