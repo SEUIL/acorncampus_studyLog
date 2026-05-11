@@ -131,6 +131,51 @@ public class SeriesDao {
         }
     }
 
+    /** 키워드로 시리즈명 검색 (페이지네이션) */
+    public List<SeriesDto> search(String keyword, int offset, int limit) {
+        String sql =
+            "SELECT s.series_id, s.user_id, s.name, s.description, s.is_public, s.created_at, " +
+            "       u.nickname AS author_name, u.avatar_url AS author_avatar_url, " +
+            "       NVL((SELECT COUNT(*) FROM posts WHERE series_id = s.series_id AND deleted_at IS NULL), 0) AS post_count " +
+            "FROM series s JOIN users u ON s.user_id = u.user_id " +
+            "WHERE s.is_public = 'Y' AND LOWER(s.name) LIKE LOWER(?) " +
+            "ORDER BY s.created_at DESC " +
+            "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        List<SeriesDto> list = new ArrayList<>();
+        Connection conn = null; PreparedStatement pstmt = null; ResultSet rs = null;
+        try {
+            conn = DBUtil.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, "%" + keyword + "%");
+            pstmt.setInt(2, offset);
+            pstmt.setInt(3, limit);
+            rs = pstmt.executeQuery();
+            while (rs.next()) list.add(mapRow(rs));
+            return list;
+        } catch (SQLException e) {
+            throw new RuntimeException("SeriesDao.search 실패", e);
+        } finally {
+            DBUtil.close(conn, pstmt, rs);
+        }
+    }
+
+    /** 키워드 검색 결과 수 */
+    public int countSearch(String keyword) {
+        String sql = "SELECT COUNT(*) FROM series s WHERE s.is_public = 'Y' AND LOWER(s.name) LIKE LOWER(?)";
+        Connection conn = null; PreparedStatement pstmt = null; ResultSet rs = null;
+        try {
+            conn = DBUtil.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, "%" + keyword + "%");
+            rs = pstmt.executeQuery();
+            return rs.next() ? rs.getInt(1) : 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("SeriesDao.countSearch 실패", e);
+        } finally {
+            DBUtil.close(conn, pstmt, rs);
+        }
+    }
+
     /** 공개 시리즈 전체 수 */
     public int countAll() {
         String sql = "SELECT COUNT(*) FROM series WHERE is_public = 'Y'";

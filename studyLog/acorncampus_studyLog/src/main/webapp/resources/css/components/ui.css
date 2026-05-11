@@ -19,6 +19,8 @@
     cursor: pointer;
 }
 .breadcrumb:hover { color: var(--text-main); background-color: var(--list-hover); }
+span.breadcrumb { cursor: default; }
+span.breadcrumb:hover { color: var(--text-sub); background-color: transparent; }
 
 /* 2. 태그 */
 .tag {
