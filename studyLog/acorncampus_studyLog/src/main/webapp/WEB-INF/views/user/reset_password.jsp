@@ -119,6 +119,7 @@
                        class="input-control"
                        placeholder="8자리 이상 영문,숫자 포함 입력"
                        minlength="8"
+                       pattern="^(?=.*[A-Za-z])(?=.*[0-9])[A-Za-z0-9]{8,}$"
                        required>
             </div>
 

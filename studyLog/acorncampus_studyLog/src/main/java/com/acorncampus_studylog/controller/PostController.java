@@ -78,7 +78,8 @@ public class PostController extends HttpServlet {
             case "/write.do":  handleWrite(req, resp);  break;
             case "/update.do": handleUpdate(req, resp); break;
             case "/delete.do": handleDelete(req, resp); break;
-            case "/upload.do": handleUpload(req, resp); break;
+            case "/upload.do":      handleUpload(req, resp);      break;
+            case "/file-upload.do": handleFileUpload(req, resp); break;
             default:
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
@@ -233,10 +234,8 @@ public class PostController extends HttpServlet {
 
         String title    = req.getParameter("title");
         String content  = req.getParameter("content");
-        String isPublic = req.getParameter("isPublic");
-
-        // isPublic이 폼에서 전달 안 되면 기본값 "Y" (공개)로 처리
-        if (isPublic == null || isPublic.isEmpty()) isPublic = "Y";
+        // 공개가 명확히 선택된 경우만 Y, 그 외에는 비공개로 저장한다.
+        String isPublic = normalizeIsPublic(req.getParameter("isPublic"));
 
         // seriesId는 선택 항목이라 없거나 0이면 null로 처리 (DB에 NULL 저장)
         Integer seriesId = parseNullableInt(req.getParameter("seriesId"));
@@ -306,8 +305,7 @@ public class PostController extends HttpServlet {
 
         String title    = req.getParameter("title");
         String content  = req.getParameter("content");
-        String isPublic = req.getParameter("isPublic");
-        if (isPublic == null || isPublic.isEmpty()) isPublic = "Y";
+        String isPublic = normalizeIsPublic(req.getParameter("isPublic"));
 
         Integer seriesId  = parseNullableInt(req.getParameter("seriesId"));
 
@@ -423,6 +421,46 @@ public class PostController extends HttpServlet {
         }
     }
 
+    /** POST /l_check/post/file-upload.do — 첨부파일 업로드, {"url","name"} 반환 */
+    private void handleFileUpload(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        resp.setContentType("application/json; charset=UTF-8");
+        Map<String, Object> result = new LinkedHashMap<>();
+
+        if (!ServletFileUpload.isMultipartContent(req)) {
+            result.put("error", "multipart 요청이 아닙니다.");
+            resp.getWriter().write(new Gson().toJson(result));
+            return;
+        }
+
+        try {
+            DiskFileItemFactory factory = new DiskFileItemFactory();
+            ServletFileUpload upload = new ServletFileUpload(factory);
+            upload.setFileSizeMax(20 * 1024 * 1024L); // 20MB
+
+            List<FileItem> items = upload.parseRequest(req);
+            String uploadDir = getServletContext().getRealPath("/resources/upload");
+
+            for (FileItem item : items) {
+                if (!item.isFormField()) {
+                    String originalName = item.getName();
+                    String url = postService.saveUploadedImage(uploadDir, originalName, item.get());
+                    result.put("url",  req.getContextPath() + url);
+                    result.put("name", originalName);
+                    resp.getWriter().write(new Gson().toJson(result));
+                    return;
+                }
+            }
+
+            result.put("error", "업로드된 파일이 없습니다.");
+            resp.getWriter().write(new Gson().toJson(result));
+
+        } catch (Exception e) {
+            result.put("error", "업로드 실패: " + e.getMessage());
+            resp.getWriter().write(new Gson().toJson(result));
+        }
+    }
+
     // ── 공통 헬퍼 ───────────────────────────────────────────────────────────
 
     /** 세션에서 로그인 사용자 반환 (세션 없으면 null) */
@@ -494,6 +532,10 @@ public class PostController extends HttpServlet {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    private String normalizeIsPublic(String isPublic) {
+        return "Y".equalsIgnoreCase(isPublic) ? "Y" : "N";
     }
 
     /**
