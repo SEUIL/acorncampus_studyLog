@@ -68,12 +68,18 @@ public class SeriesController extends HttpServlet {
 
     private void handleList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // 공개 시리즈 목록을 실제 DB 데이터로 조회
-        int pageNo = parseInt(req.getParameter("page"), 1);
-        PageDto page = seriesService.getSeriesPage(pageNo);
+        int    pageNo  = parseInt(req.getParameter("page"), 1);
+        String keyword = req.getParameter("keyword");
 
-        req.setAttribute("seriesList", seriesService.getSeriesList(pageNo));
-        req.setAttribute("page", page);
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            keyword = keyword.trim();
+            req.setAttribute("seriesList", seriesService.search(keyword, pageNo));
+            req.setAttribute("page",       seriesService.getSearchPage(keyword, pageNo));
+            req.setAttribute("keyword",    keyword);
+        } else {
+            req.setAttribute("seriesList", seriesService.getSeriesList(pageNo));
+            req.setAttribute("page",       seriesService.getSeriesPage(pageNo));
+        }
         req.getRequestDispatcher("/WEB-INF/views/series/list.jsp").forward(req, resp);
     }
 

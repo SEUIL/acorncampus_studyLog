@@ -94,13 +94,21 @@ public class PostController extends HttpServlet {
      */
     private void handleList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        int pageNo = parsePageNo(req.getParameter("page"));
+        int    pageNo  = parsePageNo(req.getParameter("page"));
+        String keyword = req.getParameter("keyword");
+        String sort    = req.getParameter("sort");
+        if (sort == null || sort.isEmpty()) sort = "latest";
 
-        // "postList"와 "page" 두 개를 setAttribute하는 이유:
-        // postList → 실제 게시글 데이터 (반복 출력용)
-        // page(PageDto) → 페이지 버튼 렌더링용 (hasPrev, hasNext, totalPages 등)
-        req.setAttribute("postList", postService.getPostList(pageNo));
-        req.setAttribute("page",     postService.getPostPage(pageNo));
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            keyword = keyword.trim();
+            req.setAttribute("postList", postService.search(keyword, pageNo));
+            req.setAttribute("page",     postService.getSearchPage(keyword, pageNo));
+            req.setAttribute("keyword",  keyword);
+        } else {
+            req.setAttribute("postList", postService.getPostList(pageNo, sort));
+            req.setAttribute("page",     postService.getPostPage(pageNo));
+        }
+        req.setAttribute("sort", sort);
         req.getRequestDispatcher("/WEB-INF/views/post/list.jsp").forward(req, resp);
     }
 

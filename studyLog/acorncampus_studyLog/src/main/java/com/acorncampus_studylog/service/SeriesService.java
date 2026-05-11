@@ -40,8 +40,18 @@ public class SeriesService {
 
     /** 시리즈 목록 페이지 정보 */
     public PageDto getSeriesPage(int pageNo) {
-        // 공개 시리즈 전체 개수 기준으로 페이지 정보 생성
         return new PageDto(pageNo, 10, seriesDao.countAll());
+    }
+
+    /** 키워드로 시리즈명 검색 */
+    public List<SeriesDto> search(String keyword, int pageNo) {
+        PageDto page = getSearchPage(keyword, pageNo);
+        return seriesDao.search(keyword, page.getOffset(), page.getPageSize());
+    }
+
+    /** 검색 결과 페이지 정보 */
+    public PageDto getSearchPage(String keyword, int pageNo) {
+        return new PageDto(pageNo, 10, seriesDao.countSearch(keyword));
     }
 
     /**
