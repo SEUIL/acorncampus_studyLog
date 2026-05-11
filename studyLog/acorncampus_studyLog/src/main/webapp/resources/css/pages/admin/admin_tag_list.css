@@ -9,5 +9,5 @@
 .admin-header h1 { margin: 0; border: none; padding: 0; font-size: 32px; font-weight: 800; color: var(--text-main); }
 
 /* 2. 태그 탭 — board-tab과 별개로 디자인이 다름 */
-.tag-tab { padding: 10px 20px; font-weight: 600; color: var(--text-sub); border-bottom: 3px solid transparent; margin-bottom: -2px; }
+.tag-tab { display: inline-flex; align-items: center; padding: 10px 20px; font-weight: 600; color: var(--text-sub); border-bottom: 3px solid transparent; margin-bottom: -2px; text-decoration: none; }
 .tag-tab.active { color: var(--text-main); border-bottom-color: var(--text-main); background: rgba(0,0,0,0.05); }

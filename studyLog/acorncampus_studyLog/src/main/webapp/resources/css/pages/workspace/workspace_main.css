@@ -3,6 +3,82 @@
    의존: global_theme.css, components/layout.css, components/series.css
    ========================================================================== */
 
-/* 1. 작업 공간 헤더 */
+/* 1. 인사말 배너 */
+.greeting-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--accent-color);
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+}
+.greeting-banner .greeting-icon { font-size: 22px; flex-shrink: 0; }
+.greeting-banner p { margin: 0; font-size: 15px; color: var(--text-main); font-weight: 500; }
+
+/* 2. 작업 공간 헤더 */
 .workspace-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
 .workspace-header h1 { margin: 0; border-bottom: none; padding-bottom: 0; font-size: 24px; }
+
+/* 2. 시리즈 없는 글 섹션 */
+.loose-posts-section { margin-top: 40px; }
+.loose-posts-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+.loose-posts-header h2 { margin: 0; font-size: 18px; color: var(--text-main); }
+.loose-posts-header .count-badge {
+    background-color: var(--list-hover);
+    color: var(--text-sub);
+    font-size: 12px; font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+
+.loose-post-list { display: flex; flex-direction: column; gap: 0; }
+.loose-post-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 4px;
+    border-bottom: 1px solid var(--border-color);
+    gap: 12px;
+    transition: background-color 0.15s;
+}
+.loose-post-item:last-child { border-bottom: none; }
+.loose-post-item:hover { background-color: var(--list-hover); border-radius: var(--radius-sm); }
+
+.loose-post-title {
+    flex: 1;
+    font-size: 15px; font-weight: 600;
+    color: var(--text-main);
+    text-decoration: none;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.loose-post-title:hover { color: var(--accent-color); }
+
+.loose-post-meta {
+    display: flex; align-items: center; gap: 12px;
+    flex-shrink: 0;
+    font-size: 12px; color: var(--text-sub);
+}
+.badge-private {
+    background-color: var(--list-hover);
+    color: var(--text-sub);
+    padding: 2px 8px; border-radius: 999px;
+    font-size: 11px; font-weight: 600;
+}
+.loose-post-edit {
+    font-size: 12px; font-weight: 600;
+    color: var(--text-sub);
+    text-decoration: none;
+    padding: 4px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    transition: var(--transition-base);
+    flex-shrink: 0;
+}
+.loose-post-edit:hover { color: var(--accent-color); border-color: var(--accent-color); }

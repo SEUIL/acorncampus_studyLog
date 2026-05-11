@@ -207,6 +207,19 @@ public class CommentDao {
     }
 
     /** 관리자 - 댓글 하드 삭제 */
+    /** 트랜잭션 안에서 같은 Connection으로 댓글을 소프트 삭제한다. */
+    public int softDelete(int commentId, Connection conn) throws SQLException {
+        String sql = "UPDATE comments SET deleted_at = SYSTIMESTAMP WHERE comment_id = ?";
+        PreparedStatement pstmt = null;
+        try {
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, commentId);
+            return pstmt.executeUpdate();
+        } finally {
+            if (pstmt != null) pstmt.close();
+        }
+    }
+
     public void hardDelete(int commentId) {
         String sql = "DELETE FROM comments WHERE comment_id = ?";
         Connection conn = null;

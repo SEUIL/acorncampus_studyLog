@@ -61,6 +61,29 @@
                 <circle class="pupil"     cx="385" cy="316" r="4.2" fill="#222"/>
                 <line class="mouth" x1="328" y1="338" x2="382" y2="338" stroke="#333" stroke-width="3" stroke-linecap="round"/>
             </g>
+
+            <%-- Zzz 수면 애니메이션 — 인트로 오버레이가 뜰 때(에러 없는 첫 진입)만 표시
+                 로그인 실패 재진입 시에는 렌더링하지 않음 --%>
+            <c:if test="${authMode ne 'register' and empty errorMsg}">
+            <g id="zzz-group" font-family="Pretendard, sans-serif" font-style="italic" font-weight="700">
+                <%-- 보라 위 (topY=48, centerX=123) --%>
+                <text class="zzz z1" x="130" y="40"  fill="rgba(255,255,255,0.55)" font-size="13">z</text>
+                <text class="zzz z2" x="141" y="26"  fill="rgba(255,255,255,0.55)" font-size="17">z</text>
+                <text class="zzz z3" x="154" y="12"  fill="rgba(255,255,255,0.55)" font-size="21">Z</text>
+                <%-- 주황 위 (topY=186, centerX=195) --%>
+                <text class="zzz z1" x="202" y="178" fill="rgba(255,255,255,0.55)" font-size="13">z</text>
+                <text class="zzz z2" x="214" y="163" fill="rgba(255,255,255,0.55)" font-size="17">z</text>
+                <text class="zzz z3" x="228" y="148" fill="rgba(255,255,255,0.55)" font-size="21">Z</text>
+                <%-- 핑크 위 (topY=150, centerX=284) --%>
+                <text class="zzz z1" x="290" y="142" fill="rgba(255,255,255,0.55)" font-size="13">z</text>
+                <text class="zzz z2" x="302" y="128" fill="rgba(255,255,255,0.55)" font-size="17">z</text>
+                <text class="zzz z3" x="315" y="114" fill="rgba(255,255,255,0.55)" font-size="21">Z</text>
+                <%-- 노랑 위 (topY=250, centerX=355) --%>
+                <text class="zzz z1" x="361" y="243" fill="rgba(255,255,255,0.55)" font-size="13">z</text>
+                <text class="zzz z2" x="373" y="229" fill="rgba(255,255,255,0.55)" font-size="17">z</text>
+                <text class="zzz z3" x="386" y="215" fill="rgba(255,255,255,0.55)" font-size="21">Z</text>
+            </g>
+            </c:if>
         </svg>
     </section>
 
@@ -77,5 +100,28 @@
 </div>
 <script src="${pageContext.request.contextPath}/resources/js/page-transition.js"></script>
 <script src="${pageContext.request.contextPath}/resources/js/index-interaction.js"></script>
+
+<%-- 불끄기 인트로 오버레이 — 로그인 페이지 + 에러 없을 때만 표시
+     로그인 실패(errorMsg 있음) 시에는 오버레이를 건너뛰고 폼을 바로 노출 --%>
+<c:choose>
+    <c:when test="${authMode ne 'register' and empty errorMsg}">
+        <%-- 정상 진입: 인트로 오버레이 표시 --%>
+        <div id="intro-overlay">
+            <button id="light-switch-btn" aria-label="불 켜기">
+                <i class="fa-solid fa-lightbulb"></i>
+            </button>
+            <p class="light-hint">불을 켜주세요</p>
+        </div>
+    </c:when>
+    <c:when test="${authMode ne 'register' and not empty errorMsg}">
+        <%-- 로그인 실패 재진입: 오버레이 없이 폼 즉시 노출 --%>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var ls = document.querySelector('.login-section');
+                if (ls) ls.classList.add('revealed');
+            });
+        </script>
+    </c:when>
+</c:choose>
 </body>
 </html>

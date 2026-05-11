@@ -9,6 +9,7 @@ public class UserDto {
     private String role;       // 권한: "USER" | "ADMIN"
     private String isBanned;   // 정지 여부: "Y" | "N"
     private String avatarUrl;  // 프로필 사진 경로
+    private String bio;        // 한 줄 소개 (프로필 수정에서 설정)
 
     public int getUserId()                       { return userId; }
     public void setUserId(int userId)            { this.userId = userId; }
@@ -27,4 +28,7 @@ public class UserDto {
 
     public String getAvatarUrl()                 { return avatarUrl; }
     public void setAvatarUrl(String avatarUrl)   { this.avatarUrl = avatarUrl; }
+
+    public String getBio()                       { return bio; }
+    public void setBio(String bio)               { this.bio = bio; }
 }

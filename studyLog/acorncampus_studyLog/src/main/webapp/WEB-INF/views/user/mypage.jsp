@@ -56,6 +56,56 @@
                 </a>
             </div>
         </section>
+
+        <%-- 시리즈에 속하지 않은 글 목록 --%>
+        <%-- postList 전체 중 seriesId가 null인 항목만 필터링해서 표시 --%>
+        <section class="loose-posts-section">
+            <%-- 시리즈 없는 글 수를 먼저 카운트 --%>
+            <c:set var="looseCount" value="0"/>
+            <c:forEach var="post" items="${postList}">
+                <c:if test="${empty post.seriesId}">
+                    <c:set var="looseCount" value="${looseCount + 1}"/>
+                </c:if>
+            </c:forEach>
+
+            <div class="loose-posts-header">
+                <h2><i class="fa-regular fa-file-lines"></i> 시리즈 없는 글</h2>
+                <span class="count-badge">${looseCount}</span>
+            </div>
+
+            <c:choose>
+                <c:when test="${looseCount > 0}">
+                    <div class="loose-post-list">
+                        <c:forEach var="post" items="${postList}">
+                            <c:if test="${empty post.seriesId}">
+                                <div class="loose-post-item">
+                                    <a class="loose-post-title"
+                                       href="${pageContext.request.contextPath}/post/detail.do?id=${post.postId}"
+                                       title="<c:out value='${post.title}'/>">
+                                        <c:out value="${post.title}"/>
+                                    </a>
+                                    <div class="loose-post-meta">
+                                        <c:if test="${post.isPublic eq 'N'}">
+                                            <span class="badge-private"><i class="fa-solid fa-lock"></i> 비공개</span>
+                                        </c:if>
+                                        <span>${post.createdAt}</span>
+                                    </div>
+                                    <a class="loose-post-edit"
+                                       href="${pageContext.request.contextPath}/l_check/post/write.do?id=${post.postId}">
+                                        수정
+                                    </a>
+                                </div>
+                            </c:if>
+                        </c:forEach>
+                    </div>
+                </c:when>
+                <c:otherwise>
+                    <p style="color: var(--text-sub); font-size: 14px; padding: 16px 0;">
+                        시리즈에 속하지 않은 글이 없습니다.
+                    </p>
+                </c:otherwise>
+            </c:choose>
+        </section>
     </main>
 </div>
 </body>

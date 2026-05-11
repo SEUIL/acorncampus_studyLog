@@ -17,6 +17,8 @@ public class ReportDto {
     // --- JOIN 필드 (DB 저장 X, 조회 시 채움) ---
     private String reporterName;   // users.nickname (신고자)
     private String targetSummary;  // 게시글 제목 또는 댓글 내용 앞 50자
+    private String targetAuthorName;
+    private String targetAuthorEmail;
 
     public int getReportId() { return reportId; }
     public void setReportId(int reportId) { this.reportId = reportId; }
@@ -44,4 +46,10 @@ public class ReportDto {
 
     public String getTargetSummary() { return targetSummary; }
     public void setTargetSummary(String targetSummary) { this.targetSummary = targetSummary; }
+
+    public String getTargetAuthorName() { return targetAuthorName; }
+    public void setTargetAuthorName(String targetAuthorName) { this.targetAuthorName = targetAuthorName; }
+
+    public String getTargetAuthorEmail() { return targetAuthorEmail; }
+    public void setTargetAuthorEmail(String targetAuthorEmail) { this.targetAuthorEmail = targetAuthorEmail; }
 }

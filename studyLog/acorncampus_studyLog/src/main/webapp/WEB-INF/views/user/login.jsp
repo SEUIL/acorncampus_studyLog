@@ -35,7 +35,9 @@
                 <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
                     <input type="checkbox"> 자동 로그인
                 </label>
-                <a href="javascript:void(0)">비밀번호 찾기</a>
+                <a href="${pageContext.request.contextPath}/user/pwd-reset/forgot.do">
+                    비밀번호 찾기
+                </a>
             </div>
 
             <button type="submit" class="btn-login">로그인</button>

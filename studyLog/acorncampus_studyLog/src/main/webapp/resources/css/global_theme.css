@@ -20,21 +20,23 @@ body, h1, h2, h3, p, ul, li {
 /* 3. CSS 변수 — Himalaya Light 테마 (기본) */
 :root {
     /* 수치 */
-    --radius-md: 8px;
-    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
     --transition-base: 0.2s ease-in-out;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.04);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.10), 0 2px 6px rgba(0, 0, 0, 0.06);
+    --shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.13), 0 4px 10px rgba(0, 0, 0, 0.07);
 
     /* 배경 */
     --bg-body: #ECEFF1;
-    --bg-card: #FAFAFA;
+    --bg-card: #FFFFFF;
 
     /* 텍스트 */
     --text-main: #263238;
     --text-sub: #78909C;
 
     /* 테두리 */
-    --border-color: #CFD8DC;
+    --border-color: #E0E6EA;
 
     /* 브랜드 컬러 */
     --accent-color: #607D8B;
@@ -44,10 +46,10 @@ body, h1, h2, h3, p, ul, li {
     --input-bg: #ffffff;
 
     /* 호버 */
-    --list-hover: #ECEFF1;
+    --list-hover: #F0F4F6;
 
     /* 태그 */
-    --tag-bg: #ECEFF1;
+    --tag-bg: #EEF2F5;
     --tag-border: transparent;
 }
 
@@ -57,16 +59,47 @@ body, h1, h2, h3, p, ul, li {
     --bg-card: #1E1E1E;
     --text-main: #E0E0E0;
     --text-sub: #9E9E9E;
-    --border-color: #333333;
+    --border-color: #2C2C2C;
     --accent-color: #00E676;
     --accent-contrast: #121212;
-    --input-bg: #121212;
+    --input-bg: #161616;
     --list-hover: #252525;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.25);
+    --shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
     --tag-bg: transparent;
     --tag-border: #00E676;
 }
 
-/* 5. body 베이스 스타일 */
+/* 5. 커스텀 스크롤바 */
+
+/* Chromium 계열 (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 999px;
+    transition: background-color 0.2s;
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-sub);
+}
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+}
+
+/* 6. body 베이스 스타일 */
 body {
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     background-color: var(--bg-body);

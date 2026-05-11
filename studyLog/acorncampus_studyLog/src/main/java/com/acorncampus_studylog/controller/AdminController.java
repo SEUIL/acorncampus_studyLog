@@ -19,11 +19,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * 관리자 화면의 요청을 한 곳에서 분기하는 컨트롤러.
- * /admin/* 아래로 들어오는 URL을 메뉴별 Service로 연결하고,
- * JSP에서 필요한 목록/페이지/통계 데이터를 request attribute로 넘긴다.
+ * 관리자 화면 요청을 한 곳에서 분기하는 컨트롤러.
+ * /admin/* 아래 URL을 메뉴별 Service로 연결하고,
+ * JSP에 필요한 목록/페이지/통계 데이터를 request attribute로 전달한다.
  *
- * 권한 체크는 LoginCheckFilter와 role 체크에서 처리하는 전제로 작성한다.
+ * 로그인 및 관리자 권한 검사는 LoginCheckFilter에서 처리한다.
  */
 @WebServlet("/admin/*")
 public class AdminController extends HttpServlet {
@@ -85,11 +85,7 @@ public class AdminController extends HttpServlet {
 
     /**
      * GET /admin/main.do
-     * 관리자 메인 화면에 필요한 요약 통계를 조회한다.
-     * 현재 Service에 있는 페이지 정보의 totalCount를 활용해서 전체 수를 표시한다.
-     * 오늘 가입/오늘 게시글처럼 날짜 조건이 필요한 값은 담당 Service 메서드가 추가되면 교체한다.
-     *
-     * forward: /WEB-INF/views/admin/main.jsp
+     * 관리자 메인 화면에 필요한 요약 통계를 전달한다.
      */
     private void handleDashboard(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -97,12 +93,14 @@ public class AdminController extends HttpServlet {
         PageDto postPage = postService.getPostPageForAdmin(1);
         PageDto pendingReportPage = reportService.getReportPage("PENDING", 1);
         req.setAttribute("totalUserCount", userPage.getTotalCount());
-        req.setAttribute("todayUserCount", 0);
+        // Admin dashboard uses the actual count instead of a temporary zero.
+        req.setAttribute("todayUserCount", userService.getTodayUserCount());
         req.setAttribute("totalPostCount", postPage.getTotalCount());
         req.setAttribute("todayPostCount", 0);
         req.setAttribute("pendingReportCount", pendingReportPage.getTotalCount());
-        // TODO: 날짜별 게시글 통계 Service가 생기면 최근 7일 그래프 데이터로 교체
-        req.setAttribute("recentPostStats", "최근 작성 흐름");
+        // TODO: 날짜별 게시글 통계 Service가 생기면 최근 7일 그래프 데이터로 교체한다.
+        // Admin dashboard chart - recent 7 days registered users.
+        req.setAttribute("recentUserStats", userService.getRecentUserStats());
         req.getRequestDispatcher("/WEB-INF/views/admin/main.jsp").forward(req, resp);
     }
 
@@ -135,11 +133,8 @@ public class AdminController extends HttpServlet {
     }
 
     /**
-     * GET /admin/user/list.do?keyword={kw}&page={page}
-     * 관리자 회원관리 화면에 회원 목록과 페이지 정보를 전달한다.
-     * keyword가 있으면 이메일/닉네임 검색 결과를, 없으면 전체 회원을 조회한다.
-     *
-     * forward: /WEB-INF/views/admin/user/list.jsp
+     * GET /admin/user/list.do?keyword={kw}&status={status}&page={page}
+     * 회원 목록과 페이지 정보를 전달한다.
      */
     private void handleUserList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -155,7 +150,7 @@ public class AdminController extends HttpServlet {
 
         req.setAttribute("userList", userService.getUserList(keyword, status, pageNo));
         req.setAttribute("page", page);
-        // 회원관리 상단 통계와 그래프는 필터와 별개로 전체 회원 상태를 기준으로 표시
+        // 상단 통계와 그래프는 목록 필터와 별개로 전체 회원 상태 기준으로 표시한다.
         req.setAttribute("totalUserCount", totalUserCount);
         req.setAttribute("activeUserCount", activeUserCount);
         req.setAttribute("bannedUserCount", bannedUserCount);
@@ -168,10 +163,7 @@ public class AdminController extends HttpServlet {
 
     /**
      * POST /admin/user/ban.do
-     * 선택한 회원을 정지 처리한 뒤 다시 회원 목록으로 이동한다.
-     *
-     * 파라미터: userId
-     * redirect: /admin/user/list.do
+     * 선택한 회원을 정지 처리한다.
      */
     private void handleUserBan(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
@@ -181,10 +173,7 @@ public class AdminController extends HttpServlet {
 
     /**
      * POST /admin/user/unban.do
-     * 정지 상태인 회원을 정상 상태로 되돌린 뒤 회원 목록으로 이동한다.
-     *
-     * 파라미터: userId
-     * redirect: /admin/user/list.do
+     * 정지 상태인 회원을 정상 상태로 되돌린다.
      */
     private void handleUserUnban(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
@@ -194,15 +183,13 @@ public class AdminController extends HttpServlet {
 
     /**
      * POST /admin/user/delete.do
-     * 관리자가 선택한 회원을 강제 삭제한다.
-     * 실제 삭제 방식은 UserService/UserDao 구현을 따른다.
-     *
-     * 파라미터: userId
-     * redirect: /admin/user/list.do
+     * 선택한 회원을 관리자 권한으로 삭제 처리한다.
      */
     private void handleUserDelete(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        writeActionJson(resp, () -> userService.forceDeleteUser(parseInt(req.getParameter("userId"), 0)),
+        // 관리자 회원 삭제는 soft delete로 처리한다.
+        // 사용자가 작성한 게시글/댓글/신고 FK 때문에 users hard delete는 실패할 수 있다.
+        writeActionJson(resp, () -> userService.deleteUserByAdmin(parseInt(req.getParameter("userId"), 0)),
                 "회원 삭제 완료");
     }
 
@@ -229,30 +216,29 @@ public class AdminController extends HttpServlet {
     }
 
     /**
-     * GET /admin/post/list.do?page={page}
-     * 관리자 게시글관리 화면에 전체 게시글 목록을 전달한다.
-     * 일반 사용자 화면과 달리 공개/비공개 글을 모두 관리 대상으로 본다.
-     *
-     * forward: /WEB-INF/views/admin/post/list.jsp
+     * GET /admin/post/list.do?keyword={kw}&status={Y|N}&page={page}
+     * 공개/비공개 글을 모두 포함한 관리자 게시글 목록을 전달한다.
      */
     private void handlePostList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        String keyword = req.getParameter("keyword");
+        String status = normalizePostStatus(req.getParameter("status"));
         int pageNo = parseInt(req.getParameter("page"), 1);
-        req.setAttribute("postList", postService.getPostListForAdmin(pageNo));
-        req.setAttribute("page", postService.getPostPageForAdmin(pageNo));
+        // 게시글 관리 화면의 검색어/공개상태 필터를 실제 조회 조건으로 전달한다.
+        req.setAttribute("postList", postService.getPostListForAdmin(keyword, status, pageNo));
+        req.setAttribute("page", postService.getPostPageForAdmin(keyword, status, pageNo));
         req.getRequestDispatcher("/WEB-INF/views/admin/post/list.jsp").forward(req, resp);
     }
 
     /**
      * POST /admin/post/delete.do
-     * 선택한 게시글을 관리자 권한으로 삭제하고 게시글 목록으로 돌아간다.
-     *
-     * 파라미터: postId
-     * redirect: /admin/post/list.do
+     * 선택한 게시글을 관리자 권한으로 삭제 처리한다.
      */
     private void handlePostDelete(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        writeActionJson(resp, () -> postService.forceDeletePost(parseInt(req.getParameter("postId"), 0)),
+        // 관리자 게시글 삭제는 soft delete로 통일한다.
+        // posts에 연결된 댓글/좋아요/신고 FK 때문에 hard delete는 운영 중 실패할 수 있다.
+        writeActionJson(resp, () -> postService.deletePost(parseInt(req.getParameter("postId"), 0)),
                 "게시글 삭제 완료");
     }
 
@@ -280,10 +266,7 @@ public class AdminController extends HttpServlet {
 
     /**
      * GET /admin/comment/list.do?page={page}
-     * 댓글관리 화면에 전체 댓글 목록과 페이지 정보를 전달한다.
-     * 분업 핵심 범위는 아니지만 기존 관리자 메뉴 구조에 맞춰 연결해 둔다.
-     *
-     * forward: /WEB-INF/views/admin/comment/list.jsp
+     * 전체 댓글 목록과 페이지 정보를 전달한다.
      */
     private void handleCommentList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -295,10 +278,7 @@ public class AdminController extends HttpServlet {
 
     /**
      * POST /admin/comment/delete.do
-     * 선택한 댓글을 관리자 권한으로 삭제하고 댓글 목록으로 돌아간다.
-     *
-     * 파라미터: commentId
-     * redirect: /admin/comment/list.do
+     * 선택한 댓글을 관리자 권한으로 삭제 처리한다.
      */
     private void handleCommentDelete(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
@@ -333,26 +313,22 @@ public class AdminController extends HttpServlet {
 
     /**
      * GET /admin/report/list.do?status={status}&page={page}
-     * 신고관리 화면에 신고 목록을 전달한다.
-     * status가 PENDING/RESOLVED/DISMISSED 중 하나면 해당 상태만 필터링한다.
-     *
-     * forward: /WEB-INF/views/admin/report/list.jsp
+     * 신고 목록을 전달한다. 현재는 status 필터만 적용한다.
      */
     private void handleReportList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         String status = normalizeReportStatus(req.getParameter("status"));
+        String keyword = req.getParameter("keyword");
         int pageNo = parseInt(req.getParameter("page"), 1);
-        req.setAttribute("reportList", reportService.getReportList(status, pageNo));
-        req.setAttribute("page", reportService.getReportPage(status, pageNo));
+        // 신고 관리 검색창의 keyword를 실제 목록/페이지 조회 조건으로 전달한다.
+        req.setAttribute("reportList", reportService.getReportList(status, keyword, pageNo));
+        req.setAttribute("page", reportService.getReportPage(status, keyword, pageNo));
         req.getRequestDispatcher("/WEB-INF/views/admin/report/list.jsp").forward(req, resp);
     }
 
     /**
      * POST /admin/report/resolve.do
      * 선택한 신고를 처리 완료 상태로 변경한다.
-     *
-     * 파라미터: reportId
-     * redirect: /admin/report/list.do
      */
     private void handleReportResolve(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
@@ -363,9 +339,6 @@ public class AdminController extends HttpServlet {
     /**
      * POST /admin/report/dismiss.do
      * 선택한 신고를 기각 상태로 변경한다.
-     *
-     * 파라미터: reportId
-     * redirect: /admin/report/list.do
      */
     private void handleReportDismiss(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
@@ -397,24 +370,20 @@ public class AdminController extends HttpServlet {
 
     /**
      * GET /admin/tag/list.do
-     * 태그관리 화면에 전체 태그 목록을 전달한다.
-     * 현재 정렬/검색 파라미터는 화면에만 있고 Service에는 아직 연결하지 않았다.
-     *
-     * forward: /WEB-INF/views/admin/tag/list.jsp
+     * 전체 태그 목록을 전달한다. 현재 keyword/sort UI는 아직 Service에 연결되지 않았다.
      */
     private void handleTagList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        req.setAttribute("tagList", tagService.getAllTagsForAdmin());
+        String keyword = req.getParameter("keyword");
+        String sort = normalizeTagSort(req.getParameter("sort"));
+        // 태그 관리 검색/정렬 UI를 실제 태그 조회 조건으로 전달한다.
+        req.setAttribute("tagList", tagService.getAllTagsForAdmin(keyword, sort));
         req.getRequestDispatcher("/WEB-INF/views/admin/tag/list.jsp").forward(req, resp);
     }
 
     /**
      * POST /admin/tag/delete.do
-     * 선택한 태그를 삭제하고 태그 목록으로 돌아간다.
-     * 연결 테이블 삭제 여부는 DB 제약조건과 TagDao 구현을 따른다.
-     *
-     * 파라미터: tagId
-     * redirect: /admin/tag/list.do
+     * 선택한 태그를 삭제한다.
      */
     private void handleTagDelete(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
@@ -462,6 +431,20 @@ public class AdminController extends HttpServlet {
             return status;
         }
         return null;
+    }
+
+    private String normalizePostStatus(String status) {
+        if ("Y".equals(status) || "N".equals(status)) {
+            return status;
+        }
+        return null;
+    }
+
+    private String normalizeTagSort(String sort) {
+        if ("latest".equals(sort) || "name".equals(sort)) {
+            return sort;
+        }
+        return "count";
     }
 
     private int toPercent(int count, int total) {

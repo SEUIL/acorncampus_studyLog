@@ -15,7 +15,7 @@
 .btn-report:hover { background-color: rgba(239, 83, 80, 0.1); color: #ef5350; }
 
 /* 3. 게시글 본문 컨테이너 */
-.post-container { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 40px; margin-bottom: 30px; }
+.post-container { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 40px; margin-bottom: 30px; box-shadow: var(--shadow-sm); }
 
 /* 4. 게시글 헤더 */
 .post-header { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color); }
@@ -35,7 +35,7 @@
 .post-body pre { background-color: var(--list-hover); padding: 15px; border-radius: 6px; overflow-x: auto; font-family: monospace; font-size: 14px; border: 1px solid var(--border-color); }
 
 /* 7. 댓글 섹션 */
-.comments-section { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 30px; }
+.comments-section { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 30px; box-shadow: var(--shadow-sm); }
 .comments-header { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: var(--text-main); }
 .comment-input-box { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
 .comment-input { width: 100%; min-height: 80px; padding: 15px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background-color: var(--input-bg); color: var(--text-main); font-family: inherit; resize: vertical; }
@@ -51,7 +51,35 @@
 .reply-list { margin-top: 14px; padding-left: 16px; border-left: 2px solid var(--border-color); }
 .reply-item { padding-top: 14px; }
 
-/* 8. 신고 모달 */
+/* 8. 댓글 액션 버튼 (답글 / 수정 / 삭제) */
+.comment-actions { display: flex; gap: 6px; margin-top: 10px; }
+.comment-action-btn {
+    background: none; border: none;
+    padding: 3px 8px;
+    font-size: 12px; color: var(--text-sub);
+    cursor: pointer; border-radius: var(--radius-sm);
+    transition: var(--transition-base);
+}
+.comment-action-btn:hover { background-color: var(--list-hover); color: var(--text-main); }
+.comment-action-btn.delete-btn:hover { color: #ef5350; }
+.comment-action-btn .fa-comment { margin-right: 3px; }
+
+/* 9. 답글 폼 / 인라인 수정 폼 */
+.reply-form, .edit-form { margin-top: 12px; }
+.reply-textarea {
+    width: 100%; min-height: 72px; padding: 12px;
+    border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+    background-color: var(--input-bg); color: var(--text-main);
+    font-family: inherit; font-size: 14px; resize: vertical;
+    box-sizing: border-box;
+}
+.reply-textarea:focus { outline: none; border-color: var(--accent-color); }
+.reply-form-actions {
+    display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px;
+}
+.btn-sm { font-size: 12px !important; padding: 6px 14px !important; }
+
+/* 10. 신고 모달 */
 .modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 9999; }
 .modal-container { background-color: var(--bg-card); width: 100%; max-width: 420px; border-radius: var(--radius-md); box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; border: 1px solid var(--border-color); }
 .modal-header { padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }

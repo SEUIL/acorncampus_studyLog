@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/form.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/table.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/admin/admin_user_list.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/admin/admin_user_list.css?v=graph-20260507">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/admin/admin_user_list.css?v=modal-20260508">
     <style>
         <%-- 회원관리 그래프 스타일: 브라우저가 예전 CSS를 캐시해도 막대 그래프가 보이도록 보강 --%>
         .big-graph { min-height: 200px; height: auto; font-size: 14px; font-weight: 400; color: var(--text-main); padding: 24px; }
@@ -37,6 +37,7 @@
             <li onclick="location.href='${pageContext.request.contextPath}/admin/main.do'"><i class="fa-solid fa-chart-pie"></i> 대시보드 메인</li>
             <li class="active" onclick="location.href='${pageContext.request.contextPath}/admin/user/list.do'"><i class="fa-solid fa-users"></i> 회원 관리</li>
             <li onclick="location.href='${pageContext.request.contextPath}/admin/post/list.do'"><i class="fa-solid fa-file-lines"></i> 게시글 관리</li>
+            <li onclick="location.href='${pageContext.request.contextPath}/admin/comment/list.do'"><i class="fa-solid fa-comments"></i> 댓글 관리</li>
             <li onclick="location.href='${pageContext.request.contextPath}/admin/report/list.do'"><i class="fa-solid fa-triangle-exclamation"></i> 신고 관리</li>
             <li onclick="location.href='${pageContext.request.contextPath}/admin/tag/list.do'"><i class="fa-solid fa-tags"></i> 태그 관리</li>
         </ul>
@@ -129,10 +130,62 @@
                                                 </form>
                                             </c:otherwise>
                                         </c:choose>
+                                        <button type="button" class="btn-sm detail-open-btn" data-modal-target="userDetailModal-${user.userId}">상세보기</button>
                                         <form action="${pageContext.request.contextPath}/admin/user/delete.do" method="post" data-ajax-form="true">
                                             <input type="hidden" name="userId" value="${user.userId}">
                                             <button type="submit" class="btn-sm btn-danger">회원 삭제</button>
                                         </form>
+                                    </div>
+                                    <div class="admin-detail-modal" id="userDetailModal-${user.userId}" aria-hidden="true" hidden>
+                                        <div class="admin-detail-backdrop" data-modal-close></div>
+                                        <div class="admin-detail-panel" role="dialog" aria-modal="true" aria-labelledby="userDetailTitle-${user.userId}">
+                                            <div class="admin-detail-header">
+                                                <h2 id="userDetailTitle-${user.userId}">회원 상세보기</h2>
+                                                <button type="button" class="admin-detail-close" data-modal-close aria-label="닫기">
+                                                    <i class="fa-solid fa-xmark"></i>
+                                                </button>
+                                            </div>
+                                            <dl class="admin-detail-list">
+                                                <div>
+                                                    <dt>회원ID</dt>
+                                                    <dd><c:out value="${user.userId}"/></dd>
+                                                </div>
+                                                <div>
+                                                    <dt>닉네임</dt>
+                                                    <dd><c:out value="${user.nickname}"/></dd>
+                                                </div>
+                                                <div>
+                                                    <dt>이메일</dt>
+                                                    <dd><c:out value="${user.email}"/></dd>
+                                                </div>
+                                                <div>
+                                                    <dt>권한</dt>
+                                                    <dd><c:out value="${user.role}"/></dd>
+                                                </div>
+                                                <div>
+                                                    <dt>상태</dt>
+                                                    <dd>
+                                                        <c:choose>
+                                                            <c:when test="${not empty user.deletedAt}">탈퇴</c:when>
+                                                            <c:when test="${user.isBanned eq 'Y'}">정지</c:when>
+                                                            <c:otherwise>정상</c:otherwise>
+                                                        </c:choose>
+                                                    </dd>
+                                                </div>
+                                                <div>
+                                                    <dt>가입일</dt>
+                                                    <dd><c:out value="${user.createdAt}"/></dd>
+                                                </div>
+                                                <div>
+                                                    <dt>탈퇴일</dt>
+                                                    <dd><c:out value="${empty user.deletedAt ? '-' : user.deletedAt}"/></dd>
+                                                </div>
+                                                <div class="detail-wide">
+                                                    <dt>자기소개</dt>
+                                                    <dd><c:out value="${empty user.bio ? '-' : user.bio}"/></dd>
+                                                </div>
+                                            </dl>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
@@ -175,6 +228,28 @@
                     console.error('Error:', error);
                     alert('서버 통신 중 오류가 발생했습니다.');
                 });
+            });
+        });
+
+        document.querySelectorAll('.detail-open-btn').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const modal = document.getElementById(button.dataset.modalTarget);
+                if (modal) {
+                    modal.hidden = false;
+                    modal.classList.add('is-open');
+                    modal.setAttribute('aria-hidden', 'false');
+                }
+            });
+        });
+
+        document.querySelectorAll('[data-modal-close]').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const modal = button.closest('.admin-detail-modal');
+                if (modal) {
+                    modal.classList.remove('is-open');
+                    modal.setAttribute('aria-hidden', 'true');
+                    modal.hidden = true;
+                }
             });
         });
     });

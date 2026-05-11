@@ -94,6 +94,21 @@ public class PostService {
     }
 
     /**
+     * 특정 사용자의 공개 게시글 목록 (타인 프로필 페이지 — 비공개 제외)
+     * @param pageNo 현재 페이지 (1-based)
+     */
+    public List<PostDto> getPublicPostsByUser(int userId, int pageNo) {
+        int total = postDao.countPublicByUserId(userId);
+        PageDto page = new PageDto(pageNo, PAGE_SIZE, total);
+        return postDao.findPublicByUserId(userId, page.getOffset(), PAGE_SIZE);
+    }
+
+    /** 타인 프로필 페이지 정보 반환 */
+    public PageDto getPublicPostPageByUser(int userId, int pageNo) {
+        return new PageDto(pageNo, PAGE_SIZE, postDao.countPublicByUserId(userId));
+    }
+
+    /**
      * 태그별 공개 게시글 목록 조회
      * @param tagName 태그명 (예: "Java")
      * @param pageNo 현재 페이지 (1-based)
@@ -243,9 +258,20 @@ public class PostService {
         return postDao.findAllForAdmin(page.getOffset(), PAGE_SIZE);
     }
 
+    public List<PostDto> getPostListForAdmin(String keyword, String status, int pageNo) {
+        // 관리자 게시글 목록의 검색어/공개상태 조건을 같은 페이지 계산에 반영한다.
+        int total = postDao.countAllForAdmin(keyword, status);
+        PageDto page = new PageDto(pageNo, PAGE_SIZE, total);
+        return postDao.findAllForAdmin(keyword, status, page.getOffset(), PAGE_SIZE);
+    }
+
     /** 관리자 - 전체 게시글 페이지 정보 */
     public PageDto getPostPageForAdmin(int pageNo) {
         return new PageDto(pageNo, PAGE_SIZE, postDao.countAllForAdmin());
+    }
+
+    public PageDto getPostPageForAdmin(String keyword, String status, int pageNo) {
+        return new PageDto(pageNo, PAGE_SIZE, postDao.countAllForAdmin(keyword, status));
     }
 
     /** 관리자 - 게시글 강제 삭제 (하드 삭제 — 실제 DB 행 삭제) */

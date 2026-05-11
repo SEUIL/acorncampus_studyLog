@@ -57,6 +57,11 @@ public class TagService {
         return tagDao.findAll();
     }
 
+    public List<TagDto> getAllTagsForAdmin(String keyword, String sort) {
+        // 관리자 태그 화면의 검색어/정렬 선택을 DAO 조회 조건으로 전달한다.
+        return tagDao.findAll(keyword, sort);
+    }
+
     /**
      * 관리자 - 태그 삭제
      * post_tags 테이블의 관련 행은 schema.sql에 CASCADE DELETE가 설정되어 있어

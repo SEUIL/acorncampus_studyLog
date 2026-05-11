@@ -24,6 +24,7 @@
             <li onclick="location.href='${pageContext.request.contextPath}/admin/main.do'"><i class="fa-solid fa-chart-pie"></i> 대시보드 메인</li>
             <li onclick="location.href='${pageContext.request.contextPath}/admin/user/list.do'"><i class="fa-solid fa-users"></i> 회원 관리</li>
             <li class="active" onclick="location.href='${pageContext.request.contextPath}/admin/post/list.do'"><i class="fa-solid fa-file-lines"></i> 게시글 관리</li>
+            <li onclick="location.href='${pageContext.request.contextPath}/admin/comment/list.do'"><i class="fa-solid fa-comments"></i> 댓글 관리</li>
             <li onclick="location.href='${pageContext.request.contextPath}/admin/report/list.do'"><i class="fa-solid fa-triangle-exclamation"></i> 신고 관리</li>
             <li onclick="location.href='${pageContext.request.contextPath}/admin/tag/list.do'"><i class="fa-solid fa-tags"></i> 태그 관리</li>
         </ul>
@@ -84,7 +85,7 @@
                                 <td>
                                     <form action="${pageContext.request.contextPath}/admin/post/delete.do" method="post" style="display:inline;" data-ajax-form="true">
                                         <input type="hidden" name="postId" value="${post.postId}">
-                                        <button type="submit" class="btn-sm btn-danger">강제 삭제</button>
+                                        <button type="submit" class="btn-sm btn-danger">삭제</button>
                                     </form>
                                 </td>
                             </tr>
