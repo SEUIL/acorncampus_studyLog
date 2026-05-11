@@ -58,7 +58,10 @@
                         <span id="toggleText">비공개</span>
                         <label class="switch">
                             <%-- 수정 모드: 기존 isPublic 값 반영 / 생성 모드: 기본 공개 --%>
-                            <input type="checkbox" id="publicToggle" name="isPublic" value="Y"
+                            <%-- 체크 해제 시에도 비공개 값이 서버로 전송되도록 기본값을 둔다. --%>
+                            <input type="hidden" id="isPublicValue" name="isPublic"
+                                   value="${empty series or series.isPublic eq 'Y' ? 'Y' : 'N'}">
+                            <input type="checkbox" id="publicToggle" value="Y"
                                    ${empty series or series.isPublic eq 'Y' ? 'checked' : ''}>
                             <span class="slider"></span>
                         </label>
@@ -99,10 +102,12 @@
 
 <script>
     const toggle = document.getElementById('publicToggle');
+    const isPublicValue = document.getElementById('isPublicValue');
     const textLeft = document.getElementById('toggleText');
     const textRight = document.getElementById('toggleTextRight');
 
     function syncVisibilityText() {
+        isPublicValue.value = toggle.checked ? 'Y' : 'N';
         if (toggle.checked) {
             textLeft.style.color = 'var(--text-sub)';
             textRight.style.color = 'var(--text-main)';
