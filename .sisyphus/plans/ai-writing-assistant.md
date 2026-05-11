@@ -99,6 +99,8 @@ Before starting Task 1, the executor must update the working branch to include `
 - Current branch contains `8714d01` after merge/rebase.
 - `studyLog/acorncampus_studyLog/mvnw.cmd -q -DskipTests compile` succeeds after resolving any conflicts.
 
+Current session note: user reported PR #76 has been merged into the current branch and compile succeeds. Read-only git verification confirmed current HEAD `0d7bd07 Merge branch 'develop' into feature/seuil/ai` contains `8714d01`.
+
 PR #76 impact summary for this plan:
 - Changed files include `PostController.java`, `SeriesController.java`, `PostDao.java`, `SeriesDao.java`, `PostService.java`, `SeriesService.java`, `header.jsp`, `post/detail.jsp`, `post/list.jsp`, `series/list.jsp`, and `resources/css/components/ui.css`.
 - It does not change `post/write.jsp`, `milkdown-editor.js`, `milkdown-slash.js`, or `components/milkdown.css`, so the AI editor integration remains Milkdown-based.
@@ -109,9 +111,15 @@ PR #76 impact summary for this plan:
 > Target: 5-8 tasks per wave. <3 per wave (except final) = under-splitting.
 > Extract shared dependencies as Wave-1 tasks for max parallelism.
 
-Wave 1: Task 1 config/dependency, Task 2 schema/DAO/DTO, Task 6 frontend shell can start after confirming IDs/selectors
+Backend-first execution override requested by user:
+- Run backend Tasks 1-5 first: config/dependency → schema/DAO/DTO → OpenAI client → AI service/limits → AI servlet endpoint.
+- Run backend portions of Task 7 after Task 5: config tests, DAO/service tests, controller tests, and guarded real API smoke test.
+- Do not start Task 6 frontend implementation until the executor presents the exact JSP/CSS/JS file list and receives explicit user approval.
+
+Wave 1: Task 1 config/dependency, Task 2 schema/DAO/DTO
 Wave 2: Task 3 OpenAI client, Task 4 AI domain service/cooldown, Task 5 servlet endpoint
-Wave 3: Task 6 frontend completion, Task 7 tests, Task 8 documentation/operational notes
+Wave 3: Task 7 backend tests/real API smoke, then STOP for frontend approval before Task 6
+Wave 4: Task 6 frontend completion after approval, Task 8 documentation/operational notes
 
 ### Dependency Matrix (full, all tasks)
 | Task | Depends On | Blocks |
@@ -121,22 +129,23 @@ Wave 3: Task 6 frontend completion, Task 7 tests, Task 8 documentation/operation
 | 3 OpenAI client wrapper | 1 | 4, 7 |
 | 4 AI domain service | 2, 3 | 5, 7 |
 | 5 AI servlet endpoint | 2, 4 | 6, 7 |
-| 6 Post write modal/frontend | 5 for live integration; can scaffold earlier | 7 |
-| 7 Tests and real API smoke | 1, 2, 3, 4, 5, 6 | 8 |
+| 6 Post write modal/frontend | 5 and explicit user frontend approval | 7 |
+| 7 Tests and real API smoke | Backend portion: 1-5; full UI QA: 6 | 8 |
 | 8 Docs and runbook updates | 1-7 | Final verification |
 
 ### Agent Dispatch Summary (wave → task count → categories)
 | Wave | Task Count | Recommended Categories |
 |------|------------|------------------------|
-| 1 | 3 | quick, unspecified-high, visual-engineering |
+| 1 | 2 | quick, unspecified-high |
 | 2 | 3 | unspecified-high, deep |
-| 3 | 2 | unspecified-high, writing |
+| 3 | 1 | unspecified-high |
+| 4 | 2 | visual-engineering, writing |
 
 ## TODOs
 > Implementation + Test = ONE task. Never separate.
 > EVERY task MUST have: Agent Profile + Parallelization + QA Scenarios.
 
-- [ ] 1. Configure OpenAI Secret Loading and Dependencies
+- [x] 1. Configure OpenAI Secret Loading and Dependencies
 
   **What to do**: Add OpenAI integration configuration without exposing secrets. Update `studyLog/acorncampus_studyLog/.gitignore` to ignore `src/main/resources/openai.properties`. Add a non-secret example file only if needed, named `src/main/resources/openai.properties.example`, containing placeholder keys only. Add the official OpenAI Java SDK dependency to `pom.xml` if compatible with Java 17 and this WAR project; if dependency resolution fails or servlet packaging conflicts arise, use Java 17 `java.net.http.HttpClient` with Gson instead. Implement `OpenAiConfig` in `com.acorncampus_studylog.util` or `service.ai` that reads `src/main/resources/openai.properties` from classpath with keys: `openai.api.key`, `openai.model`, `openai.timeout.seconds`. Defaults: model `gpt-5.4-mini`, timeout 25 seconds. Missing API key must fail with a clear server-side exception and client-safe error message.
   **Must NOT do**: Do not commit real `openai.properties`; do not read API key from request parameters; do not put the key into JSP/JS; do not edit `mail.properties` for OpenAI.
@@ -178,7 +187,7 @@ Wave 3: Task 6 frontend completion, Task 7 tests, Task 8 documentation/operation
 
   **Commit**: NO | Message: `feat(ai): configure OpenAI secret loading` | Files: [`pom.xml`, `.gitignore`, `src/main/resources/openai.properties.example`, config class]
 
-- [ ] 2. Add AI Usage Log Persistence
+- [x] 2. Add AI Usage Log Persistence
 
   **What to do**: Add Oracle DDL for AI usage logging in `src/main/resources/schema.sql`. Add sequence `ai_usage_log_seq` and table `ai_usage_log` with fields: `usage_id NUMBER PRIMARY KEY`, `user_id NUMBER NOT NULL`, `action VARCHAR2(20) NOT NULL`, `status VARCHAR2(20) NOT NULL`, `input_chars NUMBER NOT NULL`, `custom_prompt_chars NUMBER DEFAULT 0 NOT NULL`, `max_output_tokens NUMBER NOT NULL`, `requested_at TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL`, `completed_at TIMESTAMP`, `error_code VARCHAR2(50)`, FK to `users(user_id)`, check constraints for action (`IMPROVE`, `SUMMARY`, `EXPAND`, `TITLE`, `TAGS`, `CUSTOM`) and status (`PENDING`, `SUCCESS`, `FAILED`). Add index on `(user_id, requested_at)`. Add `AiUsageLogDto` and `AiUsageLogDao` with methods: `insertPending(userId, action, inputChars, customPromptChars, maxOutputTokens)`, `markSuccess(usageId)`, `markFailed(usageId, errorCode)`, `findRecentPendingOrSuccess(userId, seconds)`. Use `PreparedStatement` and `DBUtil.close` style.
   **Must NOT do**: Do not store full draft text, custom prompt body, AI output, or API key in DB. Do not add count quotas.
@@ -219,7 +228,7 @@ Wave 3: Task 6 frontend completion, Task 7 tests, Task 8 documentation/operation
 
   **Commit**: NO | Message: `feat(ai): add usage log persistence` | Files: [`schema.sql`, `AiUsageLogDto.java`, `AiUsageLogDao.java`, tests]
 
-- [ ] 3. Implement OpenAI Client Wrapper
+- [x] 3. Implement OpenAI Client Wrapper
 
   **What to do**: Create a small server-side client wrapper, e.g. `OpenAiClient` or `OpenAiWritingClient`, that accepts a prepared prompt and returns generated text. Use Responses API with the official Java SDK if dependency works; otherwise use Java 17 `HttpClient` and Gson to call the Responses API directly. Server fixes model and max output tokens; callers cannot override them from request parameters. Use timeout 25 seconds. Use max output tokens exactly `600`. Default temperature should be conservative (`0.4`) if supported by the chosen API/model; otherwise omit unsupported parameters rather than forcing incompatible options. Normalize OpenAI errors into application exceptions with safe codes: `OPENAI_CONFIG_MISSING`, `OPENAI_TIMEOUT`, `OPENAI_RATE_LIMIT`, `OPENAI_SERVER_ERROR`, `OPENAI_BAD_RESPONSE`.
   **Must NOT do**: Do not stream in v1; do not expose raw OpenAI exception bodies to client; do not support model selection from UI.
@@ -261,7 +270,7 @@ Wave 3: Task 6 frontend completion, Task 7 tests, Task 8 documentation/operation
 
   **Commit**: NO | Message: `feat(ai): add OpenAI client wrapper` | Files: [`OpenAiConfig.java`, `OpenAiWritingClient.java`, tests]
 
-- [ ] 4. Implement AI Writing Domain Service and Limits
+- [x] 4. Implement AI Writing Domain Service and Limits
 
   **What to do**: Add service layer, e.g. `AiWritingService`, that validates request fields, checks cooldown, inserts `PENDING` usage log, builds prompts, calls the OpenAI client, and marks usage `SUCCESS`/`FAILED`. Enforce exact limits: request body max 8 KB at controller boundary; `draftText` max 3,000 Java characters after trim; `customPrompt` max 500 Java characters after trim; output max 600 tokens via client; cooldown 15 seconds per user. Do not add request-count quotas. Build action-specific Korean prompts with strict output instructions: `IMPROVE` returns improved text only; `SUMMARY` returns concise Korean summary only; `EXPAND` expands while preserving meaning; `TITLE` returns 3-5 title candidates; `TAGS` returns comma-separated tags; `CUSTOM` follows user's instruction but refuses secrets, illegal content, credential extraction, or instructions to ignore limits.
   **Must NOT do**: Do not accept unknown actions; do not trust client-provided userId/model/maxTokens; do not store prompt bodies in usage log.
@@ -303,7 +312,7 @@ Wave 3: Task 6 frontend completion, Task 7 tests, Task 8 documentation/operation
 
   **Commit**: NO | Message: `feat(ai): add writing service limits` | Files: [`AiWritingService.java`, request/response DTOs, tests]
 
-- [ ] 5. Add Authenticated AI Servlet Endpoint
+- [x] 5. Add Authenticated AI Servlet Endpoint
 
   **What to do**: Add `AiController` under `com.acorncampus_studylog.controller` with `@WebServlet("/l_check/ai/*")` and route `POST /l_check/ai/assist.do`. Read JSON request body with a hard 8 KB maximum before parsing. Use Gson request DTO fields: `action`, `draftText`, `customPrompt`. Get login user from `session.getAttribute("loginUser")`; if missing, return JSON `401` even though filter should protect it. Call `AiWritingService`; map validation errors to `400`, cooldown to `429`, OpenAI/config/server errors to safe `500` or `503`. Response success JSON: `{ "status":"ok", "action":"...", "result":"...", "usageId":123 }`. Error JSON: `{ "status":"error", "code":"...", "message":"...", "retryAfterSeconds":15 }` when relevant. Use Gson for all JSON.
   **Must NOT do**: Do not use `String.format` JSON; do not redirect HTML login page for AJAX; do not accept GET for generation; do not log prompt body.
@@ -345,7 +354,7 @@ Wave 3: Task 6 frontend completion, Task 7 tests, Task 8 documentation/operation
 
   **Commit**: NO | Message: `feat(ai): add writing assistant endpoint` | Files: [`AiController.java`, controller tests]
 
-- [ ] 6. Build Post Write AI Modal and Frontend Integration
+- [x] 6. Build Post Write AI Modal and Frontend Integration
 
   **What to do**: First stop and ask the user for explicit frontend approval before editing any JSP/CSS/JS files. Present the intended frontend file list: `post/write.jsp`, a new AI modal JS module if used, and AI modal CSS location. After approval, update the Milkdown-based `src/main/webapp/WEB-INF/views/post/write.jsp` and scoped CSS/JS to add an AI assistant modal opened by `Ctrl+Space` while on the post write page. Current editor state: `write.jsp` mounts Milkdown at `#editor`, stores submitted markdown in hidden `#contentHidden`, initializes from hidden `#milkdown-init`, imports `initEditor/getMarkdown` from `milkdown-editor.js`, and falls back to `#fallback-textarea` if Milkdown init fails. AI Run must read current draft through `getMarkdown()` when Milkdown is active and through `#fallback-textarea.value` when fallback is active. Add or extend a Milkdown helper for Apply behavior: safest v1 default is replace full editor content with the AI result after preview Apply; if exact Milkdown set-markdown API is uncertain, implement a documented fallback that updates `#contentHidden`/fallback textarea and prompts user to save, but prefer a real Milkdown helper that updates both editor view and internal `_markdown`. Modal must include: action selector/buttons for 5 fixed actions, custom prompt textarea, run button, loading state, preview area, Apply button, Cancel/Close button, cooldown/error message area. The Run button sends `fetch` POST to `${contextPath}/l_check/ai/assist.do` with JSON. Apply behavior: for `TITLE`, offer to apply selected line to `.title-input`; for `TAGS`, offer to apply comma-separated tags to `.tag-input`; for text actions (`IMPROVE`, `SUMMARY`, `EXPAND`, `CUSTOM`), replace the editor content only after explicit Apply. Preserve original content until Apply. Disable duplicate Run while a request is in flight. Handle `401`, `400`, `429`, `500/503` with readable Korean messages.
   **Must NOT do**: Do not edit frontend files before user approval; do not auto-run on page load; do not auto-apply; do not bind Ctrl+Space globally outside this page; do not add Toast UI; do not expose API config in JS; do not broadly modify `post_write.css` because it is shared by post and series write pages.
@@ -355,7 +364,7 @@ Wave 3: Task 6 frontend completion, Task 7 tests, Task 8 documentation/operation
   - Skills: `[]` - No extra skill required.
   - Omitted: [`deep`] - UI behavior is straightforward once endpoint is defined.
 
-  **Parallelization**: Can Parallel: PARTIAL | Wave 1 scaffold / Wave 3 integration | Blocks: 7 | Blocked By: 5 for live endpoint integration
+  **Parallelization**: Can Parallel: NO for implementation | Wave 4 after backend and explicit frontend approval | Blocks: full UI QA in 7 | Blocked By: 5 and user frontend approval
 
   **References**:
   - Pattern: `studyLog/acorncampus_studyLog/src/main/webapp/WEB-INF/views/post/write.jsp:10-17` - CSS load order includes `global_theme.css`, components, page CSS, and `components/milkdown.css`.
@@ -406,7 +415,7 @@ Wave 3: Task 6 frontend completion, Task 7 tests, Task 8 documentation/operation
 
   **Commit**: NO | Message: `feat(ai): add post writing assistant modal` | Files: [`write.jsp`, `milkdown-editor.js`, AI modal JS file, scoped AI modal CSS file or tightly scoped `post_write.css` section]
 
-- [ ] 7. Add Automated Tests and Opt-in Real API Smoke Test
+- [x] 7. Add Automated Tests and Opt-in Real API Smoke Test
 
   **What to do**: Add targeted JUnit 5 tests for config loading, prompt/action validation, limits, cooldown, and fake OpenAI client success/error paths. Add a real API smoke test class named `OpenAiRealApiTest` or similar that is disabled unless `-Dopenai.realTest=true` is supplied and `openai.properties` with a real key is present. Normal `mvn test` and `-Dtest=Ai*Test test` must not call the real API. If the existing `DaoIntegrationTest` requires Oracle and would interfere with normal runs, keep new tests targeted with `-Dtest=Ai*Test` acceptance commands rather than changing existing test policy. Ensure real smoke test uses a tiny prompt, e.g. Korean one-sentence rewrite, and max output <= 80 tokens for the test only if client supports per-test override through safe test configuration; otherwise keep production 600 token cap but tiny prompt.
   **Must NOT do**: Do not run real API tests automatically in CI/default Maven; do not print API key or full response bodies to logs; do not fail normal tests when key is absent.
@@ -416,7 +425,7 @@ Wave 3: Task 6 frontend completion, Task 7 tests, Task 8 documentation/operation
   - Skills: `[]` - No extra skill required.
   - Omitted: [`visual-engineering`] - UI QA covered separately.
 
-  **Parallelization**: Can Parallel: NO | Wave 3 | Blocks: 8 | Blocked By: 1, 2, 3, 4, 5, 6
+  **Parallelization**: Can Parallel: PARTIAL | Wave 3 for backend tests after Tasks 1-5; Wave 4 for UI QA after Task 6 | Blocks: 8 | Blocked By: backend tests need 1-5; UI QA needs 6
 
   **References**:
   - Pattern: `studyLog/acorncampus_studyLog/src/test/java/com/acorncampus_studylog/dao/DaoIntegrationTest.java:15-22` - current JUnit style and real DB dependency note.
@@ -445,7 +454,7 @@ Wave 3: Task 6 frontend completion, Task 7 tests, Task 8 documentation/operation
 
   **Commit**: NO | Message: `test(ai): add assistant tests and real API smoke` | Files: [`src/test/java/...Ai*Test.java`, `OpenAiRealApiTest.java`]
 
-- [ ] 8. Update Project Documentation and Operational Notes
+- [x] 8. Update Project Documentation and Operational Notes
 
   **What to do**: Update project-facing documentation to describe the AI assistant without exposing secrets. Update `CLAUDE.md` known features/status and add a short docs note, e.g. `docs/AI_글쓰기_도우미_가이드.md`, with setup steps: create ignored `src/main/resources/openai.properties`, required keys, run compile, run opt-in real API smoke test, SQL DDL requirement, UI usage (`Ctrl+Space`). Include limits exactly: 3,000 chars draft, 500 chars custom prompt, 8 KB body, 600 output tokens, 15-second cooldown, no request-count quotas. Include troubleshooting for 401/400/429/503.
   **Must NOT do**: Do not include real API keys, pricing claims that may go stale, or instructions to commit ignored secret files.
@@ -455,7 +464,7 @@ Wave 3: Task 6 frontend completion, Task 7 tests, Task 8 documentation/operation
   - Skills: `[]` - No extra skill required.
   - Omitted: [`visual-engineering`] - No UI code here.
 
-  **Parallelization**: Can Parallel: NO | Wave 3 | Blocks: Final verification | Blocked By: 1-7
+  **Parallelization**: Can Parallel: NO | Wave 4 | Blocks: Final verification | Blocked By: 1-7
 
   **References**:
   - Pattern: `studyLog/acorncampus_studyLog/CLAUDE.md:5-10` - project tech stack/status style.
@@ -490,10 +499,10 @@ Wave 3: Task 6 frontend completion, Task 7 tests, Task 8 documentation/operation
 > 4 review agents run in PARALLEL. ALL must APPROVE. Present consolidated results to user and get explicit "okay" before completing.
 > **Do NOT auto-proceed after verification. Wait for user's explicit approval before marking work complete.**
 > **Never mark F1-F4 as checked before getting user's okay.** Rejection or user feedback -> fix -> re-run -> present again -> wait for okay.
-- [ ] F1. Plan Compliance Audit — oracle
-- [ ] F2. Code Quality Review — unspecified-high
-- [ ] F3. Real Manual QA — unspecified-high (+ playwright if UI)
-- [ ] F4. Scope Fidelity Check — deep
+- [x] F1. Plan Compliance Audit — oracle
+- [x] F2. Code Quality Review — unspecified-high
+- [x] F3. Real Manual QA — unspecified-high (+ playwright if UI)
+- [x] F4. Scope Fidelity Check — deep
 
 ## Commit Strategy
 - Do not commit automatically. The user has not explicitly requested commits.

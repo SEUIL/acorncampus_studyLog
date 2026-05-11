@@ -12,6 +12,7 @@ CREATE SEQUENCE tags_seq     START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
 CREATE SEQUENCE series_seq   START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
 CREATE SEQUENCE comments_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
 CREATE SEQUENCE reports_seq  START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE SEQUENCE ai_usage_log_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE; -- AI 사용 로그 시퀀스 추가
 
 -- ── 사용자 ──────────────────────────────────────────────────
 CREATE TABLE users (
@@ -128,6 +129,23 @@ CREATE TABLE reports (
     CONSTRAINT chk_reports_status  CHECK (status IN ('PENDING', 'RESOLVED', 'DISMISSED'))
 );
 
+-- ── AI 사용 로그 ──────────────────────────────────────────────
+CREATE TABLE ai_usage_log (
+    usage_id            NUMBER       PRIMARY KEY,
+    user_id             NUMBER       NOT NULL,
+    action              VARCHAR2(20) NOT NULL, -- IMPROVE / SUMMARY / EXPAND / TITLE / TAGS / CUSTOM
+    status              VARCHAR2(20) DEFAULT 'PENDING' NOT NULL, -- PENDING / SUCCESS / FAILED
+    input_chars         NUMBER       NOT NULL,
+    custom_prompt_chars NUMBER       DEFAULT 0 NOT NULL,
+    max_output_tokens   NUMBER       NOT NULL,
+    requested_at        TIMESTAMP    DEFAULT SYSTIMESTAMP NOT NULL,
+    completed_at        TIMESTAMP,
+    error_code          VARCHAR2(50),
+    CONSTRAINT fk_ai_usage_user   FOREIGN KEY (user_id) REFERENCES users(user_id),
+    CONSTRAINT chk_ai_usage_action CHECK (action IN ('IMPROVE', 'SUMMARY', 'EXPAND', 'TITLE', 'TAGS', 'CUSTOM')),
+    CONSTRAINT chk_ai_usage_status CHECK (status IN ('PENDING', 'SUCCESS', 'FAILED'))
+);
+
 -- ── 인덱스 ──────────────────────────────────────────────────
 CREATE INDEX idx_posts_user_id    ON posts(user_id);
 CREATE INDEX idx_posts_created    ON posts(created_at DESC);
@@ -138,6 +156,7 @@ CREATE INDEX idx_post_tags_tag    ON post_tags(tag_id);
 CREATE INDEX idx_reports_status   ON reports(status);
 CREATE INDEX idx_reports_target   ON reports(target_type, target_id);
 CREATE INDEX idx_series_user      ON series(user_id);
+CREATE INDEX idx_ai_usage_user_requested ON ai_usage_log(user_id, requested_at); -- AI 사용 로그 인덱스 추가
 
 -- ── 비밀번호 재설정 토큰 ────────────────────────────────────
 CREATE TABLE password_reset_tokens (

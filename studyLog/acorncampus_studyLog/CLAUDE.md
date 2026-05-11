@@ -22,7 +22,7 @@ com.acorncampus_studylog
 
 ## 구현 완료 현황 (2026-05-11 기준)
 
-### Controller (12개 — 전원 완료)
+### Controller (13개 — 전원 완료)
 | 클래스 | URL 패턴 | 역할 | 상태 |
 |--------|---------|------|------|
 | MainController | `/` | 메인 페이지 | ✅ |
@@ -37,8 +37,9 @@ com.acorncampus_studylog
 | ReportController | `/l_check/report/*` | 신고 AJAX | ✅ |
 | AdminController | `/admin/*` | 관리자 (회원·글·댓글·신고·태그) AJAX 리팩토링 완료 | ✅ |
 | PasswordResetController | `/user/pwd-reset/*` | 이메일 토큰 기반 비밀번호 재설정 | ✅ |
+| AiController | `/l_check/ai/*` | AI 글쓰기 보조 JSON API, 백엔드 구현 완료 | ✅ |
 
-### Service (8개 — 전원 완료)
+### Service (9개 — 전원 완료)
 | 클래스 | 상태 | 비고 |
 |--------|------|------|
 | UserService | ✅ | login, register, 프로필수정, 비번변경, 탈퇴, ban/unban/forceDelete |
@@ -49,10 +50,11 @@ com.acorncampus_studylog
 | ReportService | ✅ | 신고 접수(중복방지), 관리자 처리 |
 | TagService | ✅ | 태그 클라우드, 관리자 정렬(사용빈도·최신·이름순) |
 | PasswordResetService | ✅ | SecureRandom 토큰, BCrypt 해싱, 30분 만료, 재사용 방지 |
+| AiWritingService | ✅ | OpenAI 글쓰기 보조 검증, 쿨다운, 프롬프트 라우팅, 사용 로그 기록 |
 
 ### DAO / DTO
-- DAO 8개: UserDao, PostDao, CommentDao, TagDao, SeriesDao, LikeDao, ReportDao, PasswordResetDao (Oracle SQL 완전 구현)
-- DTO 9개: UserDto(세션용), UserDetailDto, PostDto, CommentDto, TagDto, SeriesDto, ReportDto, PageDto, PasswordResetTokenDto
+- DAO 9개: UserDao, PostDao, CommentDao, TagDao, SeriesDao, LikeDao, ReportDao, PasswordResetDao, AiUsageLogDao (Oracle SQL 완전 구현)
+- DTO 10개: UserDto(세션용), UserDetailDto, PostDto, CommentDto, TagDto, SeriesDto, ReportDto, PageDto, PasswordResetTokenDto, AiUsageLogDto
 
 ### JSP Views
 | 경로 | 상태 | 비고                                         |
@@ -116,6 +118,23 @@ mvn test -Dtest=DaoIntegrationTest
 ```
 - 전제조건: Oracle testdb 실행 중, `blog` 계정 + schema.sql 테이블 생성 완료
 - `@AfterAll`에서 테스트 데이터 자동 하드 삭제 → 반복 실행 가능
+
+### AI 글쓰기 보조 백엔드 테스트
+```bash
+mvnw.cmd -q -DskipTests compile
+mvnw.cmd -q -Dtest=Ai*Test test
+```
+- 기본 테스트는 OpenAI 네트워크 호출 없이 실행된다.
+- 실제 OpenAI 스모크 테스트는 `src/main/resources/openai.properties`를 로컬에 만든 뒤 `mvnw.cmd -q -Dtest=OpenAiRealApiTest -Dopenai.realTest=true test`로만 실행한다.
+- Windows PowerShell에서는 점이 포함된 Maven 속성을 따옴표로 감싸 `"-Dopenai.realTest=true"`처럼 실행한다.
+
+## AI 글쓰기 보조 현재 상태
+- 백엔드는 `/l_check/ai/assist.do` POST JSON API까지 구현 완료. 프론트 모달, 단축키 연결, 미리보기 적용 UI는 사용자 승인 전까지 구현 완료로 보지 않는다.
+- 단축키 요구사항은 `Ctrl+Space`이며, 프론트 작업 시 기존 Milkdown 편집기 흐름과 초안 보존 규칙을 따라야 한다.
+- 설정 파일은 `src/main/resources/openai.properties`이며 `.gitignore`에 등록되어 있다. 저장소에는 `openai.properties.example`만 둔다.
+- 제한값: `draftText` 3,000자, `customPrompt` 500자, 요청 본문 8KB, OpenAI 출력 600 tokens, 사용자별 15초 쿨다운.
+- 요청 작업: `IMPROVE`, `SUMMARY`, `EXPAND`, `TITLE`, `TAGS`, `CUSTOM`.
+- 자세한 설정과 실행 순서는 `docs/AI_글쓰기_도우미_런북.md`를 확인한다.
 
 ## 알려진 이슈 및 수정 이력
 | 파일 | 내용 | 심각도 |

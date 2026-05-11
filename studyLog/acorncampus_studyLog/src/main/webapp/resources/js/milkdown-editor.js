@@ -8,7 +8,7 @@
  * listener 순서: .use(listener) 이후 두 번째 .config()에서 listenerCtx 접근 (순서 오류 수정)
  */
 
-import { Editor, rootCtx, defaultValueCtx, editorViewCtx } from 'https://esm.sh/@milkdown/core@7.3.6'
+import { Editor, rootCtx, defaultValueCtx, editorViewCtx, parserCtx } from 'https://esm.sh/@milkdown/core@7.3.6'
 import { commonmark }            from 'https://esm.sh/@milkdown/preset-commonmark@7.3.6?deps=@milkdown/core@7.3.6'
 import { history }               from 'https://esm.sh/@milkdown/plugin-history@7.3.6?deps=@milkdown/core@7.3.6'
 import { listener, listenerCtx } from 'https://esm.sh/@milkdown/plugin-listener@7.3.6?deps=@milkdown/core@7.3.6'
@@ -64,6 +64,23 @@ export async function initEditor(el, initialContent = '') {
 export function getMarkdown() {
     return _markdown
 }
+
+export function setMarkdown(markdown = '') {
+    _markdown = markdown
+    if (!_editor) return
+
+    _editor.action(ctx => {
+        const view = ctx.get(editorViewCtx)
+        const parser = ctx.get(parserCtx)
+        const doc = parser(markdown)
+        if (!doc) return
+
+        const { state } = view
+        view.dispatch(state.tr.replace(0, state.doc.content.size, doc.slice(0)))
+        view.focus()
+    })
+}
+
 
 /** ProseMirror 이미지 노드를 커서 위치에 직접 삽입 */
 export function insertImage(url, alt = '') {

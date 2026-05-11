@@ -10,7 +10,7 @@
 - Before any frontend implementation starts, user confirmation is required.
 
 ## Technical Decisions
-- Usage limit policy: composite server-side limits selected — input length cap + output token cap + per-user daily/hourly quota + cooldown.
+- Usage limit policy: composite server-side limits selected — input length cap + output token cap + 15-second cooldown only; no hourly/daily/global count quotas.
 - Availability: all logged-in users; no admin/beta restriction because this is not intended for deployment.
 - AI actions: 5 fixed actions + custom prompt; fixed actions are 문장 다듬기, 요약, 늘려쓰기, 제목 추천, 태그 추천.
 - AI result insertion: preview first, then user explicitly applies the result.
@@ -24,9 +24,10 @@
 - API key storage: ignored `src/main/resources/openai.properties`, with `.gitignore` update required.
 - Test strategy: include real OpenAI API test; plan should make it opt-in/manual or property-gated to avoid accidental cost during normal `mvn test`.
 - Frontend implementation gate: executor must stop before modifying JSP/CSS/JS and get explicit user approval.
+- Backend-first execution requested: user reported PR #76 merged and compile succeeds; git verification confirmed HEAD contains `8714d01` via merge commit `0d7bd07`.
 
 ## Research Findings
-- `src/main/webapp/WEB-INF/views/post/write.jsp`: post write form uses plain `<textarea name="content" class="editor-textarea">`, not a detected Toast UI editor instance in the first direct read.
+- Superseded initial finding: early read saw textarea-style assumptions, but latest code uses Milkdown mounted at `#editor` with hidden `#contentHidden` and fallback `#fallback-textarea`.
 - `pom.xml`: Gson already exists for JSON; no OpenAI dependency currently confirmed in direct read.
 - `.gitignore`: `src/main/resources/mail.properties` is ignored for SMTP credentials; OpenAI secret should follow server-side ignored/env pattern, never client/JSP.
 - `DaoIntegrationTest`: JUnit 5 integration test exists but depends on real Oracle testdb/blog/schema setup.
