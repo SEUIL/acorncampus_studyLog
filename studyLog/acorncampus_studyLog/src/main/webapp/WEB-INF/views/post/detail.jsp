@@ -273,46 +273,54 @@
 <script>
     // 1. 모달 열기/닫기 함수
     function toggleModal(show) {
-        document.getElementById('reportModal').style.display = show ? 'flex' : 'none';
-    }
+            document.getElementById('reportModal').style.display = show ? 'flex' : 'none';
+        }
 
-    // 2. 게시글 좋아요/싫어요 토글 AJAX
-    function togglePostLike(btn, postId, likeType) {
-        const params = new URLSearchParams();
-        params.append('postId', postId);
-        params.append('likeType', likeType);
+        // 2. 게시글 좋아요/싫어요 토글 AJAX (수정됨)
+        function togglePostLike(btn, postId, likeType) {
+            const params = new URLSearchParams();
+            params.append('postId', postId);
+            params.append('likeType', likeType);
 
-        fetch('${pageContext.request.contextPath}/l_check/like/post.do', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: params
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'ok') {
-                // 이모지 버스트 애니메이션
-                if (typeof window.spawnLikeReaction === 'function') {
-                    window.spawnLikeReaction(btn, likeType);
+            fetch('${pageContext.request.contextPath}/l_check/like/post.do', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    // 이모지 버스트 애니메이션 (함수가 있을 경우)
+                    if (typeof window.spawnLikeReaction === 'function') {
+                        window.spawnLikeReaction(btn, likeType);
+                    }
+
+                    // 카운트 숫자 갱신
+                    const container = btn.closest('.post-actions-bottom');
+                    const likeCountEl = container.querySelector('#like-count');
+                    const dislikeCountEl = container.querySelector('#dislike-count');
+
+                    if (likeCountEl) likeCountEl.textContent = data.likeCount;
+                    if (dislikeCountEl) dislikeCountEl.textContent = data.dislikeCount;
+
+                    // 버튼 활성 상태 갱신 (수정된 부분: 인덱스로 정확히 타겟팅)
+                    const buttons = container.querySelectorAll('.btn-outline');
+                    const likeBtn = buttons[0];
+                    const dislikeBtn = buttons[1];
+
+                    if (likeBtn && dislikeBtn) {
+                        likeBtn.classList.toggle('active', data.myLike === 'L');
+                        dislikeBtn.classList.toggle('active-dislike', data.myLike === 'D');
+                    }
+                } else {
+                    alert('오류 발생: ' + data.message);
                 }
-                // 카운트 숫자 갱신
-                document.getElementById('like-count').textContent    = data.likeCount;
-                document.getElementById('dislike-count').textContent = data.dislikeCount;
-                // 버튼 활성 상태 갱신 (새로고침 없이)
-                const likeBtn    = document.querySelector('.btn-outline:first-of-type');
-                const dislikeBtn = document.querySelector('.btn-outline:last-of-type');
-                if (likeBtn && dislikeBtn) {
-                    likeBtn.classList.toggle('active',         data.myLike === 'L');
-                    dislikeBtn.classList.toggle('active-dislike', data.myLike === 'D');
-                }
-            } else {
-                alert('오류 발생: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('서버 통신 중 오류가 발생했습니다.');
-        });
-    }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('서버 통신 중 오류가 발생했습니다.');
+            });
+        }
 
     /* ── 답글 폼 토글 ──────────────────────────────────────────── */
     function toggleReplyForm(commentId) {
