@@ -157,3 +157,9 @@ CREATE INDEX idx_prt_user_id ON password_reset_tokens(user_id);
 -- ── 확인 쿼리 ───────────────────────────────────────────────
 -- SELECT table_name FROM user_tables ORDER BY table_name;
 -- SELECT sequence_name FROM user_sequences ORDER BY sequence_name;
+
+-- 관리자 신고 관리 테이블의 새 컬럼 추가
+ALTER TABLE reports ADD (
+  2      processed_by NUMBER,
+  3      processed_at TIMESTAMP
+  4  );
