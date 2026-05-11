@@ -23,7 +23,7 @@
 
     <main class="main-content">
         <div class="top-bar">
-            <a class="breadcrumb" href="${pageContext.request.contextPath}/<c:choose><c:when test="${not empty post.seriesId}">series/detail.do?id=${post.seriesId}</c:when><c:otherwise>post/list.do</c:otherwise></c:choose>">
+            <a class="breadcrumb" href="${pageContext.request.contextPath}/<c:choose><c:when test="${param.from eq 'community'}">community.do</c:when><c:when test="${not empty post.seriesId}">series/detail.do?id=${post.seriesId}</c:when><c:otherwise>post/list.do</c:otherwise></c:choose>">
                 <i class="fa-solid fa-arrow-left"></i> 목록으로 돌아가기
             </a>
             <div class="top-actions">

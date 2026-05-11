@@ -40,7 +40,7 @@
                     <c:forEach var="post" items="${popularPosts}">
                         <%-- outer: div+onclick — inner에 프로필 <a>를 중첩 앵커 없이 넣기 위함 --%>
                         <div class="popular-card"
-                             onclick="location.href='${pageContext.request.contextPath}/post/detail.do?id=${post.postId}'">
+                             onclick="location.href='${pageContext.request.contextPath}/post/detail.do?id=${post.postId}&from=community'">
 
                             <%-- 썸네일 영역 --%>
                             <div class="popular-card-thumb">
@@ -129,7 +129,7 @@
             </div>
             <div class="series-grid" style="padding: 20px;">
                 <c:forEach var="series" items="${popularSeries}">
-                    <a class="series-card" href="${pageContext.request.contextPath}/series/detail.do?id=${series.seriesId}">
+                    <a class="series-card" href="${pageContext.request.contextPath}/series/detail.do?id=${series.seriesId}&from=community">
                         <div class="series-info">
                             <h3><c:out value="${series.name}"/></h3>
                             <p><c:out value="${series.description}"/></p>

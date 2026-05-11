@@ -76,7 +76,7 @@
                                 <td><c:out value="${post.postId}"/></td>
                                 <td><c:out value="${empty post.seriesName ? '자유게시판' : post.seriesName}"/></td>
                                 <td style="text-align:left;">
-                                    <a class="post-link" href="${pageContext.request.contextPath}/post/detail.do?id=${post.postId}">
+                                    <a class="post-link" href="${pageContext.request.contextPath}/post/detail.do?id=${post.postId}&from=community">
                                         <c:out value="${post.title}"/>
                                     </a>
                                 </td>

@@ -36,10 +36,6 @@
             <p class="text-sub" style="margin-top: 10px;">등록된 태그를 검색하고 정렬 기준에 따라 관리합니다.</p>
         </div>
 
-        <div class="board-tabs">
-            <div class="board-tab active">태그 관리</div>
-        </div>
-
         <c:set var="currentSort" value="${empty param.sort ? 'count' : param.sort}" />
         <c:url var="countSortUrl" value="/admin/tag/list.do">
             <c:param name="sort" value="count" />
@@ -54,18 +50,19 @@
             <c:param name="keyword" value="${param.keyword}" />
         </c:url>
 
+        <div class="tag-tabs">
+            <a class="tag-tab ${currentSort eq 'count' ? 'active' : ''}" href="${countSortUrl}">사용빈도순</a>
+            <a class="tag-tab ${currentSort eq 'latest' ? 'active' : ''}" href="${latestSortUrl}">최신 등록</a>
+            <a class="tag-tab ${currentSort eq 'name' ? 'active' : ''}" href="${nameSortUrl}">이름순</a>
+        </div>
+
         <form class="controls-bar" action="${pageContext.request.contextPath}/admin/tag/list.do" method="get">
+            <input type="hidden" name="sort" value="${currentSort}">
             <div class="controls-left">
                 <input type="text" name="keyword" class="admin-input" placeholder="태그 이름 검색" style="width: 300px;" value="<c:out value='${param.keyword}'/>">
                 <button class="btn-sm" style="background: var(--text-main); color: var(--bg-card);" type="submit">검색</button>
             </div>
-            <div class="controls-right">
-                <select class="admin-select" name="sort">
-                    <option value="count" ${currentSort eq 'count' ? 'selected' : ''}>정렬 : 사용빈도순</option>
-                    <option value="latest" ${currentSort eq 'latest' ? 'selected' : ''}>정렬 : 최신 등록</option>
-                    <option value="name" ${currentSort eq 'name' ? 'selected' : ''}>정렬 : 이름순</option>
-                </select>
-            </div>
+            <div class="controls-right"></div>
         </form>
 
         <c:set var="tagItems" value="${not empty tagList ? tagList : tags}" />

@@ -61,7 +61,7 @@
             <c:when test="${not empty seriesItems}">
                 <div class="series-grid">
                     <c:forEach var="item" items="${seriesItems}">
-                        <a class="series-card" href="${pageContext.request.contextPath}/series/detail.do?id=${item.seriesId}">
+                        <a class="series-card" href="${pageContext.request.contextPath}/series/detail.do?id=${item.seriesId}&from=community">
                             <div class="series-info">
                                 <h3><c:out value="${item.name}"/></h3>
                                 <p><c:out value="${item.description}"/></p>

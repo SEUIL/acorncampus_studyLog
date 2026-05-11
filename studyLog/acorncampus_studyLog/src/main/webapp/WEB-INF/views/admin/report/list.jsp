@@ -60,7 +60,7 @@
             <table class="admin-table">
                 <thead>
                 <tr>
-                    <th>신고ID</th><th>신고유형</th><th>대상 요약</th><th>신고자</th><th>신고당한 사람</th><th>상태</th><th>신고일</th><th>사유</th><th>관리</th>
+                    <th>신고ID</th><th>신고유형</th><th>대상 요약</th><th>신고자</th><th>신고당한 사람</th><th>상태</th><th>신고일</th><th>처리정보</th><th>관리</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -75,18 +75,30 @@
                                 <td><c:out value="${empty report.targetAuthorName ? '-' : report.targetAuthorName}"/></td>
                                 <td><c:out value="${report.status}"/></td>
                                 <td><c:out value="${report.createdAt}"/></td>
-                                <td class="reason-box"><c:out value="${report.reason}"/></td>
+                                <td class="process-info">
+                                    <c:choose>
+                                        <c:when test="${not empty report.processedAt}">
+                                            <strong><c:out value="${empty report.processorName ? '-' : report.processorName}"/></strong>
+                                            <span><c:out value="${report.processedAt}"/></span>
+                                        </c:when>
+                                        <c:otherwise>-</c:otherwise>
+                                    </c:choose>
+                                </td>
                                 <td>
                                     <div class="action-group">
                                         <button type="button" class="btn-sm detail-open-btn" data-modal-target="reportDetailModal-${report.reportId}">상세보기</button>
-                                        <form action="${pageContext.request.contextPath}/admin/report/resolve.do" method="post" data-ajax-form="true">
-                                            <input type="hidden" name="reportId" value="${report.reportId}">
-                                            <button type="submit" class="btn-sm btn-danger">승인</button>
-                                        </form>
-                                        <form action="${pageContext.request.contextPath}/admin/report/dismiss.do" method="post" data-ajax-form="true">
-                                            <input type="hidden" name="reportId" value="${report.reportId}">
-                                            <button type="submit" class="btn-sm">기각</button>
-                                        </form>
+                                        <c:if test="${report.status eq 'PENDING'}">
+                                            <div class="action-row">
+                                                <form action="${pageContext.request.contextPath}/admin/report/resolve.do" method="post" data-ajax-form="true">
+                                                    <input type="hidden" name="reportId" value="${report.reportId}">
+                                                    <button type="submit" class="btn-sm btn-danger">승인</button>
+                                                </form>
+                                                <form action="${pageContext.request.contextPath}/admin/report/dismiss.do" method="post" data-ajax-form="true">
+                                                    <input type="hidden" name="reportId" value="${report.reportId}">
+                                                    <button type="submit" class="btn-sm">기각</button>
+                                                </form>
+                                            </div>
+                                        </c:if>
                                     </div>
                                     <div class="admin-detail-modal" id="reportDetailModal-${report.reportId}" aria-hidden="true" hidden>
                                         <div class="admin-detail-backdrop" data-modal-close></div>
@@ -129,6 +141,14 @@
                                                 <div>
                                                     <dt>신고일</dt>
                                                     <dd><c:out value="${report.createdAt}"/></dd>
+                                                </div>
+                                                <div>
+                                                    <dt>처리자</dt>
+                                                    <dd><c:out value="${empty report.processorName ? '-' : report.processorName}"/></dd>
+                                                </div>
+                                                <div>
+                                                    <dt>처리일</dt>
+                                                    <dd><c:out value="${empty report.processedAt ? '-' : report.processedAt}"/></dd>
                                                 </div>
                                                 <div class="detail-wide">
                                                     <dt>대상 요약</dt>
