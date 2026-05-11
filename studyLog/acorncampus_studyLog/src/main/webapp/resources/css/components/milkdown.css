@@ -1,0 +1,204 @@
+/* ==========================================================================
+   milkdown.css — Milkdown 에디터 전용 스타일
+   사이트 CSS 변수(global_theme.css)를 그대로 사용해 라이트/다크 자동 대응
+   ========================================================================== */
+
+/* 에디터 래퍼 — editor-area가 flex:1로 높이를 결정, Milkdown은 그 안을 꽉 채움 */
+.milkdown {
+    font-family: inherit;
+    background: var(--bg-card);
+    color: var(--text-main);
+    height: 100%;
+    overflow-y: auto;
+    cursor: text;
+}
+
+/* ProseMirror 편집 영역 */
+.milkdown .ProseMirror,
+.milkdown .editor {
+    outline: none;
+    min-height: 400px;
+    padding: 24px 30px;
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--text-main);
+}
+
+/* 플레이스홀더 */
+.milkdown .ProseMirror.pm-placeholder::before,
+.milkdown .editor.pm-placeholder::before {
+    content: attr(data-placeholder);
+    color: var(--text-sub);
+    opacity: 0.6;
+    pointer-events: none;
+    float: left;
+    height: 0;
+}
+
+/* 헤딩 */
+.milkdown h1 { font-size: 2em;    font-weight: 800; border-bottom: 2px solid var(--border-color); padding-bottom: 6px;  margin: 24px 0 12px; color: var(--text-main); }
+.milkdown h2 { font-size: 1.5em;  font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 4px;  margin: 20px 0 10px; color: var(--text-main); }
+.milkdown h3 { font-size: 1.25em; font-weight: 700; margin: 16px 0 8px;  color: var(--text-main); }
+.milkdown h4 { font-size: 1.1em;  font-weight: 600; margin: 14px 0 6px;  color: var(--text-main); }
+
+/* 단락 */
+.milkdown p { margin-bottom: 14px; }
+
+/* 인라인 서식 */
+.milkdown strong { font-weight: 700; }
+.milkdown em     { font-style: italic; }
+.milkdown del    { text-decoration: line-through; color: var(--text-sub); }
+
+/* 인라인 코드 */
+.milkdown code {
+    background: var(--list-hover);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 14px;
+    color: var(--accent-color);
+}
+
+/* 코드 블록 */
+.milkdown pre {
+    background: var(--list-hover);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 16px 20px;
+    overflow-x: auto;
+    margin-bottom: 16px;
+}
+.milkdown pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--text-main);
+    font-size: 14px;
+}
+
+/* 인용구 */
+.milkdown blockquote {
+    border-left: 4px solid var(--accent-color);
+    background: var(--list-hover);
+    padding: 12px 16px;
+    margin: 16px 0;
+    border-radius: var(--radius-sm);
+    color: var(--text-sub);
+}
+.milkdown blockquote p { margin-bottom: 0; }
+
+/* 목록 */
+.milkdown ul, .milkdown ol { padding-left: 24px; margin-bottom: 14px; }
+.milkdown li { margin-bottom: 4px; }
+/* 체크박스 리스트 (GFM) */
+.milkdown li[data-checked] { list-style: none; }
+.milkdown input[type="checkbox"] { margin-right: 6px; accent-color: var(--accent-color); }
+
+/* 수평선 */
+.milkdown hr { border: none; border-top: 2px solid var(--border-color); margin: 24px 0; }
+
+/* 링크 */
+.milkdown a { color: var(--accent-color); text-decoration: underline; }
+
+/* 표 */
+.milkdown table { border-collapse: collapse; width: 100%; margin-bottom: 16px; }
+.milkdown th { background: var(--list-hover); border: 1px solid var(--border-color); padding: 8px 14px; font-weight: 600; text-align: left; color: var(--text-main); }
+.milkdown td { border: 1px solid var(--border-color); padding: 8px 14px; color: var(--text-main); }
+.milkdown tr:hover td { background: var(--list-hover); }
+
+/* 이미지 */
+.milkdown img { max-width: 100%; border-radius: var(--radius-sm); margin: 8px 0; }
+
+/* 포커스 선택 영역 */
+.milkdown .ProseMirror-selectednode { outline: 2px solid var(--accent-color); border-radius: var(--radius-sm); }
+
+/* 다크모드 — 배경과 무관하게 텍스트 흰색 강제 */
+.dark-theme .milkdown,
+.dark-theme .milkdown .ProseMirror,
+.dark-theme .milkdown .editor         { color: #ffffff !important; background: var(--bg-card); }
+.dark-theme .milkdown h1,
+.dark-theme .milkdown h2,
+.dark-theme .milkdown h3,
+.dark-theme .milkdown h4              { color: #ffffff !important; border-color: var(--border-color); }
+.dark-theme .milkdown p,
+.dark-theme .milkdown li,
+.dark-theme .milkdown td              { color: #ffffff !important; }
+.dark-theme .milkdown th              { color: #ffffff !important; background: var(--list-hover); }
+.dark-theme .milkdown strong          { color: #ffffff !important; }
+.dark-theme .milkdown blockquote      { color: #cccccc !important; background: var(--list-hover); }
+.dark-theme .milkdown pre code        { color: #ffffff !important; }
+.dark-theme .milkdown code            { color: var(--accent-color) !important; background: var(--list-hover); }
+
+/* ── 슬래시 커맨드 메뉴 ─────────────────────────────────────────────────── */
+.milkdown-slash-menu {
+    position: fixed;
+    display: none;
+    z-index: 9999;
+    width: 280px;
+    max-height: 360px;
+    overflow-y: auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    padding: 6px;
+}
+
+.slash-header {
+    padding: 6px 10px 4px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--text-sub);
+    text-transform: uppercase;
+}
+
+.slash-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 7px 10px;
+    border: none;
+    background: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    text-align: left;
+    color: var(--text-main);
+    font-family: inherit;
+    transition: background var(--transition-base);
+}
+.slash-item:hover, .slash-item:focus {
+    background: var(--list-hover);
+    outline: none;
+}
+
+.slash-icon {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: var(--list-hover);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-sub);
+}
+
+.slash-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+.slash-text strong { font-size: 13px; font-weight: 600; color: var(--text-main); }
+.slash-text small  { font-size: 11px; color: var(--text-sub); }
+
+/* 다크모드 */
+.dark-theme .milkdown-slash-menu { background: var(--bg-card); border-color: var(--border-color); }
+.dark-theme .slash-item          { color: #ffffff; }
+.dark-theme .slash-text strong   { color: #ffffff; }
+.dark-theme .slash-icon          { color: #cccccc; }

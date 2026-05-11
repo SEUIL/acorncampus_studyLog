@@ -27,10 +27,32 @@
 .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
 .tag-chip { background-color: var(--list-hover); color: var(--text-sub); padding: 6px 10px; border-radius: 999px; font-size: 12px; text-decoration: none; }
 
-/* 6. 게시글 본문 */
-.post-body { font-size: 16px; line-height: 1.8; color: var(--text-main); min-height: 300px; white-space: pre-wrap; }
-.post-body p { margin-bottom: 15px; }
-.post-body pre { background-color: var(--list-hover); padding: 15px; border-radius: 6px; overflow-x: auto; font-family: monospace; font-size: 14px; border: 1px solid var(--border-color); }
+/* 6. 게시글 본문 (marked.js 렌더링) */
+.post-body { font-size: 16px; line-height: 1.8; color: var(--text-main); min-height: 300px; }
+.post-body p  { margin-bottom: 14px; }
+.post-body h1 { font-size: 2em;    font-weight: 800; border-bottom: 2px solid var(--border-color); padding-bottom: 6px;  margin: 24px 0 12px; }
+.post-body h2 { font-size: 1.5em;  font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 4px;  margin: 20px 0 10px; }
+.post-body h3 { font-size: 1.25em; font-weight: 700; margin: 16px 0 8px; }
+.post-body h4 { font-size: 1.1em;  font-weight: 600; margin: 14px 0 6px; }
+.post-body strong { font-weight: 700; }
+.post-body em     { font-style: italic; }
+.post-body del    { text-decoration: line-through; color: var(--text-sub); }
+.post-body code   { background: var(--list-hover); border: 1px solid var(--border-color); border-radius: 4px; padding: 2px 6px; font-size: 14px; color: var(--accent-color); }
+.post-body pre    { background: var(--list-hover); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 16px; overflow-x: auto; margin-bottom: 14px; }
+.post-body pre code { background: none; border: none; padding: 0; color: var(--text-main); }
+.post-body blockquote { border-left: 4px solid var(--accent-color); background: var(--list-hover); padding: 12px 16px; margin: 16px 0; border-radius: var(--radius-sm); color: var(--text-sub); }
+.post-body blockquote p { margin-bottom: 0; }
+.post-body ul, .post-body ol { padding-left: 24px; margin-bottom: 14px; }
+.post-body li { margin-bottom: 4px; }
+.post-body hr  { border: none; border-top: 2px solid var(--border-color); margin: 24px 0; }
+.post-body a   { color: var(--accent-color); text-decoration: underline; }
+.post-body a[download] { display: inline-flex; align-items: center; gap: 4px; background: var(--list-hover); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 4px 10px; text-decoration: none; font-size: 14px; }
+.post-body a[download]:hover { background: var(--border-color); }
+.post-body img { max-width: 100%; border-radius: var(--radius-sm); margin: 8px 0; }
+.post-body table { border-collapse: collapse; width: 100%; margin-bottom: 14px; }
+.post-body th { background: var(--list-hover); border: 1px solid var(--border-color); padding: 8px 14px; font-weight: 600; text-align: left; }
+.post-body td { border: 1px solid var(--border-color); padding: 8px 14px; }
+.post-body tr:hover td { background: var(--list-hover); }
 
 /* 7. 추천/비추천 버튼 활성화 스타일 (추가됨) */
 .post-actions-bottom .btn-outline.active {
@@ -101,3 +123,18 @@
 .modal-select { padding: 10px; margin-bottom: 15px; }
 .modal-textarea { height: 100px; padding: 10px; resize: none; margin-bottom: 20px; }
 .modal-footer { padding: 20px; border-top: 1px solid var(--border-color); background-color: var(--list-hover); display: flex; justify-content: flex-end; gap: 10px; }
+
+/* 다크모드 — 게시글 본문 텍스트 흰색 강제 */
+.dark-theme .post-body,
+.dark-theme .post-body p,
+.dark-theme .post-body li,
+.dark-theme .post-body td      { color: #ffffff !important; }
+.dark-theme .post-body h1,
+.dark-theme .post-body h2,
+.dark-theme .post-body h3,
+.dark-theme .post-body h4      { color: #ffffff !important; border-color: var(--border-color); }
+.dark-theme .post-body th      { color: #ffffff !important; background: var(--list-hover); }
+.dark-theme .post-body strong  { color: #ffffff !important; }
+.dark-theme .post-body blockquote { color: #cccccc !important; background: var(--list-hover); }
+.dark-theme .post-body pre code   { color: #ffffff !important; }
+.dark-theme .post-body code       { color: var(--accent-color) !important; }

@@ -78,7 +78,8 @@ public class PostController extends HttpServlet {
             case "/write.do":  handleWrite(req, resp);  break;
             case "/update.do": handleUpdate(req, resp); break;
             case "/delete.do": handleDelete(req, resp); break;
-            case "/upload.do": handleUpload(req, resp); break;
+            case "/upload.do":      handleUpload(req, resp);      break;
+            case "/file-upload.do": handleFileUpload(req, resp); break;
             default:
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
@@ -408,6 +409,46 @@ public class PostController extends HttpServlet {
                     result.put("url", req.getContextPath() + url);
                     resp.getWriter().write(new Gson().toJson(result));
                     return; // 파일 하나만 처리하고 종료
+                }
+            }
+
+            result.put("error", "업로드된 파일이 없습니다.");
+            resp.getWriter().write(new Gson().toJson(result));
+
+        } catch (Exception e) {
+            result.put("error", "업로드 실패: " + e.getMessage());
+            resp.getWriter().write(new Gson().toJson(result));
+        }
+    }
+
+    /** POST /l_check/post/file-upload.do — 첨부파일 업로드, {"url","name"} 반환 */
+    private void handleFileUpload(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        resp.setContentType("application/json; charset=UTF-8");
+        Map<String, Object> result = new LinkedHashMap<>();
+
+        if (!ServletFileUpload.isMultipartContent(req)) {
+            result.put("error", "multipart 요청이 아닙니다.");
+            resp.getWriter().write(new Gson().toJson(result));
+            return;
+        }
+
+        try {
+            DiskFileItemFactory factory = new DiskFileItemFactory();
+            ServletFileUpload upload = new ServletFileUpload(factory);
+            upload.setFileSizeMax(20 * 1024 * 1024L); // 20MB
+
+            List<FileItem> items = upload.parseRequest(req);
+            String uploadDir = getServletContext().getRealPath("/resources/upload");
+
+            for (FileItem item : items) {
+                if (!item.isFormField()) {
+                    String originalName = item.getName();
+                    String url = postService.saveUploadedImage(uploadDir, originalName, item.get());
+                    result.put("url",  req.getContextPath() + url);
+                    result.put("name", originalName);
+                    resp.getWriter().write(new Gson().toJson(result));
+                    return;
                 }
             }
 
