@@ -38,9 +38,13 @@
                 </div>
                 <div class="popular-grid">
                     <c:forEach var="post" items="${popularPosts}">
+                        <c:url var="postDetailUrl" value="/post/detail.do">
+                            <c:param name="id" value="${post.postId}" />
+                            <c:param name="parentUrl" value="${pageContext.request.contextPath}/community.do" />
+                        </c:url>
                         <%-- outer: div+onclick — inner에 프로필 <a>를 중첩 앵커 없이 넣기 위함 --%>
                         <div class="popular-card"
-                             onclick="location.href='${pageContext.request.contextPath}/post/detail.do?id=${post.postId}&from=community'">
+                             onclick="location.href='${postDetailUrl}'">
 
                             <%-- 썸네일 영역 --%>
                             <div class="popular-card-thumb">
@@ -129,7 +133,11 @@
             </div>
             <div class="series-grid" style="padding: 20px;">
                 <c:forEach var="series" items="${popularSeries}">
-                    <a class="series-card" href="${pageContext.request.contextPath}/series/detail.do?id=${series.seriesId}&from=community">
+                    <c:url var="seriesDetailUrl" value="/series/detail.do">
+                        <c:param name="id" value="${series.seriesId}" />
+                        <c:param name="parentUrl" value="${pageContext.request.contextPath}/community.do" />
+                    </c:url>
+                    <a class="series-card" href="${seriesDetailUrl}">
                         <div class="series-info">
                             <h3><c:out value="${series.name}"/></h3>
                             <p><c:out value="${series.description}"/></p>
