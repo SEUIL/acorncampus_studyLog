@@ -1,4 +1,13 @@
 studyLog/acorncampus_studyLog/.idea/workspace.xml
 studyLog/acorncampus_studyLog/.idea/sqldialects.xml
-studyLog/acorncampus_studyLog/.sisyphus/run-continuation/ses_1ea4bf6e9ffezvbYvs52uzXEXO.json
-studyLog/acorncampus_studyLog/.sisyphus/run-continuation/ses_1ea4ec8a9ffe6rSjIeJeHameSX.json
+.sisyphus/run-continuation/ses_1eb395d76ffeL7WMkf096bbz2E.json
+
+# OpenCode / Playwright 임시 산출물
+.playwright-mcp/
+
+# Sisyphus / OpenCode 내부 작업 상태
+.sisyphus/boulder.json
+.sisyphus/run-continuation/
+.sisyphus/notepads/
+.sisyphus/drafts/
+.sisyphus/evidence/

@@ -55,5 +55,8 @@ src/main/webapp/resources/upload/*
 ### 메일 설정 (SMTP 자격증명 — 절대 커밋 금지) ###
 src/main/resources/mail.properties
 
+### OpenAI 설정 (API 키 — 절대 커밋 금지) ###
+src/main/resources/openai.properties
+
 ### 로그 ###
 *.log

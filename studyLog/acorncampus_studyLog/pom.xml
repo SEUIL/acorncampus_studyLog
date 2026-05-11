@@ -66,6 +66,13 @@
             <version>2.10.1</version>
         </dependency>
 
+        <!-- OpenAI Java SDK (서버 측 AI 요청) -->
+        <dependency>
+            <groupId>com.openai</groupId>
+            <artifactId>openai-java</artifactId>
+            <version>4.30.0</version>
+        </dependency>
+
         <!-- Oracle JDBC -->
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>
