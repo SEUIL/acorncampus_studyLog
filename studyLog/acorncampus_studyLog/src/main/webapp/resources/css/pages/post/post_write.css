@@ -23,12 +23,55 @@
 .dark-theme .meta-area { background-color: rgba(255,255,255,0.01); }
 .tag-input, .series-select { width: 100%; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--input-bg); color: var(--text-main); font-size: 14px; font-family: inherit; padding: 10px 12px; }
 
-/* 6. 에디터 영역 */
-.editor-area { flex: 1; background-color: var(--bg-card); overflow: hidden; }
+/* 6. 에디터 영역 및 시리즈 설명 영역 수정 */
+.editor-area {
+    flex: 1;
+    background-color: var(--bg-card);
+    overflow: hidden;
+    /* 추가: 자식 요소인 textarea가 높이를 꽉 채울 수 있게 flex 설정 */
+    display: flex;
+    flex-direction: column;
+}
+
+.editor-textarea {
+    width: 100% !important;
+    /* 수정: 고정된 높이 대신 flex: 1을 사용하여 남는 아래 여백을 꽉 채움 */
+    flex: 1;
+    padding: 30px;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 16px;
+    line-height: 1.8;
+    box-sizing: border-box;
+    resize: none; /* 꽉 채운 상태이므로 수동 크기 조절 비활성화 권장 */
+}
+
+.editor-textarea::placeholder {
+    color: var(--text-sub);
+    opacity: 0.5;
+}
 
 /* 7. 하단 푸터 */
-.write-footer { padding: 15px 30px; background-color: var(--list-hover); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; gap: 20px; }
-.footer-right { display: flex; align-items: center; gap: 20px; }
+.write-footer {
+    display: flex;
+    justify-content: flex-end; /* 전체 요소를 오른쪽 끝으로 정렬 */
+    gap: 20px;
+    padding: 15px 30px;
+    background-color: var(--list-hover);
+    border-top: 1px solid var(--border-color);
+}
+
+.footer-right {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* 토글과 버튼 사이의 간격 */
+    /* 만약 토글은 왼쪽에 두고 버튼만 오른쪽 끝에 두고 싶다면 아래 주석 해제 */
+     flex: 1;
+     justify-content: flex-end;
+}
 
 /* 8. 공개/비공개 토글 */
 .visibility-toggle { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: var(--text-sub); }

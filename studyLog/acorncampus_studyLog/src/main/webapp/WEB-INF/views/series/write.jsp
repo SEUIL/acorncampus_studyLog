@@ -48,8 +48,7 @@
 
             <div class="editor-area">
                 <textarea name="description" class="editor-textarea"
-                          placeholder="시리즈에 대한 간단한 설명을 입력하세요."
-                          style="min-height: 160px;"><c:out value="${series.description}"/></textarea>
+                          placeholder="시리즈에 대한 간단한 설명을 입력하세요."><c:out value="${series.description}"/></textarea>
             </div>
 
             <div class="write-footer">

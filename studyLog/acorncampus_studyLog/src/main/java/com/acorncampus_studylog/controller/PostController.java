@@ -235,49 +235,46 @@ public class PostController extends HttpServlet {
     private void handleWrite(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         UserDto loginUser = getLoginUser(req);
-        // LoginCheckFilter가 /l_check/* 요청을 막아주지만
-        // POST는 /post/write.do로 오기 때문에 필터가 적용 안 될 수 있어서 이중 체크
         if (loginUser == null) {
             resp.sendRedirect(req.getContextPath() + "/user/login.do");
-            return;
+            return; // 반드시 리턴
         }
 
         String title    = req.getParameter("title");
         String content  = req.getParameter("content");
-        // 공개가 명확히 선택된 경우만 Y, 그 외에는 비공개로 저장한다.
         String isPublic = normalizeIsPublic(req.getParameter("isPublic"));
-
-        // seriesId는 선택 항목이라 없거나 0이면 null로 처리 (DB에 NULL 저장)
         Integer seriesId = parseNullableInt(req.getParameter("seriesId"));
-
-        // 태그는 "Java,Spring,Oracle" 형식의 쉼표 구분 문자열로 받아서 List로 변환
         List<String> tagNames = parseTags(req.getParameter("tags"));
 
-        // 필수 입력값 검증 실패 시 에러 메시지와 함께 폼으로 다시 forward
-        // redirect가 아닌 forward를 쓰는 이유: 입력값을 유지하기 위해서 (redirect하면 폼 데이터 사라짐)
+        // 추가: 프론트에서 보낸 썸네일 URL 파라미터 받기
+        String thumbnailUrl = req.getParameter("thumbnailUrl");
+
+        // 필수 입력값 검증
         if (title == null || title.trim().isEmpty()) {
             req.setAttribute("errorMsg", "제목을 입력해 주세요.");
             handleWriteForm(req, resp);
-            return;
+            return; // 포워드 후 리턴
         }
         if (content == null || content.trim().isEmpty()) {
             req.setAttribute("errorMsg", "내용을 입력해 주세요.");
             handleWriteForm(req, resp);
-            return;
+            return; // 포워드 후 리턴
         }
 
         try {
-            // createPost()가 새 post_id를 반환하므로 즉시 상세 페이지로 리다이렉트
+            // 단 한 번만 호출하고 모든 파라미터를 넘깁니다.
             int newPostId = postService.createPost(
                     loginUser.getUserId(), seriesId,
                     title.trim(), content,
-                    null,     // 썸네일은 별도 이미지 업로드(/upload.do)로 처리
+                    thumbnailUrl, // 추출된 URL 전달
                     isPublic, tagNames);
+
             resp.sendRedirect(req.getContextPath() + "/post/detail.do?id=" + newPostId);
+            return; // 리다이렉트 후 리턴
         } catch (IllegalArgumentException e) {
-            // 태그 5개 초과 등 비즈니스 규칙 위반 시 에러 메시지 표시 후 폼으로 복귀
             req.setAttribute("errorMsg", e.getMessage());
             handleWriteForm(req, resp);
+            return; // 포워드 후 리턴
         }
     }
 
@@ -302,7 +299,6 @@ public class PostController extends HttpServlet {
             return;
         }
 
-        // 수정 전 실제로 존재하는 글인지 확인 + 소유자 체크
         PostDto post = postService.getPostDetail(postId);
         if (post == null) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, "존재하지 않는 게시글입니다.");
@@ -316,20 +312,20 @@ public class PostController extends HttpServlet {
         String title    = req.getParameter("title");
         String content  = req.getParameter("content");
         String isPublic = normalizeIsPublic(req.getParameter("isPublic"));
-
         Integer seriesId  = parseNullableInt(req.getParameter("seriesId"));
-
-        // 수정 시 tags 파라미터가 오면 태그 교체, null이면 기존 태그 유지
-        // parseTags()는 빈 문자열이면 빈 리스트 반환 → 모든 태그 제거
         List<String> tagNames = parseTags(req.getParameter("tags"));
 
+        // 추가: 수정된 본문에서 추출된 새 썸네일 URL 받기
+        String thumbnailUrl = req.getParameter("thumbnailUrl");
+
         try {
-            // 썸네일 URL은 수정 폼에서 별도 처리하지 않으므로 기존 값 유지
-            postService.updatePost(postId, seriesId, title, content, post.getThumbnailUrl(), isPublic, tagNames);
+            // 기존 썸네일을 무조건 유지하는 대신, 새로 전달받은 thumbnailUrl을 사용하도록 통합
+            postService.updatePost(postId, seriesId, title.trim(), content, thumbnailUrl, isPublic, tagNames);
             resp.sendRedirect(req.getContextPath() + "/post/detail.do?id=" + postId);
+            return; // 완료 후 리턴
         } catch (IllegalArgumentException e) {
-            // 태그 초과 등 오류 시 수정 폼으로 돌아감 (error 파라미터로 메시지 전달)
             resp.sendRedirect(req.getContextPath() + "/l_check/post/update.do?id=" + postId + "&error=" + e.getMessage());
+            return; // 에러 후 리턴
         }
     }
 
