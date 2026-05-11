@@ -58,21 +58,16 @@ public class PostService {
      * @param pageNo 현재 페이지 (1-based)
      */
     public List<PostDto> getPostList(int pageNo) {
-        // 전체 게시글 수를 먼저 구한 뒤 PageDto를 만들어야 offset을 계산할 수 있음
-        int total = postDao.countAll();
-
-        // PageDto 생성: (현재 페이지, 페이지 크기, 전체 개수)
-        // PageDto 내부에서 offset = (pageNo - 1) * pageSize 를 계산해줌
-        PageDto page = new PageDto(pageNo, PAGE_SIZE, total);
-
-        // offset부터 PAGE_SIZE개만큼 잘라서 반환
-        return postDao.findAll(page.getOffset(), PAGE_SIZE);
+        return getPostList(pageNo, "latest");
     }
 
-    /** 게시글 목록 페이지 정보 반환 — JSP의 페이지 버튼 렌더링에 사용 */
+    public List<PostDto> getPostList(int pageNo, String sort) {
+        PageDto page = new PageDto(pageNo, PAGE_SIZE, postDao.countAll());
+        return postDao.findAll(page.getOffset(), PAGE_SIZE, sort);
+    }
+
+    /** 게시글 목록 페이지 정보 반환 */
     public PageDto getPostPage(int pageNo) {
-        // PageDto 안에 hasPrev(), hasNext(), getTotalPages() 등이 구현되어 있어서
-        // JSP에서 이 객체를 받아 페이지 버튼을 그릴 수 있음
         return new PageDto(pageNo, PAGE_SIZE, postDao.countAll());
     }
 

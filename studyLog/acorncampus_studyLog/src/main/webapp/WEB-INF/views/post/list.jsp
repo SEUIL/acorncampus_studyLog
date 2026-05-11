@@ -25,7 +25,7 @@
     <main class="main-content">
         <div class="top-bar">
             <div class="nav-left">
-                <a class="breadcrumb" href="${pageContext.request.contextPath}/">
+                <a class="breadcrumb" href="${pageContext.request.contextPath}/community.do">
                     <i class="fa-solid fa-house"></i> 커뮤니티 <span style="color: var(--border-color);">/</span> 전체 게시글
                 </a>
             </div>
@@ -37,8 +37,8 @@
         </div>
 
         <div class="board-tabs">
-            <a class="board-tab active" href="${pageContext.request.contextPath}/post/list.do">게시글</a>
-            <a class="board-tab" href="${pageContext.request.contextPath}/series/list.do">시리즈</a>
+            <a class="board-tab active" href="${pageContext.request.contextPath}/post/list.do?keyword=${param.keyword}">게시글</a>
+            <a class="board-tab" href="${pageContext.request.contextPath}/series/list.do?keyword=${param.keyword}">시리즈</a>
         </div>
 
         <form class="controls-bar" action="${pageContext.request.contextPath}/post/list.do" method="get">
