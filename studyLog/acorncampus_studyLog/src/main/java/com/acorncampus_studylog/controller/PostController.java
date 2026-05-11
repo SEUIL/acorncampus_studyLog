@@ -233,10 +233,8 @@ public class PostController extends HttpServlet {
 
         String title    = req.getParameter("title");
         String content  = req.getParameter("content");
-        String isPublic = req.getParameter("isPublic");
-
-        // isPublic이 폼에서 전달 안 되면 기본값 "Y" (공개)로 처리
-        if (isPublic == null || isPublic.isEmpty()) isPublic = "Y";
+        // 공개가 명확히 선택된 경우만 Y, 그 외에는 비공개로 저장한다.
+        String isPublic = normalizeIsPublic(req.getParameter("isPublic"));
 
         // seriesId는 선택 항목이라 없거나 0이면 null로 처리 (DB에 NULL 저장)
         Integer seriesId = parseNullableInt(req.getParameter("seriesId"));
@@ -306,8 +304,7 @@ public class PostController extends HttpServlet {
 
         String title    = req.getParameter("title");
         String content  = req.getParameter("content");
-        String isPublic = req.getParameter("isPublic");
-        if (isPublic == null || isPublic.isEmpty()) isPublic = "Y";
+        String isPublic = normalizeIsPublic(req.getParameter("isPublic"));
 
         Integer seriesId  = parseNullableInt(req.getParameter("seriesId"));
 
@@ -494,6 +491,10 @@ public class PostController extends HttpServlet {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    private String normalizeIsPublic(String isPublic) {
+        return "Y".equalsIgnoreCase(isPublic) ? "Y" : "N";
     }
 
     /**
