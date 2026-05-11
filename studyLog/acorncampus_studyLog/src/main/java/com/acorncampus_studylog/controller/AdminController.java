@@ -271,8 +271,9 @@ public class AdminController extends HttpServlet {
     private void handleCommentList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         int pageNo = parseInt(req.getParameter("page"), 1);
-        req.setAttribute("commentList", commentService.getCommentListForAdmin(pageNo));
-        req.setAttribute("page", commentService.getCommentPageForAdmin(pageNo));
+        String keyword = req.getParameter("keyword");
+        req.setAttribute("commentList", commentService.getCommentListForAdmin(keyword, pageNo));
+        req.setAttribute("page", commentService.getCommentPageForAdmin(keyword, pageNo));
         req.getRequestDispatcher("/WEB-INF/views/admin/comment/list.jsp").forward(req, resp);
     }
 
