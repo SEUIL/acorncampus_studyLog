@@ -160,6 +160,6 @@ CREATE INDEX idx_prt_user_id ON password_reset_tokens(user_id);
 
 -- 관리자 신고 관리 테이블의 새 컬럼 추가
 ALTER TABLE reports ADD (
-  2      processed_by NUMBER,
-  3      processed_at TIMESTAMP
-  4  );
+        processed_by NUMBER,
+        processed_at TIMESTAMP
+    );
