@@ -118,6 +118,12 @@ public class CommentService {
         return commentDao.findAllForAdmin(offset, limit);
     }
 
+    public List<CommentDto> getCommentListForAdmin(String keyword, int pageNo) {
+        int limit = 10;
+        int offset = (pageNo - 1) * limit;
+        return commentDao.findAllForAdmin(keyword, offset, limit);
+    }
+
     /**
      * 관리자 - 전체 댓글 페이지 정보
      * @param pageNo 현재 페이지 번호
@@ -129,6 +135,11 @@ public class CommentService {
         int totalCount = commentDao.countAllForAdmin();
 
         return new PageDto(pageNo, limit, totalCount);
+    }
+
+    public PageDto getCommentPageForAdmin(String keyword, int pageNo) {
+        int limit = 10;
+        return new PageDto(pageNo, limit, commentDao.countAllForAdmin(keyword));
     }
 
     /**
