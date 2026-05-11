@@ -1,7 +1,5 @@
 /* ==========================================================================
-   post_detail.css — 게시글 상세 페이지 전용
-   의존: global_theme.css, components/layout.css, components/button.css, components/ui.css
-   ※ main-content max-width를 900px로 좁게 설정 (가독성)
+   post_detail.css — 게시글 상세 페이지 전용 (수정본)
    ========================================================================== */
 
 /* 1. 콘텐츠 폭 조정 */
@@ -34,7 +32,19 @@
 .post-body p { margin-bottom: 15px; }
 .post-body pre { background-color: var(--list-hover); padding: 15px; border-radius: 6px; overflow-x: auto; font-family: monospace; font-size: 14px; border: 1px solid var(--border-color); }
 
-/* 7. 댓글 섹션 */
+/* 7. 추천/비추천 버튼 활성화 스타일 (추가됨) */
+.post-actions-bottom .btn-outline.active {
+    background-color: var(--accent-color);
+    color: var(--accent-contrast);
+    border-color: var(--accent-color);
+}
+.post-actions-bottom .btn-outline.active-dislike {
+    background-color: #ef5350;
+    color: #ffffff;
+    border-color: #ef5350;
+}
+
+/* 8. 댓글 섹션 */
 .comments-section { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 30px; box-shadow: var(--shadow-sm); }
 .comments-header { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: var(--text-main); }
 .comment-input-box { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
@@ -51,7 +61,7 @@
 .reply-list { margin-top: 14px; padding-left: 16px; border-left: 2px solid var(--border-color); }
 .reply-item { padding-top: 14px; }
 
-/* 8. 댓글 액션 버튼 (답글 / 수정 / 삭제) */
+/* 9. 댓글 액션 버튼 */
 .comment-actions { display: flex; gap: 6px; margin-top: 10px; }
 .comment-action-btn {
     background: none; border: none;
@@ -64,7 +74,7 @@
 .comment-action-btn.delete-btn:hover { color: #ef5350; }
 .comment-action-btn .fa-comment { margin-right: 3px; }
 
-/* 9. 답글 폼 / 인라인 수정 폼 */
+/* 10. 답글 폼 / 인라인 수정 폼 */
 .reply-form, .edit-form { margin-top: 12px; }
 .reply-textarea {
     width: 100%; min-height: 72px; padding: 12px;
@@ -79,7 +89,7 @@
 }
 .btn-sm { font-size: 12px !important; padding: 6px 14px !important; }
 
-/* 10. 신고 모달 */
+/* 11. 신고 모달 */
 .modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 9999; }
 .modal-container { background-color: var(--bg-card); width: 100%; max-width: 420px; border-radius: var(--radius-md); box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; border: 1px solid var(--border-color); }
 .modal-header { padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
