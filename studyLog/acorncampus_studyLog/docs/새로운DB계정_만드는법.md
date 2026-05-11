@@ -28,3 +28,8 @@ ALTER USER 계정이름 QUOTA UNLIMITED ON USERS;
 - 서비스 이름 : testdb
 
 4. 접속 후 `schema.sql` 파일을 실행해서 테이블과 초기 데이터를 생성합니다
+
+
+5. 관리자 계정으로 전환하는 법
+- 계정 생성 후
+- update users set user_role='ADMIN' where email='가입한이메일';

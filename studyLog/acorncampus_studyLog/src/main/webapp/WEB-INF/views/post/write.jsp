@@ -92,6 +92,7 @@
             <div class="editor-area">
                 <div id="editor"></div>
                 <input type="hidden" name="content" id="contentHidden">
+                <input type="hidden" name="thumbnailUrl" id="thumbnailUrlHidden">
             </div>
 
             <div class="write-footer">
@@ -523,7 +524,17 @@
             return;
         }
         document.getElementById('contentHidden').value = content;
-    });
+        const imgRegex = /!\[.*?\]\((.*?)\)/;
+            const match = content.match(imgRegex);
+
+            if (match && match[1]) {
+                // 첫 번째로 매칭된 이미지의 URL을 히든 필드에 저장
+                document.getElementById('thumbnailUrlHidden').value = match[1];
+            } else {
+                // 이미지가 없으면 빈 값 전송
+                document.getElementById('thumbnailUrlHidden').value = "";
+            }
+        });
 
     setSelectedAiAction(selectedAiAction);
 </script>

@@ -51,9 +51,15 @@
                                 <c:choose>
                                     <c:when test="${not empty post.thumbnailUrl}">
                                         <c:choose>
+                                            <%-- 1. http로 시작하는 외부 이미지 --%>
                                             <c:when test="${fn:startsWith(post.thumbnailUrl, 'http')}">
                                                 <img src="<c:out value='${post.thumbnailUrl}'/>" alt="">
                                             </c:when>
+                                            <%-- 2. /로 시작하는 내부 이미지 (이미 contextPath가 포함되어 있음) --%>
+                                            <c:when test="${fn:startsWith(post.thumbnailUrl, '/')}">
+                                                <img src="<c:out value='${post.thumbnailUrl}'/>" alt="">
+                                            </c:when>
+                                            <%-- 3. 그 외 상대 경로 --%>
                                             <c:otherwise>
                                                 <img src="${pageContext.request.contextPath}<c:out value='${post.thumbnailUrl}'/>" alt="">
                                             </c:otherwise>
