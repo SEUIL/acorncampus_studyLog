@@ -8,7 +8,7 @@ import java.util.Properties;
 public final class OpenAiConfig {
 
     private static final String RESOURCE_NAME = "openai.properties";
-    private static final String DEFAULT_MODEL = "gpt-5.4-mini";
+    private static final String DEFAULT_MODEL = "gpt-4o-mini";
     private static final int DEFAULT_TIMEOUT_SECONDS = 25;
 
     private static final OpenAiConfig INSTANCE = load();

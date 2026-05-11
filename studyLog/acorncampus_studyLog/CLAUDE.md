@@ -7,7 +7,7 @@
 - Servlet 기반 MVC2 패턴
 - Oracle 19c (ojdbc8)
 - 세션 기반 인증
-- JSTL 1.2, Toast UI Editor
+- JSTL 1.2, Milkdown Editor
 
 ## 패키지 구조
 ```
@@ -37,7 +37,7 @@ com.acorncampus_studylog
 | ReportController | `/l_check/report/*` | 신고 AJAX | ✅ |
 | AdminController | `/admin/*` | 관리자 (회원·글·댓글·신고·태그) AJAX 리팩토링 완료 | ✅ |
 | PasswordResetController | `/user/pwd-reset/*` | 이메일 토큰 기반 비밀번호 재설정 | ✅ |
-| AiController | `/l_check/ai/*` | AI 글쓰기 보조 JSON API, 백엔드 구현 완료 | ✅ |
+| AiController | `/l_check/ai/*` | AI 글쓰기 보조 JSON API, OpenAI 연동, 사용 로그 기록 | ✅ |
 
 ### Service (9개 — 전원 완료)
 | 클래스 | 상태 | 비고 |
@@ -72,7 +72,7 @@ com.acorncampus_studylog
 | `views/user/reset_password.jsp` | ✅ | 이메일 토큰으로 새 비밀번호 설정                          |
 | `views/post/list.jsp` | ✅ | 게시글 목록                                     |
 | `views/post/detail.jsp` | ✅ | 게시글 상세 + 댓글                                |
-| `views/post/write.jsp` | ✅ | 작성/수정 통합 폼                                 |
+| `views/post/write.jsp` | ✅ | 작성/수정 통합 폼, `Ctrl+Space` AI 글쓰기 도우미 모달 |
 | `views/series/list.jsp` | ✅ | 시리즈 목록                                     |
 | `views/series/detail.jsp` | ✅ | 시리즈 상세                                     |
 | `views/series/write.jsp` | ✅ | 시리즈 작성/수정 통합                               |
@@ -106,6 +106,8 @@ resources/css/
 ## JS 리소스
 - `resources/js/main.js` — 공통 JS (테마 전환 등)
 - `resources/js/interactions.js` — 스크롤 Reveal 애니메이션, 좋아요 파티클 버스트 (PR #66)
+- `resources/js/milkdown-editor.js` — Milkdown 에디터 초기화, 현재 마크다운 조회, AI 결과 적용용 `setMarkdown()`
+- `resources/js/milkdown-slash.js` — Milkdown 슬래시 명령
 
 ### 기타
 - `src/main/resources/schema.sql` — Oracle DDL (9테이블 + 6시퀀스 + 인덱스)
@@ -119,7 +121,7 @@ mvn test -Dtest=DaoIntegrationTest
 - 전제조건: Oracle testdb 실행 중, `blog` 계정 + schema.sql 테이블 생성 완료
 - `@AfterAll`에서 테스트 데이터 자동 하드 삭제 → 반복 실행 가능
 
-### AI 글쓰기 보조 백엔드 테스트
+### AI 글쓰기 보조 테스트
 ```bash
 mvnw.cmd -q -DskipTests compile
 mvnw.cmd -q -Dtest=Ai*Test test
@@ -127,11 +129,15 @@ mvnw.cmd -q -Dtest=Ai*Test test
 - 기본 테스트는 OpenAI 네트워크 호출 없이 실행된다.
 - 실제 OpenAI 스모크 테스트는 `src/main/resources/openai.properties`를 로컬에 만든 뒤 `mvnw.cmd -q -Dtest=OpenAiRealApiTest -Dopenai.realTest=true test`로만 실행한다.
 - Windows PowerShell에서는 점이 포함된 Maven 속성을 따옴표로 감싸 `"-Dopenai.realTest=true"`처럼 실행한다.
+- 실제 DB 기록 확인은 `AiWritingService`를 실제 DAO와 함께 호출해 `ai_usage_log`에 `PENDING` 생성 후 OpenAI 성공 시 `SUCCESS`로 갱신되는지 확인한다.
+- 2026-05-11 실제 검증: `OpenAiRealApiTest` 통과, `Ai*Test` 통과, `mvnw.cmd -q -DskipTests package` 통과, `ai_usage_log` 실제 행 `SUCCESS` 기록 확인.
 
 ## AI 글쓰기 보조 현재 상태
-- 백엔드는 `/l_check/ai/assist.do` POST JSON API까지 구현 완료. 프론트 모달, 단축키 연결, 미리보기 적용 UI는 사용자 승인 전까지 구현 완료로 보지 않는다.
-- 단축키 요구사항은 `Ctrl+Space`이며, 프론트 작업 시 기존 Milkdown 편집기 흐름과 초안 보존 규칙을 따라야 한다.
+- `/l_check/ai/assist.do` POST JSON API, OpenAI 서버 사이드 호출, `ai_usage_log` 사용 로그, 프론트 모달 연결까지 구현 완료.
+- 게시글 작성/수정 화면에서 `Ctrl+Space`로 AI 도우미 모달을 열고, 실행 결과는 미리보기로 먼저 보여 준 뒤 사용자가 Apply를 눌렀을 때만 제목/태그/본문에 반영한다.
+- 프론트 구현은 사용자 승인 완료 상태이며, 기존 Milkdown 편집기 흐름과 초안 보존 규칙을 따른다.
 - 설정 파일은 `src/main/resources/openai.properties`이며 `.gitignore`에 등록되어 있다. 저장소에는 `openai.properties.example`만 둔다.
+- 비용 기준 로컬 검증 모델은 `gpt-4o-mini`를 권장한다. 고성능 모델이 필요한 기능 범위는 아니며, 모델은 서버 설정 `openai.model`에서만 바꾼다.
 - 제한값: `draftText` 3,000자, `customPrompt` 500자, 요청 본문 8KB, OpenAI 출력 600 tokens, 사용자별 15초 쿨다운.
 - 요청 작업: `IMPROVE`, `SUMMARY`, `EXPAND`, `TITLE`, `TAGS`, `CUSTOM`.
 - 자세한 설정과 실행 순서는 `docs/AI_글쓰기_도우미_런북.md`를 확인한다.
@@ -158,6 +164,7 @@ mvnw.cmd -q -Dtest=Ai*Test test
 | `pom.xml` | `maven-surefire-plugin 3.2.5` 추가 (JUnit 5 mvn test 실행에 필요) | 완료 |
 | `AdminController` (건희) | ban/unban/강제삭제/신고처리 AJAX 방식으로 리팩토링 완료 | 완료 |
 | CSS | 단일 파일에서 3계층 아키텍처로 리팩토링 완료 | 완료 |
+| `AiController`, `write.jsp`, `milkdown-editor.js` | OpenAI 글쓰기 도우미 백엔드, 프론트 모달, 실제 API/DB 로그 검증 완료 | 완료 |
 
 ## 핵심 규칙
 - DB 쿼리: `PreparedStatement` 만 사용, `Statement` 금지 (SQL Injection 방지)
