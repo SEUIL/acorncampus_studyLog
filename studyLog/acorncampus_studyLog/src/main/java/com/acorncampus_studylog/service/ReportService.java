@@ -77,7 +77,7 @@ public class ReportService {
     }
 
     /** 신고 승인 처리. 대상 게시글/댓글 삭제와 신고 상태 변경을 하나의 트랜잭션으로 묶는다. */
-    public void resolveReport(int reportId) {
+    public void resolveReport(int reportId, int adminUserId) {
         Connection conn = null;
         try {
             conn = DBUtil.getConnection();
@@ -100,7 +100,7 @@ public class ReportService {
             if (deletedRows == 0) {
                 throw new RuntimeException("신고 대상이 존재하지 않습니다.");
             }
-            if (reportDao.updateStatus(reportId, "RESOLVED", conn) == 0) {
+            if (reportDao.updateStatus(reportId, "RESOLVED", adminUserId, conn) == 0) {
                 throw new RuntimeException("신고 상태 변경에 실패했습니다.");
             }
 
@@ -117,8 +117,8 @@ public class ReportService {
     }
 
     /** 신고 기각 처리. 대상 콘텐츠는 건드리지 않고 신고 상태만 DISMISSED로 변경한다. */
-    public void dismissReport(int reportId) {
-        if (reportDao.updateStatus(reportId, "DISMISSED") == 0) {
+    public void dismissReport(int reportId, int adminUserId) {
+        if (reportDao.updateStatus(reportId, "DISMISSED", adminUserId) == 0) {
             throw new RuntimeException("존재하지 않는 신고입니다.");
         }
     }

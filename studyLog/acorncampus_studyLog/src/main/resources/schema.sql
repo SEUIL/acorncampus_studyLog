@@ -122,8 +122,11 @@ CREATE TABLE reports (
     target_id   NUMBER         NOT NULL,
     reason      VARCHAR2(1000),
     status      VARCHAR2(15)   DEFAULT 'PENDING' NOT NULL, -- PENDING / RESOLVED / DISMISSED
+    processed_by NUMBER,
+    processed_at TIMESTAMP,
     created_at  TIMESTAMP      DEFAULT SYSTIMESTAMP NOT NULL,
     CONSTRAINT fk_reports_reporter FOREIGN KEY (reporter_id) REFERENCES users(user_id),
+    CONSTRAINT fk_reports_processor FOREIGN KEY (processed_by) REFERENCES users(user_id),
     CONSTRAINT chk_reports_type    CHECK (target_type IN ('POST', 'COMMENT')),
     CONSTRAINT chk_reports_status  CHECK (status IN ('PENDING', 'RESOLVED', 'DISMISSED'))
 );

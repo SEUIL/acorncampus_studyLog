@@ -12,7 +12,13 @@
 .reason-box { text-align: left; line-height: 1.6; }
 
 /* 3. 액션 버튼 그룹 */
-.action-group { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.action-group { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.action-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.process-info { min-width: 120px; }
+.process-info strong,
+.process-info span { display: block; }
+.process-info strong { margin-bottom: 4px; color: var(--text-main); }
+.process-info span { color: var(--text-sub); font-size: 12px; line-height: 1.4; }
 
 /* 4. 신고 테이블 td 상단 정렬 (긴 텍스트 대응) */
 .admin-table td { vertical-align: top; }

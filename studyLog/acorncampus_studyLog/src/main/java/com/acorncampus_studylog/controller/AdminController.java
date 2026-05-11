@@ -1,6 +1,7 @@
 package com.acorncampus_studylog.controller;
 
 import com.acorncampus_studylog.dto.PageDto;
+import com.acorncampus_studylog.dto.UserDto;
 import com.acorncampus_studylog.service.CommentService;
 import com.acorncampus_studylog.service.PostService;
 import com.acorncampus_studylog.service.ReportService;
@@ -333,7 +334,7 @@ public class AdminController extends HttpServlet {
      */
     private void handleReportResolve(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        writeActionJson(resp, () -> reportService.resolveReport(parseInt(req.getParameter("reportId"), 0)),
+        writeActionJson(resp, () -> reportService.resolveReport(parseInt(req.getParameter("reportId"), 0), getAdminUserId(req)),
                 "신고 처리 완료");
     }
 
@@ -343,7 +344,7 @@ public class AdminController extends HttpServlet {
      */
     private void handleReportDismiss(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        writeActionJson(resp, () -> reportService.dismissReport(parseInt(req.getParameter("reportId"), 0)),
+        writeActionJson(resp, () -> reportService.dismissReport(parseInt(req.getParameter("reportId"), 0), getAdminUserId(req)),
                 "신고 기각 완료");
     }
 
@@ -425,6 +426,17 @@ public class AdminController extends HttpServlet {
             return status;
         }
         return null;
+    }
+
+    private int getAdminUserId(HttpServletRequest req) {
+        if (req.getSession(false) == null) {
+            throw new IllegalStateException("관리자 로그인 정보가 없습니다.");
+        }
+        UserDto loginUser = (UserDto) req.getSession(false).getAttribute("loginUser");
+        if (loginUser == null) {
+            throw new IllegalStateException("관리자 로그인 정보가 없습니다.");
+        }
+        return loginUser.getUserId();
     }
 
     private String normalizeUserStatus(String status) {

@@ -14,8 +14,10 @@ import java.util.List;
 public class ReportDao {
 
     private static final String REPORT_SELECT =
-        "SELECT r.report_id, r.reporter_id, r.target_type, r.target_id, r.reason, r.status, r.created_at, " +
+        "SELECT r.report_id, r.reporter_id, r.target_type, r.target_id, r.reason, r.status, " +
+        "       r.processed_by, r.processed_at, r.created_at, " +
         "       reporter.nickname AS reporter_name, " +
+        "       processor.nickname AS processor_name, " +
         "       target_user.nickname AS target_author_name, " +
         "       target_user.email AS target_author_email, " +
         "       CASE " +
@@ -26,6 +28,7 @@ public class ReportDao {
     private static final String REPORT_FROM =
         "FROM reports r " +
         "JOIN users reporter ON r.reporter_id = reporter.user_id " +
+        "LEFT JOIN users processor ON r.processed_by = processor.user_id " +
         "LEFT JOIN posts p ON r.target_type = 'POST' AND r.target_id = p.post_id " +
         "LEFT JOIN comments c ON r.target_type = 'COMMENT' AND r.target_id = c.comment_id " +
         "LEFT JOIN users target_user ON target_user.user_id = CASE " +
@@ -233,6 +236,18 @@ public class ReportDao {
         }
     }
 
+    public int updateStatus(int reportId, String status, int processedBy) {
+        Connection conn = null;
+        try {
+            conn = DBUtil.getConnection();
+            return updateStatus(reportId, status, processedBy, conn);
+        } catch (SQLException e) {
+            throw new RuntimeException("ReportDao.updateStatus 처리 기록 실패", e);
+        } finally {
+            DBUtil.close(conn, null, null);
+        }
+    }
+
     /** 신고 상태를 변경한다. 트랜잭션 중 같은 Connection을 재사용할 때 사용한다. */
     public int updateStatus(int reportId, String status, Connection conn) throws SQLException {
         String sql = "UPDATE reports SET status = ? WHERE report_id = ?";
@@ -241,6 +256,21 @@ public class ReportDao {
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, status);
             pstmt.setInt(2, reportId);
+            return pstmt.executeUpdate();
+        } finally {
+            if (pstmt != null) pstmt.close();
+        }
+    }
+
+    /** 신고 처리 상태와 처리 관리자/처리 시각을 함께 기록한다. */
+    public int updateStatus(int reportId, String status, int processedBy, Connection conn) throws SQLException {
+        String sql = "UPDATE reports SET status = ?, processed_by = ?, processed_at = SYSTIMESTAMP WHERE report_id = ?";
+        PreparedStatement pstmt = null;
+        try {
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, status);
+            pstmt.setInt(2, processedBy);
+            pstmt.setInt(3, reportId);
             return pstmt.executeUpdate();
         } finally {
             if (pstmt != null) pstmt.close();
@@ -301,8 +331,12 @@ public class ReportDao {
         r.setTargetId(rs.getInt("target_id"));
         r.setReason(rs.getString("reason"));
         r.setStatus(rs.getString("status"));
+        int processedBy = rs.getInt("processed_by");
+        r.setProcessedBy(rs.wasNull() ? null : processedBy);
+        r.setProcessedAt(rs.getTimestamp("processed_at"));
         r.setCreatedAt(rs.getTimestamp("created_at"));
         r.setReporterName(rs.getString("reporter_name"));
+        r.setProcessorName(rs.getString("processor_name"));
         r.setTargetSummary(rs.getString("target_summary"));
         r.setTargetAuthorName(rs.getString("target_author_name"));
         r.setTargetAuthorEmail(rs.getString("target_author_email"));
