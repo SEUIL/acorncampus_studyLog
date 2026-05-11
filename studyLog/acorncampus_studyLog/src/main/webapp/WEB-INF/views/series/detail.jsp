@@ -23,7 +23,7 @@
 
     <main class="main-content">
         <div class="top-bar">
-            <a class="breadcrumb" href="${pageContext.request.contextPath}/l_check/user/mypage.do">
+            <a class="breadcrumb" href="${pageContext.request.contextPath}/<c:choose><c:when test="${param.from eq 'community'}">community.do</c:when><c:otherwise>l_check/user/mypage.do</c:otherwise></c:choose>">
                 <i class="fa-solid fa-arrow-left"></i> 돌아가기
             </a>
             <button class="btn btn-primary" onclick="location.href='${pageContext.request.contextPath}/l_check/post/write.do?seriesId=${series.seriesId}'">
@@ -61,7 +61,7 @@
                 <c:when test="${not empty seriesPosts}">
                     <c:forEach var="post" items="${seriesPosts}" varStatus="status">
                         <li class="post-item">
-                            <a class="post-info" href="${pageContext.request.contextPath}/post/detail.do?id=${post.postId}">
+                            <a class="post-info" href="${pageContext.request.contextPath}/post/detail.do?id=${post.postId}<c:if test='${param.from eq \"community\"}'>&from=community</c:if>">
                                 <div class="post-number">${status.index + 1}</div>
                                 <div>
                                     <span class="post-title"><c:out value="${post.title}"/></span>
