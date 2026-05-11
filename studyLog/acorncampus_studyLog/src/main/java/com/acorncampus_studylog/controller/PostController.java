@@ -109,6 +109,7 @@ public class PostController extends HttpServlet {
             req.setAttribute("page",     postService.getPostPage(pageNo));
         }
         req.setAttribute("sort", sort);
+        req.setAttribute("currentUrl", getCurrentUrl(req));
         req.getRequestDispatcher("/WEB-INF/views/post/list.jsp").forward(req, resp);
     }
 
@@ -164,6 +165,7 @@ public class PostController extends HttpServlet {
 
         req.setAttribute("post",     post);
         req.setAttribute("comments", comments);
+        req.setAttribute("backUrl", resolveParentUrl(req, getPostFallbackUrl(req, post)));
         req.getRequestDispatcher("/WEB-INF/views/post/detail.jsp").forward(req, resp);
     }
 
@@ -513,6 +515,42 @@ public class PostController extends HttpServlet {
     private boolean isOwnerOrAdmin(UserDto loginUser, int postOwnerId) {
         return loginUser.getUserId() == postOwnerId
                 || "ADMIN".equals(loginUser.getRole());
+    }
+
+    private String getPostFallbackUrl(HttpServletRequest req, PostDto post) {
+        if (post.getSeriesId() != null) {
+            return req.getContextPath() + "/series/detail.do?id=" + post.getSeriesId();
+        }
+        return req.getContextPath() + "/post/list.do";
+    }
+
+    private String resolveParentUrl(HttpServletRequest req, String fallbackUrl) {
+        String parentUrl = req.getParameter("parentUrl");
+        if (parentUrl == null || parentUrl.trim().isEmpty()) {
+            return fallbackUrl;
+        }
+
+        String contextPath = req.getContextPath();
+        boolean validAppPath = contextPath.isEmpty()
+                ? parentUrl.startsWith("/") && !parentUrl.startsWith("//")
+                : parentUrl.startsWith(contextPath + "/");
+        if (!validAppPath) {
+            return fallbackUrl;
+        }
+
+        if (parentUrl.equals(getCurrentUrl(req))) {
+            return fallbackUrl;
+        }
+
+        return parentUrl;
+    }
+
+    private String getCurrentUrl(HttpServletRequest req) {
+        String currentUrl = req.getRequestURI();
+        if (req.getQueryString() != null) {
+            currentUrl += "?" + req.getQueryString();
+        }
+        return currentUrl;
     }
 
     /**

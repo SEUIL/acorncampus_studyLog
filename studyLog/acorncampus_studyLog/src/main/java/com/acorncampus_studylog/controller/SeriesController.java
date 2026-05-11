@@ -80,6 +80,7 @@ public class SeriesController extends HttpServlet {
             req.setAttribute("seriesList", seriesService.getSeriesList(pageNo));
             req.setAttribute("page",       seriesService.getSeriesPage(pageNo));
         }
+        req.setAttribute("currentUrl", getCurrentUrl(req));
         req.getRequestDispatcher("/WEB-INF/views/series/list.jsp").forward(req, resp);
     }
 
@@ -95,6 +96,8 @@ public class SeriesController extends HttpServlet {
 
         req.setAttribute("series", series);
         req.setAttribute("postList", series.getPostList());
+        req.setAttribute("backUrl", resolveParentUrl(req, req.getContextPath() + "/series/list.do"));
+        req.setAttribute("currentUrl", getCurrentUrl(req));
         req.getRequestDispatcher("/WEB-INF/views/series/detail.jsp").forward(req, resp);
     }
 
@@ -186,6 +189,35 @@ public class SeriesController extends HttpServlet {
 
     private UserDto getLoginUser(HttpServletRequest req) {
         return (UserDto) req.getSession().getAttribute("loginUser");
+    }
+
+    private String resolveParentUrl(HttpServletRequest req, String fallbackUrl) {
+        String parentUrl = req.getParameter("parentUrl");
+        if (parentUrl == null || parentUrl.trim().isEmpty()) {
+            return fallbackUrl;
+        }
+
+        String contextPath = req.getContextPath();
+        boolean validAppPath = contextPath.isEmpty()
+                ? parentUrl.startsWith("/") && !parentUrl.startsWith("//")
+                : parentUrl.startsWith(contextPath + "/");
+        if (!validAppPath) {
+            return fallbackUrl;
+        }
+
+        if (parentUrl.equals(getCurrentUrl(req))) {
+            return fallbackUrl;
+        }
+
+        return parentUrl;
+    }
+
+    private String getCurrentUrl(HttpServletRequest req) {
+        String currentUrl = req.getRequestURI();
+        if (req.getQueryString() != null) {
+            currentUrl += "?" + req.getQueryString();
+        }
+        return currentUrl;
     }
 
     private boolean canManageSeries(HttpServletRequest req, SeriesDto series) {

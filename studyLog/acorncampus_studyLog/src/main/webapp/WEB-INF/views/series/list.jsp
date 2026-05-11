@@ -26,7 +26,7 @@
     <main class="main-content">
         <div class="top-bar">
             <div class="nav-left">
-                <a class="breadcrumb" href="${pageContext.request.contextPath}/">
+                <a class="breadcrumb" href="${pageContext.request.contextPath}/community.do">
                     <i class="fa-solid fa-house"></i> 커뮤니티 <span style="color: var(--border-color);">/</span> 전체 시리즈
                 </a>
             </div>
@@ -61,7 +61,11 @@
             <c:when test="${not empty seriesItems}">
                 <div class="series-grid">
                     <c:forEach var="item" items="${seriesItems}">
-                        <a class="series-card" href="${pageContext.request.contextPath}/series/detail.do?id=${item.seriesId}&from=community">
+                        <c:url var="seriesDetailUrl" value="/series/detail.do">
+                            <c:param name="id" value="${item.seriesId}" />
+                            <c:param name="parentUrl" value="${currentUrl}" />
+                        </c:url>
+                        <a class="series-card" href="${seriesDetailUrl}">
                             <div class="series-info">
                                 <h3><c:out value="${item.name}"/></h3>
                                 <p><c:out value="${item.description}"/></p>
