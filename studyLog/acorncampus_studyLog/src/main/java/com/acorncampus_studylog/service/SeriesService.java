@@ -127,6 +127,7 @@ public class SeriesService {
     }
 
     private String normalizeIsPublic(String isPublic) {
-        return "N".equalsIgnoreCase(isPublic) ? "N" : "Y";
+        // 공개가 명확히 선택된 경우만 Y, 그 외에는 비공개로 저장한다.
+        return "Y".equalsIgnoreCase(isPublic) ? "Y" : "N";
     }
 }
