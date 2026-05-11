@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/button.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/form.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/table.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/tabs.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/admin/admin_report_list.css?v=modal-20260508">
 </head>
 <body>
@@ -31,18 +32,28 @@
 
     <main class="main-content">
         <div class="admin-header">
-            <h1 style="background: var(--bg-card); padding: 15px 30px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">신고 목록</h1>
-            <form class="controls-right" action="${pageContext.request.contextPath}/admin/report/list.do" method="get">
-                <input type="text" name="keyword" class="admin-input" placeholder="검색어 입력" value="<c:out value='${param.keyword}'/>">
+            <h1><i class="fa-solid fa-triangle-exclamation"></i> 신고 관리</h1>
+            <p class="text-sub" style="margin-top: 10px;">신고된 게시글과 댓글을 검색하고 처리 상태를 관리합니다.</p>
+        </div>
+
+        <div class="board-tabs">
+            <div class="board-tab active">신고 관리</div>
+        </div>
+
+        <form class="controls-bar" action="${pageContext.request.contextPath}/admin/report/list.do" method="get">
+            <div class="controls-left">
+                <input type="text" name="keyword" class="admin-input" placeholder="신고자, 대상 작성자, 사유 검색" style="width: 300px;" value="<c:out value='${param.keyword}'/>">
+                <button class="btn-sm" style="background: var(--text-main); color: var(--bg-card);">검색</button>
+            </div>
+            <div class="controls-right">
                 <select name="status" class="admin-select">
                     <option value="">전체 상태</option>
                     <option value="PENDING" ${param.status eq 'PENDING' ? 'selected' : ''}>대기</option>
                     <option value="RESOLVED" ${param.status eq 'RESOLVED' ? 'selected' : ''}>처리 완료</option>
                     <option value="DISMISSED" ${param.status eq 'DISMISSED' ? 'selected' : ''}>기각</option>
                 </select>
-                <button class="btn-sm">검색</button>
-            </form>
-        </div>
+            </div>
+        </form>
 
         <c:set var="reportItems" value="${not empty reportList ? reportList : reports}" />
         <div class="admin-table-wrapper">

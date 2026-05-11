@@ -95,6 +95,45 @@ public class CommentDao {
         }
     }
 
+    public List<CommentDto> findAllForAdmin(String keyword, int offset, int limit) {
+        StringBuilder sql = new StringBuilder()
+            .append("SELECT c.comment_id, c.post_id, c.user_id, c.parent_comment_id, c.content, ")
+            .append("       c.created_at, c.updated_at, c.deleted_at, u.nickname AS author_name ")
+            .append("FROM comments c JOIN users u ON c.user_id = u.user_id ")
+            .append("WHERE c.deleted_at IS NULL ");
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+        if (hasKeyword) {
+            sql.append("AND (LOWER(c.content) LIKE LOWER(?) OR LOWER(u.nickname) LIKE LOWER(?) OR TO_CHAR(c.post_id) = ?) ");
+        }
+        sql.append("ORDER BY c.created_at DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+
+        List<CommentDto> list = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            conn = DBUtil.getConnection();
+            pstmt = conn.prepareStatement(sql.toString());
+            int idx = 1;
+            if (hasKeyword) {
+                String trimmedKeyword = keyword.trim();
+                String likeKeyword = "%" + trimmedKeyword + "%";
+                pstmt.setString(idx++, likeKeyword);
+                pstmt.setString(idx++, likeKeyword);
+                pstmt.setString(idx++, trimmedKeyword);
+            }
+            pstmt.setInt(idx++, offset);
+            pstmt.setInt(idx, limit);
+            rs = pstmt.executeQuery();
+            while (rs.next()) list.add(mapRow(rs));
+            return list;
+        } catch (SQLException e) {
+            throw new RuntimeException("CommentDao.findAllForAdmin 검색 실패", e);
+        } finally {
+            DBUtil.close(conn, pstmt, rs);
+        }
+    }
+
     /** 게시글의 댓글 수 (삭제되지 않은 것만) */
     public int countByPostId(int postId) {
         String sql = "SELECT COUNT(*) FROM comments WHERE post_id = ? AND deleted_at IS NULL";
@@ -127,6 +166,38 @@ public class CommentDao {
             return rs.next() ? rs.getInt(1) : 0;
         } catch (SQLException e) {
             throw new RuntimeException("CommentDao.countAllForAdmin 실패", e);
+        } finally {
+            DBUtil.close(conn, pstmt, rs);
+        }
+    }
+
+    public int countAllForAdmin(String keyword) {
+        StringBuilder sql = new StringBuilder()
+            .append("SELECT COUNT(*) ")
+            .append("FROM comments c JOIN users u ON c.user_id = u.user_id ")
+            .append("WHERE c.deleted_at IS NULL ");
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+        if (hasKeyword) {
+            sql.append("AND (LOWER(c.content) LIKE LOWER(?) OR LOWER(u.nickname) LIKE LOWER(?) OR TO_CHAR(c.post_id) = ?) ");
+        }
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            conn = DBUtil.getConnection();
+            pstmt = conn.prepareStatement(sql.toString());
+            if (hasKeyword) {
+                String trimmedKeyword = keyword.trim();
+                String likeKeyword = "%" + trimmedKeyword + "%";
+                pstmt.setString(1, likeKeyword);
+                pstmt.setString(2, likeKeyword);
+                pstmt.setString(3, trimmedKeyword);
+            }
+            rs = pstmt.executeQuery();
+            return rs.next() ? rs.getInt(1) : 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("CommentDao.countAllForAdmin 검색 실패", e);
         } finally {
             DBUtil.close(conn, pstmt, rs);
         }

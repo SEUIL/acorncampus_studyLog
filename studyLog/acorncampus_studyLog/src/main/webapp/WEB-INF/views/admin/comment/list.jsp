@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/button.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/form.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/table.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/tabs.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/pages/admin/admin_report_list.css">
 </head>
 <body>
@@ -31,8 +32,21 @@
 
     <main class="main-content">
         <div class="admin-header">
-            <h1 style="background: var(--bg-card); padding: 15px 30px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">댓글 목록</h1>
+            <h1><i class="fa-solid fa-comments"></i> 댓글 관리</h1>
+            <p class="text-sub" style="margin-top: 10px;">작성된 댓글을 검색하고 관리자 권한으로 관리합니다.</p>
         </div>
+
+        <div class="board-tabs">
+            <div class="board-tab active">댓글 관리</div>
+        </div>
+
+        <form class="controls-bar" action="${pageContext.request.contextPath}/admin/comment/list.do" method="get">
+            <div class="controls-left">
+                <input type="text" name="keyword" class="admin-input" placeholder="댓글 내용, 작성자, 게시글ID 검색" style="width: 300px;" value="<c:out value='${param.keyword}'/>">
+                <button class="btn-sm" style="background: var(--text-main); color: var(--bg-card);">검색</button>
+            </div>
+            <div class="controls-right"></div>
+        </form>
 
         <c:set var="commentItems" value="${not empty commentList ? commentList : comments}" />
         <div class="admin-table-wrapper">
