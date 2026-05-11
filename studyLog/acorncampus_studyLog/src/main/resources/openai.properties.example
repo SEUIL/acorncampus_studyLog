@@ -1,3 +1,3 @@
 openai.api.key=YOUR_OPENAI_API_KEY
-openai.model=gpt-5.4-mini
+openai.model=gpt-4o-mini
 openai.timeout.seconds=25

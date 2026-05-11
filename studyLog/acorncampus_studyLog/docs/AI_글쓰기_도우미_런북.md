@@ -1,15 +1,23 @@
 # AI 글쓰기 도우미 설정 및 테스트 런북
 
-> 작성일: 2026-05-11  
-> 대상: AI 글쓰기 도우미 백엔드 설정, 테스트, 다음 프론트 작업을 맡는 팀원
+> 작성일: 2026-05-11
+> 최종 업데이트: 2026-05-11
+> 대상: AI 글쓰기 도우미 설정, 운영, 테스트를 맡는 팀원
 
 ## 현재 상태
 
-AI 글쓰기 도우미는 백엔드 우선 범위가 완료된 상태다. `/l_check/ai/assist.do` POST JSON API, OpenAI 설정 로더, 클라이언트, 서비스, 사용 로그 DAO, 테스트가 준비되어 있다.
+AI 글쓰기 도우미는 백엔드, 프론트 연결, 실제 OpenAI 호출, 실제 DB 사용 로그 기록까지 완료된 상태다.
 
-프론트 모달과 화면 연결은 아직 완료로 표시하지 않는다. `Ctrl+Space`로 여는 모달, 미리보기, Apply 동작은 사용자 승인 후 JSP, CSS, JS 파일을 정해 진행해야 한다.
+- `/l_check/ai/assist.do` POST JSON API 구현 완료
+- 서버 사이드 OpenAI 호출 구현 완료
+- `ai_usage_log` 기반 사용 로그와 15초 쿨다운 구현 완료
+- 게시글 작성/수정 화면 `Ctrl+Space` AI 모달 구현 완료
+- 미리보기 후 Apply 방식 구현 완료
+- 실제 OpenAI API 스모크 테스트 통과
+- 실제 DB `ai_usage_log` `SUCCESS` 기록 확인
+- Tomcat/IDE 실행 환경에서 브라우저 UI 확인 완료
 
-## 구현된 백엔드 구성
+## 구현 구성
 
 | 영역 | 파일 | 역할 |
 |------|------|------|
@@ -20,6 +28,9 @@ AI 글쓰기 도우미는 백엔드 우선 범위가 완료된 상태다. `/l_ch
 | Config | `src/main/java/com/acorncampus_studylog/util/OpenAiConfig.java` | `openai.properties` 로딩 |
 | DAO | `src/main/java/com/acorncampus_studylog/dao/AiUsageLogDao.java` | `ai_usage_log` 저장과 최근 사용 조회 |
 | Schema | `src/main/resources/schema.sql` | `ai_usage_log_seq`, `ai_usage_log`, `idx_ai_usage_user_requested` |
+| JSP | `src/main/webapp/WEB-INF/views/post/write.jsp` | AI 모달, 단축키, 미리보기, Apply 처리 |
+| CSS | `src/main/webapp/resources/css/pages/post/post_write.css` | post write 전용 AI 모달 스타일 |
+| JS | `src/main/webapp/resources/js/milkdown-editor.js` | AI 결과 적용용 `setMarkdown()` 포함 |
 
 ## 로컬 설정
 
@@ -27,13 +38,13 @@ AI 글쓰기 도우미는 백엔드 우선 범위가 완료된 상태다. `/l_ch
 
 ```properties
 openai.api.key=YOUR_OPENAI_API_KEY
-openai.model=gpt-5.4-mini
+openai.model=gpt-4o-mini
 openai.timeout.seconds=25
 ```
 
 실제 키는 로컬 `openai.properties`에만 넣는다. 이 파일은 `.gitignore`에 등록되어 있으므로 커밋하지 않는다. 문서, JSP, JS, HTML, 테스트 출력에도 실제 키를 적지 않는다.
 
-`openai.model`과 `openai.timeout.seconds`는 비워 두면 기본값을 쓴다. 기본 모델은 `gpt-5.4-mini`, 기본 타임아웃은 25초다.
+`openai.model`은 서버에서만 읽는다. 클라이언트는 모델, temperature, token 값을 선택할 수 없다. 이 기능 범위에서는 `gpt-4o-mini`를 비용 대비 기본 권장 모델로 둔다.
 
 ## 제한값
 
@@ -64,20 +75,18 @@ openai.timeout.seconds=25
 
 `CUSTOM`은 `customPrompt`가 필수다. 모든 요청은 `draftText`가 필요하다.
 
-## 프론트 작업 전 확인
+## 프론트 동작
 
-프론트는 아직 구현 완료 상태가 아니다. 작업 전 사용자에게 JSP, CSS, JS 수정 대상 파일을 보여 주고 승인을 받아야 한다.
+게시글 작성/수정 화면에서만 동작한다.
 
-요구사항은 다음 상태로 남아 있다.
+1. 로그인 후 게시글 작성/수정 페이지에 진입한다.
+2. `Ctrl+Space`를 누르거나 `AI 도우미` 버튼을 누른다.
+3. AI 작업을 선택한다.
+4. `실행` 버튼을 누르면 `/l_check/ai/assist.do`로 JSON 요청을 보낸다.
+5. 결과는 미리보기 영역에만 표시된다.
+6. 사용자가 `Apply`를 눌렀을 때만 제목, 태그, 본문 중 해당 대상에 반영된다.
 
-| 항목 | 상태 |
-|------|------|
-| `Ctrl+Space` 단축키 | 미구현, 승인 후 연결 |
-| AI 모달 | 미구현, 승인 후 작성 |
-| 결과 미리보기 | 미구현, 승인 후 작성 |
-| Apply 버튼으로 명시 적용 | 미구현, 승인 후 작성 |
-
-프론트 구현 시 AI 결과를 자동 적용하지 않는다. 오류가 나도 사용자의 기존 초안은 보존해야 한다.
+오류가 나거나 쿨다운이 걸려도 기존 초안은 변경하지 않는다. `TITLE`은 제목 입력값에, `TAGS`는 태그 입력값에, 나머지 작업은 Milkdown 본문에 적용한다.
 
 ## 테스트 명령
 
@@ -86,30 +95,39 @@ openai.timeout.seconds=25
 ```bash
 mvnw.cmd -q -DskipTests compile
 mvnw.cmd -q -Dtest=Ai*Test test
+mvnw.cmd -q -DskipTests package
 ```
 
 위 명령은 실제 OpenAI API를 호출하지 않는다. 로컬 키가 없어도 통과해야 한다.
 
 실제 API 스모크 테스트는 명시적으로 켠 경우에만 실행한다.
 
-```bash
-mvnw.cmd -q -Dtest=OpenAiRealApiTest -Dopenai.realTest=true test
-```
-
-Windows PowerShell에서는 점이 포함된 Maven 속성을 따옴표로 감싼다.
-
 ```powershell
 .\mvnw.cmd -q -Dtest=OpenAiRealApiTest "-Dopenai.realTest=true" test
 ```
 
-스모크 테스트 실행 조건은 두 가지다. `-Dopenai.realTest=true`가 있어야 하고, 무시되는 `src/main/resources/openai.properties`에 `openai.api.key`가 있어야 한다. 둘 중 하나라도 없으면 테스트는 호출 없이 skip된다.
+Windows PowerShell에서는 점이 포함된 Maven 속성을 따옴표로 감싼다. 스모크 테스트 실행 조건은 두 가지다. `-Dopenai.realTest=true`가 있어야 하고, 무시되는 `src/main/resources/openai.properties`에 `openai.api.key`가 있어야 한다. 둘 중 하나라도 없으면 테스트는 호출 없이 skip된다.
+
+## 실제 검증 기록
+
+2026-05-11 기준 다음 검증을 완료했다.
+
+| 검증 | 결과 |
+|------|------|
+| `OpenAiRealApiTest` 실제 OpenAI 호출 | 통과 |
+| `Ai*Test` 회귀 테스트 | 통과 |
+| `mvnw.cmd -q -DskipTests package` | 통과 |
+| 실제 Oracle DB `ai_usage_log` 기록 | `SUCCESS` 행 생성 확인 |
+| Tomcat/IDE 브라우저 UI 확인 | 완료 |
+
+실제 DB 테스트에서는 `AiWritingService` 호출 후 `ai_usage_log`에 `PENDING`이 생성되고, OpenAI 호출 성공 뒤 `SUCCESS`로 갱신되는 흐름을 확인했다.
 
 ## 비밀값 취급
 
-실제 API 키는 저장소에 넣지 않는다. 확인할 때는 다음 명령으로 docs와 CLAUDE.md에 키 형태 문자열이 없는지 확인한다.
+실제 API 키는 저장소에 넣지 않는다. 확인할 때는 docs와 CLAUDE.md에 OpenAI 키 접두어 형태의 문자열이 없는지 확인한다.
 
 ```bash
-git grep -n "sk-" -- studyLog/acorncampus_studyLog/docs studyLog/acorncampus_studyLog/CLAUDE.md
+git grep -n "OPENAI_API_KEY" -- studyLog/acorncampus_studyLog/docs studyLog/acorncampus_studyLog/CLAUDE.md
 ```
 
-결과가 없으면 문서에 OpenAI 키 패턴이 노출되지 않은 상태다.
+실제 키 값이 문서에 노출되지 않았는지도 커밋 전 diff에서 함께 확인한다.
