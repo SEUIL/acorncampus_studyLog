@@ -88,9 +88,8 @@ public class PostController extends HttpServlet {
     // ── GET 핸들러 ──────────────────────────────────────────────────────────
 
     /**
-     * GET /post/list.do?page={page}
-     * → 공개 게시글 목록 (최신순, 페이지네이션)
-     * forward: /WEB-INF/views/post/list.jsp
+     * GET /post/list.do?page={page}&keyword={keyword}&sort={sort}
+     * → 공개 게시글 목록 (최신순/조회수/좋아요순, 페이지네이션, 태그 검색 지원)
      */
     private void handleList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -101,13 +100,24 @@ public class PostController extends HttpServlet {
 
         if (keyword != null && !keyword.trim().isEmpty()) {
             keyword = keyword.trim();
-            req.setAttribute("postList", postService.search(keyword, pageNo));
-            req.setAttribute("page",     postService.getSearchPage(keyword, pageNo));
-            req.setAttribute("keyword",  keyword);
+
+            // --- 태그 검색 분기 로직 추가 ---
+            if (keyword.startsWith("#")) {
+                String tagName = keyword.substring(1).trim();
+                // PostService에 이미 구현된 태그 검색 메서드 활용
+                req.setAttribute("postList", postService.getPostsByTag(tagName, pageNo));
+                req.setAttribute("page",     postService.getPostPageByTag(tagName, pageNo));
+            } else {
+                // 일반 키워드 검색
+                req.setAttribute("postList", postService.search(keyword, pageNo));
+                req.setAttribute("page",     postService.getSearchPage(keyword, pageNo));
+            }
+            req.setAttribute("keyword", keyword);
         } else {
             req.setAttribute("postList", postService.getPostList(pageNo, sort));
             req.setAttribute("page",     postService.getPostPage(pageNo));
         }
+
         req.setAttribute("sort", sort);
         req.setAttribute("currentUrl", getCurrentUrl(req));
         req.getRequestDispatcher("/WEB-INF/views/post/list.jsp").forward(req, resp);
