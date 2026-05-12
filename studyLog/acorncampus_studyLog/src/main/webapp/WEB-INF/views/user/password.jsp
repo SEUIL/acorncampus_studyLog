@@ -6,6 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <title>스터디로그 - 비밀번호 변경</title>
+    <jsp:include page="/WEB-INF/views/common/head.jsp"/>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/global_theme.css">
 </head>
 <body>

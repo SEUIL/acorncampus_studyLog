@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>비밀번호 찾기 - 스터디로그</title>
-
+    <jsp:include page="/WEB-INF/views/common/head.jsp"/>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/global_theme.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/typography.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/button.css">
