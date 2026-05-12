@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>스터디로그 - 내 작업 공간</title>
+    <jsp:include page="/WEB-INF/views/common/head.jsp"/>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/global_theme.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/components/typography.css">
