@@ -10,9 +10,9 @@ import java.sql.SQLException;
 public class DBUtil {
 
     // DB 접속 정보
-    private static final String URL  = "jdbc:oracle:thin:@localhost:1521:testdb";
-    private static final String USER = "blog";
-    private static final String PASS = "blog1234";
+    private static final String URL  = "jdbc:oracle:thin:@3.36.62.46:1521:xe";
+    private static final String USER = "system";
+    private static final String PASS = "1234";
 
     // 클래스 로드 시 Oracle 드라이버 등록 (딱 한 번 실행)
     static {
