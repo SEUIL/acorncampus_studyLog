@@ -417,22 +417,31 @@ class DaoIntegrationTest {
     // ── 22: Soft Delete 검증 ─────────────────────────────────────────────────
 
     @Test @Order(22)
-    @DisplayName("22. SoftDelete — deleted_at IS NULL 필터가 올바르게 동작하는지 검증")
+    @DisplayName("22. SoftDelete — deleted_at IS NULL 필터 및 변조 검증")
     void softDelete() {
-        // 댓글 소프트 삭제 → findById null
+        // 1. 댓글 소프트 삭제 (댓글은 기존 방식 유지)
         commentDao.softDelete(testCommentId);
         assertNull(commentDao.findById(testCommentId),
                 "소프트 삭제된 댓글이 findById에서 반환됨 — deleted_at IS NULL 조건 확인");
 
-        // 게시글 소프트 삭제 → findById null
+        // 2. 게시글 소프트 삭제 (게시글은 기존 방식 유지)
         postDao.softDelete(testPostId);
         assertNull(postDao.findById(testPostId),
                 "소프트 삭제된 게시글이 findById에서 반환됨 — deleted_at IS NULL 조건 확인");
 
-        // 사용자 소프트 삭제 → findById null
-        userDao.softDelete(testUserId);
+        // 3. 사용자 소프트 삭제 (수정된 UserDao signature 대응)
+        String delEmail = "del_" + System.currentTimeMillis() + "_" + TEST_EMAIL;
+        String delNick = "탈퇴유저_" + System.currentTimeMillis();
+
+        userDao.softDelete(testUserId, delEmail, delNick); // 파라미터 3개로 수정
+
+        // 4. 검증: findById로 조회 시 null이어야 함 (deleted_at IS NULL 조건 때문)
         assertNull(userDao.findById(testUserId),
                 "소프트 삭제된 사용자가 findById에서 반환됨 — deleted_at IS NULL 조건 확인");
+
+        // 5. 검증: 원본 이메일로 조회 시에도 null이어야 함 (이메일이 변조되었으므로)
+        assertNull(userDao.findByEmail(TEST_EMAIL),
+                "변조된 이메일의 원본으로 조회 시 null이어야 함");
     }
 
     // ── 정리: 하드 삭제 (FK 역순) ───────────────────────────────────────────
