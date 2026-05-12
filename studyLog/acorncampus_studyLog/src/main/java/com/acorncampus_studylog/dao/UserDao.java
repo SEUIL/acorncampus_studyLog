@@ -288,18 +288,21 @@ public class UserDao {
         }
     }
 
-    /** 계정 소프트 삭제 (deleted_at 설정, 실제 데이터는 보존) */
-    public void softDelete(int userId) {
-        String sql = "UPDATE users SET deleted_at = SYSTIMESTAMP WHERE user_id = ?";
+    /** 계정 소프트 삭제 (이메일/닉네임 변조를 통해 중복 가입 방지 해결) */
+    public void softDelete(int userId, String deletedEmail, String deletedNickname) {
+        // deleted_at 뿐만 아니라 email과 nickname도 함께 업데이트합니다.
+        String sql = "UPDATE users SET email = ?, nickname = ?, deleted_at = SYSTIMESTAMP WHERE user_id = ?";
         Connection conn = null;
         PreparedStatement pstmt = null;
         try {
             conn = DBUtil.getConnection();
             pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, userId);
+            pstmt.setString(1, deletedEmail);
+            pstmt.setString(2, deletedNickname);
+            pstmt.setInt(3, userId);
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("UserDao.softDelete 실패", e);
+            throw new RuntimeException("UserDao.softDelete 변조 실패", e);
         } finally {
             DBUtil.close(conn, pstmt, null);
         }

@@ -32,4 +32,4 @@ ALTER USER 계정이름 QUOTA UNLIMITED ON USERS;
 
 5. 관리자 계정으로 전환하는 법
 - 계정 생성 후
-- update users set user_role='ADMIN' where email='가입한이메일';
+- update users set role='ADMIN' where email='가입한이메일';

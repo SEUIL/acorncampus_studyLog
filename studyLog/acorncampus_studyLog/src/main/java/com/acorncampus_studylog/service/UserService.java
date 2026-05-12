@@ -162,22 +162,27 @@ public class UserService {
      * @param rawPassword 현재 비밀번호 (본인 확인)
      * @return 비밀번호 일치 시 true
      */
+    /**
+     * 회원 탈퇴 (데이터 변조를 포함한 소프트 삭제)
+     */
     public boolean deleteAccount(int userId, String rawPassword) {
-        // TODO: 비밀번호 확인 → userDao.softDelete
-
-        // 사용자 조회
+        // 1. 사용자 조회
         UserDetailDto user = userDao.findById(userId);
+        if (user == null) return false;
 
-        // 비밀번호 확인
+        // 2. 비밀번호 확인
         boolean ok = BCryptUtil.check(rawPassword, user.getPassword());
+        if (!ok) return false;
 
-        // 틀릴 경우 실패
-        if (!ok){
-            return false;
-        }
+        // 3. 변조할 데이터 생성 (Unique 제약 조건 해제를 위해 고유값 부여)
+        long ts = System.currentTimeMillis(); // 현재 시간 밀리초
+        // 예: user@naver.com -> del_1715494000_user@naver.com
+        String deletedEmail = "del_" + ts + "_" + user.getEmail();
+        // 예: 현겸 -> 탈퇴사용자_1715494000
+        String deletedNickname = "탈퇴사용자_" + ts;
 
-        // 소프트 삭제
-        userDao.softDelete(userId);
+        // 4. 업데이트 실행 (변경된 DAO 메서드 호출)
+        userDao.softDelete(userId, deletedEmail, deletedNickname);
         return true;
     }
 
@@ -272,15 +277,16 @@ public class UserService {
 
     }
 
-    /** 관리자 - 계정 강제 삭제 */
+    /** 관리자 - 계정 강제 삭제 (변조 로직 포함) */
     public void deleteUserByAdmin(int userId) {
-        // 관리자 삭제도 일반 탈퇴와 같은 soft delete로 통일한다.
-        // users를 hard delete하면 posts/comments/reports/likes의 FK 참조 때문에 실패할 수 있다.
         UserDetailDto user = userDao.findById(userId);
-        if (user == null) {
-            return;
-        }
-        userDao.softDelete(userId);
+        if (user == null) return;
+
+        long ts = System.currentTimeMillis();
+        String deletedEmail = "admin_del_" + ts + "_" + user.getEmail();
+        String deletedNickname = "삭제된계정_" + ts;
+
+        userDao.softDelete(userId, deletedEmail, deletedNickname);
     }
 
     public void forceDeleteUser(int userId) {
