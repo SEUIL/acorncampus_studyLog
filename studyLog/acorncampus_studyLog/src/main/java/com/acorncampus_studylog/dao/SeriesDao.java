@@ -193,6 +193,65 @@ public class SeriesDao {
             DBUtil.close(conn, pstmt, rs);
         }
     }
+    /** * 특정 태그를 가진 게시글이 포함된 시리즈 목록 조회 (페이지네이션)
+     * @param tagName 검색할 태그명
+     */
+    public List<SeriesDto> findByTag(String tagName, int offset, int limit) {
+        // DISTINCT를 사용하여 여러 게시글이 동일한 태그를 가져도 시리즈는 한 번만 나오게 함
+        String sql =
+                "SELECT DISTINCT s.series_id, s.user_id, s.name, s.description, s.is_public, s.created_at, " +
+                        "       u.nickname AS author_name, u.avatar_url AS author_avatar_url, " +
+                        "       NVL((SELECT COUNT(*) FROM posts WHERE series_id = s.series_id AND deleted_at IS NULL), 0) AS post_count " +
+                        "FROM series s " +
+                        "JOIN users u ON s.user_id = u.user_id " +
+                        "JOIN posts p ON s.series_id = p.series_id " +
+                        "JOIN post_tags pt ON p.post_id = pt.post_id " +
+                        "JOIN tags t ON pt.tag_id = t.tag_id " +
+                        "WHERE s.is_public = 'Y' AND t.name = ? AND p.deleted_at IS NULL " +
+                        "ORDER BY s.created_at DESC " +
+                        "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+        List<SeriesDto> list = new ArrayList<>();
+        Connection conn = null; PreparedStatement pstmt = null; ResultSet rs = null;
+        try {
+            conn = DBUtil.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, tagName);
+            pstmt.setInt(2, offset);
+            pstmt.setInt(3, limit);
+            rs = pstmt.executeQuery();
+            while (rs.next()) list.add(mapRow(rs)); // 기존 mapRow 활용
+            return list;
+        } catch (SQLException e) {
+            throw new RuntimeException("SeriesDao.findByTag 실패", e);
+        } finally {
+            DBUtil.close(conn, pstmt, rs);
+        }
+    }
+
+    /** 태그 검색 결과에 해당하는 시리즈 총 개수 */
+    public int countByTag(String tagName) {
+        String sql =
+                "SELECT COUNT(DISTINCT s.series_id) " +
+                        "FROM series s " +
+                        "JOIN posts p ON s.series_id = p.series_id " +
+                        "JOIN post_tags pt ON p.post_id = pt.post_id " +
+                        "JOIN tags t ON pt.tag_id = t.tag_id " +
+                        "WHERE s.is_public = 'Y' AND t.name = ? AND p.deleted_at IS NULL";
+
+        Connection conn = null; PreparedStatement pstmt = null; ResultSet rs = null;
+        try {
+            conn = DBUtil.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, tagName);
+            rs = pstmt.executeQuery();
+            return rs.next() ? rs.getInt(1) : 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("SeriesDao.countByTag 실패", e);
+        } finally {
+            DBUtil.close(conn, pstmt, rs);
+        }
+    }
 
     // ── 삽입 / 수정 / 삭제 ─────────────────────────────────────────────────
 

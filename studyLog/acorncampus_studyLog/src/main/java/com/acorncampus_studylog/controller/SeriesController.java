@@ -66,6 +66,10 @@ public class SeriesController extends HttpServlet {
         }
     }
 
+    /**
+     * GET /series/list.do?page={page}&keyword={keyword}
+     * → 시리즈 목록 (태그 검색 시 해당 태그를 포함한 게시글이 있는 시리즈 조회)
+     */
     private void handleList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         int    pageNo  = parseInt(req.getParameter("page"), 1);
@@ -73,13 +77,24 @@ public class SeriesController extends HttpServlet {
 
         if (keyword != null && !keyword.trim().isEmpty()) {
             keyword = keyword.trim();
-            req.setAttribute("seriesList", seriesService.search(keyword, pageNo));
-            req.setAttribute("page",       seriesService.getSearchPage(keyword, pageNo));
-            req.setAttribute("keyword",    keyword);
+
+            // --- 태그 검색 분기 로직 추가 ---
+            if (keyword.startsWith("#")) {
+                String tagName = keyword.substring(1).trim();
+                // SeriesService에 새로 추가할 메서드 호출
+                req.setAttribute("seriesList", seriesService.getSeriesByTag(tagName, pageNo));
+                req.setAttribute("page",       seriesService.getSeriesPageByTag(tagName, pageNo));
+            } else {
+                // 일반 키워드 검색
+                req.setAttribute("seriesList", seriesService.search(keyword, pageNo));
+                req.setAttribute("page",       seriesService.getSearchPage(keyword, pageNo));
+            }
+            req.setAttribute("keyword", keyword);
         } else {
             req.setAttribute("seriesList", seriesService.getSeriesList(pageNo));
             req.setAttribute("page",       seriesService.getSeriesPage(pageNo));
         }
+
         req.setAttribute("currentUrl", getCurrentUrl(req));
         req.getRequestDispatcher("/WEB-INF/views/series/list.jsp").forward(req, resp);
     }

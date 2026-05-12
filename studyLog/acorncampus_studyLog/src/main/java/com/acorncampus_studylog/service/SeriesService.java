@@ -140,4 +140,19 @@ public class SeriesService {
         // 공개가 명확히 선택된 경우만 Y, 그 외에는 비공개로 저장한다.
         return "Y".equalsIgnoreCase(isPublic) ? "Y" : "N";
     }
+    /**
+     * 특정 태그를 가진 게시글이 포함된 시리즈 목록 조회 (페이지네이션)
+     * @param tagName 검색할 태그명 (예: "Java")
+     */
+    public List<SeriesDto> getSeriesByTag(String tagName, int pageNo) {
+        PageDto page = getSeriesPageByTag(tagName, pageNo);
+        // seriesDao에 findByTag(tagName, offset, pageSize) 구현 필요
+        return seriesDao.findByTag(tagName, page.getOffset(), page.getPageSize());
+    }
+
+    /** 태그별 시리즈 검색 결과 페이지 정보 */
+    public PageDto getSeriesPageByTag(String tagName, int pageNo) {
+        // seriesDao에 countByTag(tagName) 구현 필요
+        return new PageDto(pageNo, 10, seriesDao.countByTag(tagName));
+    }
 }
